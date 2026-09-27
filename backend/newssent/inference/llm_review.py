@@ -158,6 +158,7 @@ class GeminiReviewer:
         max_requests: int | None = None,
         system_instruction: bool = True,
         max_output_tokens: int = 32,
+        thinking: dict | None = None,
         timeout: float = 60.0,
         retries: int = 4,
         backoff: float = 10.0,
@@ -175,7 +176,9 @@ class GeminiReviewer:
         self._min_interval = 60.0 / rpm
         self._max_requests = max_requests
         self._system_instruction = system_instruction
+        # 會先「思考」的模型（例如 Gemma 4）思考也算輸出 token：上限太小會被思考用完、沒有答案
         self._max_output_tokens = max_output_tokens
+        self._thinking = thinking  # generationConfig.thinkingConfig；None＝模型預設
         self._timeout = timeout
         self._retries = retries
         self._backoff = backoff  # 第 n 次重試前等 backoff × 2^(n-1) 秒（429 另依伺服器給的 retryDelay）
@@ -209,6 +212,8 @@ class GeminiReviewer:
             "contents": [{"role": "user", "parts": [{"text": text}]}],
             "generationConfig": {"temperature": 0.0, "maxOutputTokens": self._max_output_tokens},
         }
+        if self._thinking is not None:
+            payload["generationConfig"]["thinkingConfig"] = self._thinking
         if self._system_instruction:
             payload["systemInstruction"] = {"parts": [{"text": _SYSTEM_PROMPT}]}
         return payload
