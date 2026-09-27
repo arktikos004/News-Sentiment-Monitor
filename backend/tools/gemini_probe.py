@@ -21,7 +21,7 @@ sys.path.insert(0, str(BACKEND_ROOT))
 from newssent.config import GEMINI_API_KEY  # noqa: E402
 from newssent.inference.llm_review import GeminiConfigError, GeminiReviewer  # noqa: E402
 
-CANDIDATES = ("gemma-3-27b-it", "gemma-4-31b-it", "gemma-4-26b-a4b-it", "gemini-2.5-flash-lite")
+CANDIDATES = ("gemma-3-27b-it", "gemma-4-31b-it", "gemma-4-26b-a4b-it", "gemini-3.5-flash-lite")
 
 # (目標, 標題, 預期方向)：方向明確的樣本，只用來確認「會正常回答」，不是準確度評估
 SAMPLES = (
@@ -29,6 +29,25 @@ SAMPLES = (
     ("鴻海（2317）", "鴻海遭美國商務部列入調查，股價承壓", "negative"),
     ("聯發科（2454）", "聯發科將於下週舉行法說會", "neutral"),
 )
+
+
+def dump_raw(model: str, system_instruction: bool, max_output_tokens: int) -> None:
+    """解析不出標籤時，印出原始回應的結束原因、各段文字與 token 用量，找出是被截斷還是格式不同。"""
+    import httpx
+
+    reviewer = GeminiReviewer(model=model, api_key=GEMINI_API_KEY, system_instruction=system_instruction,
+                              max_output_tokens=max_output_tokens)
+    target, title, _ = SAMPLES[0]
+    resp = httpx.post(
+        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+        headers={"x-goog-api-key": GEMINI_API_KEY}, json=reviewer._payload(target, title), timeout=60,
+    )
+    body = resp.json()
+    cand = (body.get("candidates") or [{}])[0]
+    parts = [{"thought": p.get("thought", False), "text": (p.get("text") or "")[:160]}
+             for p in (cand.get("content") or {}).get("parts") or []]
+    print(f"    原始（maxOutputTokens={max_output_tokens}）：HTTP {resp.status_code} "
+          f"finishReason={cand.get('finishReason')} usage={body.get('usageMetadata')} parts={parts}")
 
 
 def probe(model: str) -> bool:
@@ -48,6 +67,9 @@ def probe(model: str) -> bool:
         parsed = sum(a is not None for a in answers)
         expected = sum(a == e for a, (_, _, e) in zip(answers, SAMPLES))
         print(f"  {model}（{mode}）：可解析 {parsed}/{len(SAMPLES)}、符合預期 {expected}/{len(SAMPLES)} → {answers}")
+        if parsed == 0:
+            for tokens in (32, 1024):
+                dump_raw(model, system_instruction, tokens)
         if parsed == len(SAMPLES):
             print(f"\n建議：GEMINI_MODEL = {model!r}、GEMINI_SYSTEM_INSTRUCTION = {system_instruction}")
             return True
