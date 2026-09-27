@@ -77,7 +77,8 @@ jobs:
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
         run: |
           set +e
-          python -m newssent.inference.alert_recorder --max-requests 3000
+          # 每日上限 1200 次（25 RPM 約 50 分鐘），留足時間給匯出與部署；大量回補交給 backfill.yml
+          python -m newssent.inference.alert_recorder --max-requests 1200
           rc=$?
           set -e
           # 0＝完成；3＝評分額度用盡（已評的已存檔，明天接續）；其他＝失敗（美股部分照常部署）
