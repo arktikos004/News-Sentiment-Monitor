@@ -1,7 +1,8 @@
 # 每日排程：抓台股中文新聞並評分（情緒預警）→ 匯出靜態 JSON → build → 部署 news.sekinv.com。
 #
-# 台北 07:30 執行：交易日 s 的預警只用 s 開盤（09:00）前發布的標題，這個時間點讓看板在開盤前上線；
-# 07:30–09:00 之間的標題由隔天的執行補進（看板每次都從逐則分數重算）。週末照跑，讓 FinMind 用量平均。
+# 每天 4 次（台北 07:30、13:30、19:30、01:30）：07:30 這次讓當日預警在開盤（09:00）前上線——交易日 s 的
+# 預警只用 s 開盤前發布的標題，之後才發布的標題由下一次執行補進（看板每次都從逐則分數重算）。
+# 多跑幾次是為了用完每日評分額度（每次評分限 45 分鐘）、並讓美股新聞情緒一天更新數次。週末照跑。
 #
 # 狀態（alert_scores.db、news_cache.db、上一版網站資料）存在孤立分支 state，每次覆寫成單一 commit；
 # 另存 30 天的 artifact 供回復。資料庫只要通過完整性檢查就保存；site-data 只在正式站部署成功後才更新。
@@ -10,7 +11,7 @@ name: daily
 
 on:
   schedule:
-    - cron: "30 23 * * *" # 台北 07:30
+    - cron: "30 23,5,11,17 * * *" # 台北 07:30、13:30、19:30、01:30
   workflow_dispatch:
     inputs:
       branch:
@@ -77,8 +78,8 @@ jobs:
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
         run: |
           set +e
-          # 每日上限 1200 次（25 RPM 約 50 分鐘），留足時間給匯出與部署；大量回補交給 backfill.yml
-          python -m newssent.inference.alert_recorder --max-requests 1200
+          # 每次評分最多 1200 次、45 分鐘（先到先停），留足時間給匯出與部署；已評的都已存檔，下一次接續
+          python -m newssent.inference.alert_recorder --max-requests 1200 --max-minutes 45
           rc=$?
           set -e
           # 0＝完成；3＝評分額度用盡（已評的已存檔，明天接續）；其他＝失敗（美股部分照常部署）

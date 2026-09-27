@@ -158,11 +158,18 @@ ALERT_LLM_MODEL = "gemma3:27b"
 ALERT_SCORER_LEGACY = f"llm-{ALERT_LLM_MODEL}"
 # 2026-09 起雲端排程沒有 GPU，改用 Google AI Studio 託管的模型（GeminiReviewer；會把標題送到 Google）。
 # 與本機版屬於不同評分器：分數另存、不混算；換用後的一致性見 docs/scorer_switch_gemini.md
-GEMINI_MODEL = "gemma-3-27b-it"
+# 2026-09-27 實測（tools/gemini_probe.py）：gemma-3-27b-it 已下架；gemma-4-31b-it 每則約 39 秒，
+# 每次排程只評得了約 70 則、趕不上每日新增量；故採 gemma-4-26b-a4b-it＋最低思考（每則約 1.4 秒）。
+# 決策與實測數字見 docs/scorer_switch_prereg.md「修訂」一節。
+GEMINI_MODEL = "gemma-4-26b-a4b-it"
 GEMINI_SYSTEM_INSTRUCTION = True   # 模型不接受 systemInstruction 時改 False（系統提示併入 user turn）
+GEMINI_THINKING: dict[str, str] = {"thinkingLevel": "minimal"}  # generationConfig.thinkingConfig
+GEMINI_MAX_OUTPUT_TOKENS = 256     # 思考也算輸出 token：上限太小會被思考用完、沒有答案
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_RPM = 25                    # 免費層每分鐘上限約 30，留餘裕
-ALERT_SCORER = f"llm-gemini:{GEMINI_MODEL}"   # API 讀取的線上評分器
+# API 讀取的線上評分器。思考設定會改變判讀行為，所以也寫進版本字串（改了就是新評分器、分數不混算）；
+# 組法須與 GeminiReviewer.version_tag 相同（tests/test_gemini_reviewer.py 把關）
+ALERT_SCORER = "llm-gemini:" + GEMINI_MODEL + "".join(f"+{k}={v}" for k, v in GEMINI_THINKING.items())
 # 預警股票池：鏡像 stock-trend-assistant 的 STOCK_POOL（台灣 50，最後核對 2025-07-01，已知過期）。
 # 跨 repo 無法 import 只能複製——以該 repo 為準，變動時兩邊同步。
 ALERT_UNIVERSE: dict[str, str] = {

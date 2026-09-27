@@ -33,9 +33,11 @@ from newssent.config import (
     ALERT_UNIVERSE,
     FINMIND_TOKEN,
     GEMINI_API_KEY,
+    GEMINI_MAX_OUTPUT_TOKENS,
     GEMINI_MODEL,
     GEMINI_RPM,
     GEMINI_SYSTEM_INSTRUCTION,
+    GEMINI_THINKING,
 )
 from newssent.data.finmind_news import FINMIND_PROVIDER
 from newssent.data.provider import Article
@@ -139,7 +141,10 @@ def _build_reviewer(args, parser):
         api_key=GEMINI_API_KEY,
         rpm=GEMINI_RPM,
         max_requests=args.max_requests,
+        max_seconds=args.max_minutes * 60 if args.max_minutes else None,
         system_instruction=GEMINI_SYSTEM_INSTRUCTION,
+        max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS,
+        thinking=GEMINI_THINKING,
     )
     if not reviewer.available():
         parser.error(f"Gemini API 找不到模型 {reviewer.model}（或金鑰無效）")
@@ -158,6 +163,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--backend", choices=("gemini", "ollama"), default="gemini", help="評分後端")
     parser.add_argument("--llm-model", help=f"預設 gemini={GEMINI_MODEL}、ollama={ALERT_LLM_MODEL}")
     parser.add_argument("--max-requests", type=int, help="本次最多呼叫幾次 Gemini（控制每日額度）")
+    parser.add_argument("--max-minutes", type=float, help="評分最多花幾分鐘（排程 job 有總時限）")
     parser.add_argument("--score-since", type=date.fromisoformat, help="只評此 UTC 日（含）以後發布的標題，預設＝--start")
     args = parser.parse_args(argv)
 

@@ -4,9 +4,9 @@
 JSON，Next.js 靜態輸出後部署到 Cloudflare Pages。本機開發（`start_all.bat`、uvicorn＋`next dev`）不受影響。
 
 ```
-GitHub Actions（daily.yml，台北 07:30）
+GitHub Actions（daily.yml，每天台北 07:30、13:30、19:30、01:30）
   還原狀態（state 分支：alert_scores.db、news_cache.db、上一版網站資料）
-  → alert_recorder：FinMind 台股中文新聞 → Gemini API 評分（exit 3＝額度用盡，照常部署）
+  → alert_recorder：FinMind 台股中文新聞 → Gemini API 評分（gemma-4-26b-a4b-it，每次限 45 分鐘；exit 3＝額度或時間用盡，照常部署）
   → export_static：TestClient 呼叫現有 API → frontend/public/data/*.json（含發布關卡）
   → next build（NEXT_PUBLIC_STATIC_DATA=1）→ wrangler pages deploy → 保存狀態
 ```
@@ -29,9 +29,10 @@ GitHub Actions（daily.yml，台北 07:30）
 
 | 檔案 | 觸發 | 做什麼 |
 |---|---|---|
-| `daily.yml` | 每天 23:30 UTC（台北 07:30）、手動 | 上述完整流程；手動可指定 Pages 分支（非 master＝preview 網址） |
+| `daily.yml` | 每天 4 次（UTC 23:30、05:30、11:30、17:30）、手動 | 上述完整流程；手動可指定 Pages 分支（非 master＝preview 網址） |
 | `deploy.yml` | master 上 `frontend/**` 變動、手動 | 用 state 分支上的上一版資料重新 build 部署，不跑 Python |
-| `backfill.yml` | 手動 | 回補評分＋一致性報告（`tools/scorer_agreement.py`，artifact 保留 90 天） |
+| `backfill.yml` | 手動 | 回補較早期間的分數＋一致性報告（`tools/scorer_agreement.py`，artifact 保留 90 天）；近 45 天由 daily 自動消化 |
+| `gemini-probe.yml` | 手動 | 實測 Gemini 候選模型可否作答與延遲（`tools/gemini_probe.py`） |
 | `leakage.yml` | master push、PR | 洩漏回歸測試 |
 
 三個會寫狀態或部署的 workflow 共用 `concurrency: site`，不會互相覆蓋。

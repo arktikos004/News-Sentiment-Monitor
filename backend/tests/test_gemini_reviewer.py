@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from newssent.config import ALERT_SCORER, GEMINI_MODEL
+from newssent.config import ALERT_SCORER, GEMINI_MODEL, GEMINI_THINKING
 from newssent.inference.llm_review import (
     _SYSTEM_PROMPT,
     GeminiConfigError,
@@ -132,4 +132,22 @@ def test_missing_key_is_a_config_error():
 
 def test_scorer_version_matches_the_online_scorer():
     # API 讀 ALERT_SCORER：預設設定下 recorder 寫入的版本字串必須完全相同，否則看板會是空的
-    assert LlmScorer(GeminiReviewer(model=GEMINI_MODEL, api_key="k")).version == ALERT_SCORER
+    reviewer = GeminiReviewer(model=GEMINI_MODEL, api_key="k", thinking=GEMINI_THINKING)
+    assert LlmScorer(reviewer).version == ALERT_SCORER
+
+
+def test_thinking_setting_is_part_of_the_version_and_payload():
+    post = Scripted(ok('{"label": "neutral"}'))
+    reviewer = make(post, thinking={"thinkingLevel": "minimal"})
+    reviewer.judge("t", "h")
+    assert post.requests[0]["json"]["generationConfig"]["thinkingConfig"] == {"thinkingLevel": "minimal"}
+    assert reviewer.version_tag == "gemini:gemma-x+thinkingLevel=minimal"
+    assert make(Scripted()).version_tag == "gemini:gemma-x"
+
+
+def test_time_budget_stops_before_calling(monkeypatch):
+    post = Scripted(ok('{"label": "neutral"}'))
+    reviewer = make(post, max_seconds=0)
+    with pytest.raises(GeminiQuotaExhausted, match="時間上限"):
+        reviewer.judge("t", "h")
+    assert post.requests == []
