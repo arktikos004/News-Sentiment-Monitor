@@ -29,7 +29,7 @@
 
 前端是可以「加到主畫面」的 PWA：手機是底部分頁列、電腦是左側欄，預設深色。
 
-**公開站：<https://news.sekinv.com>**（靜態站，GitHub Actions 每日台北 07:30 更新；只提供 `config.STATIC_TICKERS` 的 24 檔）。部署架構、狀態分支與每日排程見 [docs/deploy.md](docs/deploy.md)。
+**公開站：<https://news.sekinv.com>**（靜態站，GitHub Actions 每天更新 4 次；只提供 `config.STATIC_TICKERS` 的 24 檔）。部署架構、狀態分支與每日排程見 [docs/deploy.md](docs/deploy.md)。
 
 ## 技術棧
 

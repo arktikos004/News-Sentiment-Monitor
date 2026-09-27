@@ -156,6 +156,7 @@ class GeminiReviewer:
         api_key: str,
         rpm: float = 25,
         max_requests: int | None = None,
+        max_seconds: float | None = None,
         system_instruction: bool = True,
         max_output_tokens: int = 32,
         thinking: dict | None = None,
@@ -170,11 +171,14 @@ class GeminiReviewer:
         if not api_key:
             raise GeminiConfigError("未設定 GEMINI_API_KEY")
         self.model = model
-        self.version_tag = f"gemini:{model}"
+        # 思考設定會改變判讀行為：寫進版本字串，改了就是新評分器（與 config.ALERT_SCORER 同一組法）
+        self.version_tag = f"gemini:{model}" + "".join(f"+{k}={v}" for k, v in (thinking or {}).items())
         self.requests = 0
         self._api_key = api_key
         self._min_interval = 60.0 / rpm
         self._max_requests = max_requests
+        # 時間上限：排程 job 有總時限，延遲變長時以時間而非次數收尾（已評的都已存檔）
+        self._deadline = time.monotonic() + max_seconds if max_seconds is not None else None
         self._system_instruction = system_instruction
         # 會先「思考」的模型（例如 Gemma 4）思考也算輸出 token：上限太小會被思考用完、沒有答案
         self._max_output_tokens = max_output_tokens
@@ -241,6 +245,8 @@ class GeminiReviewer:
         for attempt in range(self._retries + 1):
             if self._max_requests is not None and self.requests >= self._max_requests:
                 raise GeminiQuotaExhausted(f"已達本次呼叫上限 {self._max_requests} 次")
+            if self._deadline is not None and time.monotonic() >= self._deadline:
+                raise GeminiQuotaExhausted(f"已達本次時間上限（共呼叫 {self.requests} 次）")
             delay = self._backoff * 2**attempt
             try:
                 resp = self._post(payload)
