@@ -1,0 +1,27 @@
+# Gemini API 候選模型實測（手動觸發）：決定 config.GEMINI_MODEL 與 GEMINI_SYSTEM_INSTRUCTION。
+# 只呼叫幾次 API、只印結果，不改任何設定、不寫狀態。金鑰留在 GitHub secrets，不需要放到本機。
+name: gemini-probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.10"
+      - name: 安裝最小相依（實測只用到 httpx、python-dotenv）
+        run: pip install httpx==0.28.1 python-dotenv
+      - name: 實測候選模型
+        working-directory: backend
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PYTHONPATH: .
+        run: python tools/gemini_probe.py
