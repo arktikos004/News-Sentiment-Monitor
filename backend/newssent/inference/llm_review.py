@@ -28,7 +28,8 @@ from typing import Iterable
 from newssent.config import LABEL_NAMES
 
 DEFAULT_OLLAMA_HOST = "http://localhost:11434"
-DEFAULT_LLM_MODEL = "qwen2.5:14b"
+# 本機預設 gemma3:27b（實驗 #6 比較過的唯一 LLM 組；依競賽規定不使用中國廠牌生成式模型）
+DEFAULT_LLM_MODEL = "gemma3:27b"
 
 # 覆核範圍：
 #   non_neutral 文獻設定——只重判模型給了方向的（修「亂給方向」）

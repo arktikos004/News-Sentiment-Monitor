@@ -1,12 +1,12 @@
 """裁判資格考：Codex 能不能當情緒標籤的裁判？依 docs/judge_qualification_prereg.md 執行。
 
 「讓 agent 驗證模型、反覆優化」的前提是裁判比被評的模型準；否則迴圈只會把模型調成
-裁判的樣子。快取數據（盲判、同一批 60 則）：gemma3:27b 一致率 60.0%（κ=0.34）、
-qwen2.5:14b 51.7%（κ=0.17），都沒贏過被評的 bert-combined（61.7%）——都不合格。
+裁判的樣子。快取數據（盲判、同一批 60 則）：gemma3:27b 一致率 60.0%（κ=0.34），
+沒贏過被評的 bert-combined（61.7%）——不合格。
 新裁判必須先在人工已標注的 120 則上考過，才可進入優化迴圈。
 
 防裁判偷看答案：
-- 題目只給 (公司名, 標題)，不給模型判讀或信心值（盲判）；判讀規則與 gemma3/qwen 同一份
+- 題目只給 (公司名, 標題)，不給模型判讀或信心值（盲判）；判讀規則與 gemma3 同一份
 - Codex 在空的暫存目錄、read-only 沙箱、--ignore-user-config、--ephemeral 下執行
 - read-only 沙箱**不擋讀檔**，所以真正的防線是事件稽核：每批的 JSONL 事件中出現任何
   工具呼叫（執行指令、讀寫檔、網頁搜尋）→ 該批作廢、不寫快取
@@ -171,7 +171,7 @@ def load_model_preds() -> dict[tuple[str, str], str]:
 
 
 def judge_rules() -> str:
-    """判讀規則沿用 llm_review 給 gemma3/qwen 的同一份（去掉單則 JSON 的作答格式），數字才可比。"""
+    """判讀規則沿用 llm_review 給 gemma3 的同一份（去掉單則 JSON 的作答格式），數字才可比。"""
     from newssent.inference.llm_review import _SYSTEM_PROMPT
 
     rules, sep, _ = _SYSTEM_PROMPT.partition("\n- Answer with JSON only")
