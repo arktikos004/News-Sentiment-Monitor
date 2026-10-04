@@ -42,9 +42,6 @@ jobs:
           ref: state
           path: _state
 
-      - name: 還原分數庫
-        run: cp _state/alert_scores.db backend/
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12.10"
@@ -57,6 +54,11 @@ jobs:
         run: |
           pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
           pip install -e "backend[dev]" -c backend/requirements-ci.txt
+
+      - name: 還原狀態（新聞資料庫為加密封包）
+        env:
+          STATE_KEY: ${{ secrets.STATE_KEY }}
+        run: python scripts/state_crypt.py unpack --bundle _state/private.tar.gz.enc --dest backend --legacy-from _state alert_scores.db news_cache.db
 
       - name: 回補評分
         id: backfill
@@ -77,10 +79,13 @@ jobs:
         run: |
           python -c "import sqlite3,sys; r=sqlite3.connect('backend/alert_scores.db').execute('PRAGMA integrity_check').fetchone()[0]; print(r); sys.exit(r!='ok')"
 
-      - name: 保存狀態（只換分數庫）
+      - name: 保存狀態（重新加密兩個資料庫）
         if: always() && steps.integrity.outcome == 'success'
+        env:
+          STATE_KEY: ${{ secrets.STATE_KEY }}
         run: |
-          cp backend/alert_scores.db _state/
+          python scripts/state_crypt.py pack --src backend --out _state/private.tar.gz.enc alert_scores.db news_cache.db
+          rm -f _state/alert_scores.db _state/news_cache.db  # 遷移：移除舊的明文檔
           scripts/commit_state.sh _state "state: backfill run ${GITHUB_RUN_ID}"
 
       - name: 一致性報告（新 vs 本機 gemma3:27b）
@@ -93,5 +98,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: scorer-agreement-${{ github.run_id }}
-          path: agreement
+          # 只留彙總報告：disagreements.csv 含新聞標題（FinMind 條款不含再散布），不上傳
+          path: agreement/report.md
           retention-days: 90

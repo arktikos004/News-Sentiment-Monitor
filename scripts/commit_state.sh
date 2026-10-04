@@ -10,5 +10,10 @@ git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 git checkout -q --orphan next
 git add -A
+# 守門：公開的 state 分支絕不能出現明文新聞資料庫（應只有 private.tar.gz.enc）
+if git diff --cached --name-only | grep -E '\.db$'; then
+  echo "::error::拒絕提交明文資料庫"
+  exit 1
+fi
 git commit -qm "${msg}"
 git push -qf origin next:state
