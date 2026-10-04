@@ -2,6 +2,8 @@
 
 個人研究原型。透過 NLP 技術自動擷取美股財經新聞並即時分析市場情緒，將非結構化文字轉化為可量化的情緒指標，輔助投資決策。
 
+資料來源與授權見 [DATA_SOURCES.md](./DATA_SOURCES.md)，套件授權見 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)，生成式 AI 的使用見 [AI_USE.md](./AI_USE.md)。
+
 > 完整開發計畫見 [PLAN.md](PLAN.md)。**全部 Phase（0–8）已完成**：五模型比較後選型
 > fine-tuned **BERT**（測試 Macro F1 **0.8458**，基線 0.7286），FastAPI 真實推論、
 > yfinance 即時新聞源（含快取降級）、Next.js 監控儀表板、線上抽測與完整文件。
@@ -172,5 +174,13 @@ python tools/timestamp_lag.py              # 發布→抓取時間落差實測
 ## 開發者
 
 個人專案：問題設定、資料管線、模型訓練與評估、前後端、線上抽測的人工標注皆由開發者本人完成。
+開發過程與系統內使用的生成式 AI 見 [AI_USE.md](./AI_USE.md)。
+
+## 授權
+
+- 本 repo 的程式碼與文件未採用開源授權，保留所有權利。
+- 正式模型權重（Release `models-v1`）的訓練語料含 Financial PhraseBank，依其條件以 CC BY-NC-SA 3.0 提供（非商業、相同方式分享）。
+- 新聞標題的著作權屬原媒體；本站只顯示標題、媒體名稱與原文連結，不儲存也不轉載內文。
+- 第三方套件、資料與模型的授權見 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) 與 [DATA_SOURCES.md](./DATA_SOURCES.md)。
 
 > 免責聲明：本系統之情緒指標僅供學術研究與參考，不構成任何投資建議。
