@@ -5,7 +5,7 @@ JSON，Next.js 靜態輸出後部署到 Cloudflare Pages。本機開發（`start
 
 ```
 GitHub Actions（daily.yml，每天台北 07:30、13:30、19:30、01:30）
-  還原狀態（state 分支：alert_scores.db、news_cache.db、上一版網站資料）
+  還原狀態（state 分支：加密封包 private.tar.gz.enc〔alert_scores.db、news_cache.db〕、上一版網站資料）
   → alert_recorder：FinMind 台股中文新聞 → Gemini API 評分（gemma-4-26b-a4b-it，每次限 45 分鐘；exit 3＝額度或時間用盡，照常部署）
   → export_static：TestClient 呼叫現有 API → frontend/public/data/*.json（含發布關卡）
   → next build（NEXT_PUBLIC_STATIC_DATA=1）→ wrangler pages deploy → 保存狀態
@@ -21,6 +21,7 @@ GitHub Actions（daily.yml，每天台北 07:30、13:30、19:30、01:30）
 | 新評分器沒有 20 日基準 | `backfill.yml` 手動回補分數；看板全是「資料不足」的交易日不匯出 |
 | 把假資料發布出去 | 匯出關卡：模型 mock、覆蓋率 < 70%、預警日期倒退 → exit 1，不部署，線上維持上一版 |
 | 資料庫要跨次保存 | 孤立分支 `state`，每次覆寫成單一 commit（SQLite 整檔改寫，留歷史會無限長大）；另存 30 天 artifact |
+| 新聞資料不得再散布 | 兩個資料庫只以 AES-256-GCM 加密封包 `private.tar.gz.enc` 存在公開的 state 分支（`scripts/state_crypt.py`，金鑰在 Secret `STATE_KEY`）；`commit_state.sh` 遇到明文 `.db` 直接失敗；backfill 的 artifact 只留彙總報告 |
 | 模型 439 MB 不能進 git | GitHub Release `models-v1` ＋ `backend/models.lock`（sha256）＋ actions/cache |
 | pickle 模型對版本敏感 | `backend/requirements-ci.txt` 鎖定與 Windows 開發機相同的版本 |
 | 股價站要讀情緒 | `frontend/public/_headers` 對 `/data/*` 開放跨站讀取 |
@@ -45,12 +46,14 @@ GitHub Actions（daily.yml，每天台北 07:30、13:30、19:30、01:30）
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 帳號 ID |
 | `GEMINI_API_KEY` | Google AI Studio 金鑰 |
 | `FINMIND_TOKEN` | FinMind 註冊 token（每小時額度 300 → 600；沒有也能跑，較慢） |
+| `STATE_KEY` | state 分支私有資料封包的金鑰（`python scripts/state_crypt.py keygen` 產生；遺失就解不開封包，另存一份在密碼管理器） |
 
 ## 常用操作
 
 ```bash
-# 把雲端最新的分數庫拿回本機分析
-git fetch github state && git show github/state:alert_scores.db > backend/alert_scores.db
+# 把雲端最新的資料庫拿回本機分析（需要 STATE_KEY）
+git fetch github state && git show github/state:private.tar.gz.enc > /tmp/private.tar.gz.enc
+STATE_KEY=... python scripts/state_crypt.py unpack --bundle /tmp/private.tar.gz.enc --dest backend
 
 # 本機產生靜態站預覽
 cd backend && python -m newssent.export_static --out ../frontend/public/data

@@ -43,9 +43,6 @@ jobs:
           ref: state
           path: _state
 
-      - name: 還原狀態
-        run: cp _state/alert_scores.db _state/news_cache.db backend/
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12.10"
@@ -58,6 +55,13 @@ jobs:
         run: |
           pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
           pip install -e "backend[dev]" -c backend/requirements-ci.txt
+
+      - name: 還原狀態（新聞資料庫為加密封包）
+        env:
+          STATE_KEY: ${{ secrets.STATE_KEY }}
+        # 新聞標題資料庫（FinMind／Yahoo 條款不含再散布）只以加密封包存在公開的 state 分支；
+        # --legacy-from 僅供遷移：封包還不存在時改讀舊的明文檔，之後的保存步驟就會改成封包
+        run: python scripts/state_crypt.py unpack --bundle _state/private.tar.gz.enc --dest backend --legacy-from _state alert_scores.db news_cache.db
 
       - name: 模型快取
         uses: actions/cache@v4
@@ -132,8 +136,11 @@ jobs:
 
       - name: 保存狀態
         if: always() && steps.integrity.outcome == 'success'
+        env:
+          STATE_KEY: ${{ secrets.STATE_KEY }}
         run: |
-          cp backend/alert_scores.db backend/news_cache.db _state/
+          python scripts/state_crypt.py pack --src backend --out _state/private.tar.gz.enc alert_scores.db news_cache.db
+          rm -f _state/alert_scores.db _state/news_cache.db  # 遷移：移除舊的明文檔
           if [ "${{ steps.deploy.outcome }}" = "success" ] && [ "${PAGES_BRANCH}" = "master" ]; then
             rm -rf _state/site-data && cp -r frontend/public/data _state/site-data
           fi
