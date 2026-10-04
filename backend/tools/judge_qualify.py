@@ -102,7 +102,7 @@ def judge_key() -> str:
 
 
 def load_exam_rows(paths: list[Path] | None = None, expected: int | None = N_EXAM) -> list[dict]:
-    """三批人工盲標，依 (ticker, title) 去重；題數與預先聲明不符就拒絕（考題不可悄悄變少）。"""
+    """三批人工標注（07-17 批為 AI 初標＋人工複核，其餘為盲標），依 (ticker, title) 去重；題數與預先聲明不符就拒絕（考題不可悄悄變少）。"""
     rows: list[dict] = []
     seen: set[tuple[str, str]] = set()
     for path in paths or EXAM_CSVS:
@@ -357,7 +357,7 @@ def write_report(rows, judge_preds, model_preds, stats) -> None:
         "",
         f"> 產出 {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC｜依 [預先聲明](judge_qualification_prereg.md) 執行｜"
         f"裁判 `{judge_key()}`｜合格標準：**{PASS_RULE}**",
-        "> 考題＝人工盲標 120 則；裁判只看 (公司名, 標題)，看不到模型判讀；有工具呼叫的批次一律作廢。",
+        "> 考題＝人工標注 120 則（07-17 批 30 則為 AI 初標＋人工複核，其餘 90 則為盲標）；裁判只看 (公司名, 標題)，看不到模型判讀；有工具呼叫的批次一律作廢。",
         "",
         "## 裁決",
         "",
