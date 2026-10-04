@@ -51,7 +51,11 @@ def _to_item(alert: TickerAlert) -> StockAlert:
         ],
         evidence=[
             AlertEvidence(
-                title=e.title, source=e.source, published_at=e.published_at.isoformat(), score=_round(e.score)
+                title=e.title,
+                source=e.source,
+                url=e.url,
+                published_at=e.published_at.isoformat(),
+                score=_round(e.score),
             )
             for e in alert.evidence
         ],

@@ -17,6 +17,9 @@ def test_news_returns_articles_from_provider(client):
     assert body["ticker"] == "AAPL"
     assert len(body["articles"]) == 2
     assert body["is_mock"] is True
+    # 標題的著作權屬原媒體：每一則都要帶媒體名稱與原文連結，前端才能標示來源並連回原文
+    assert [a["source"] for a in body["articles"]] == ["Example", "Example"]
+    assert [a["url"] for a in body["articles"]] == ["https://example.com/1", "https://example.com/2"]
 
 
 def test_news_lowercase_ticker_normalized(client):

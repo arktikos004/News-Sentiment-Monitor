@@ -40,7 +40,7 @@ function NewsRow({ a }: { a: NewsItem }) {
           {LABEL_TEXT[a.sentiment]}
           <span className="font-mono tabular-nums">{percent(a.confidence)}</span>
         </span>
-        <span className="min-w-0 flex-1 truncate text-ink-3">{host}</span>
+        <span className="min-w-0 flex-1 truncate text-ink-3">{a.source || host}</span>
         <span className="shrink-0 text-ink-3">{relativeTime(a.published_at)}</span>
       </div>
       <p className="mt-2 text-body text-ink transition-colors group-hover:text-brand">{a.title}</p>
