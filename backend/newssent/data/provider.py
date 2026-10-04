@@ -12,10 +12,13 @@
 from __future__ import annotations
 
 import abc
+import logging
 from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timezone
 
 from newssent.data.cache import NewsCache, time_bucket, validate_ticker
+
+logger = logging.getLogger("newssent")
 
 
 @dataclass
@@ -98,6 +101,8 @@ class CachedNewsProvider(NewsProvider):
                 for a in self._fetch(ticker, limit)
             ]
         except Exception as exc:
+            # 一定要留下紀錄：2026-10 Yahoo 改版時這裡默默退回舊快取，排程全綠、網站卻停在三天前
+            logger.warning("新聞源抓取失敗，退回舊快取（stale）：%s：%s", ticker, exc)
             fallback = self._cache.read_latest(ticker)
             if fallback is not None:
                 return NewsResult([Article.from_dict(a) for a in fallback], stale=True)
@@ -161,10 +166,23 @@ class YFinanceNewsProvider(CachedNewsProvider):
         import yfinance as yf
 
         raw = yf.Ticker(ticker).get_news(count=limit)
+        if not raw:
+            # 2026-10 起 Yahoo 的個股新聞串流端點（xhr/ncp）回 404，yfinance 不報錯、只回空清單。
+            # 改走搜尋端點（舊版 payload，_to_article 本來就支援）。
+            raw = _search_news(yf, ticker, limit)
         articles = [a for a in (_to_article(item) for item in raw or []) if a is not None]
         if not articles:
             raise NewsProviderError(f"yfinance 未回傳 {ticker} 的任何新聞")
         return articles[:limit]
+
+
+def _search_news(yf, ticker: str, limit: int) -> list[dict]:
+    """Yahoo 搜尋端點的新聞。搜尋會帶出只是順帶提到的文章，所以只留 relatedTickers 含該代號者；
+    整批都沒有 relatedTickers 欄位（格式又改）時才全收。"""
+    news = yf.Search(ticker, news_count=limit).news or []
+    if any("relatedTickers" in n for n in news):
+        news = [n for n in news if ticker in (n.get("relatedTickers") or [])]
+    return news
 
 
 def _to_article(item: dict) -> Article | None:

@@ -33,6 +33,7 @@ class SentimentResponse(BaseModel):
 class NewsItem(BaseModel):
     title: str
     url: str
+    source: str = Field(default="", description="媒體名稱（資料源提供；沒有時為空字串，前端改顯示網域）")
     published_at: str
     sentiment: SentimentLabel
     confidence: float = Field(ge=0, le=1)
@@ -69,6 +70,7 @@ class DailySentimentPoint(BaseModel):
 class AlertEvidence(BaseModel):
     title: str
     source: str
+    url: str = Field(default="", description="原文連結：標題的著作權屬原媒體，網站只顯示標題並連回原文")
     published_at: str = Field(description="發布時間（ISO8601，UTC）")
     score: float
 

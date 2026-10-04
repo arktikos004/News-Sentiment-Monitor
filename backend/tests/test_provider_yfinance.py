@@ -113,17 +113,63 @@ def test_fetch_failure_without_cache_raises(cache, monkeypatch):
         provider.get_news("TSLA", limit=5)
 
 
+class _EmptyTicker:
+    """2026-10 之後的實況：Yahoo 的個股新聞串流端點回 404，yfinance 不報錯、只回空清單。"""
+
+    def __init__(self, ticker):
+        pass
+
+    def get_news(self, count):
+        return []
+
+
+def _fake_search(news):
+    class FakeSearch:
+        def __init__(self, query, news_count):
+            self.news = news
+
+    return FakeSearch
+
+
 def test_empty_yfinance_response_treated_as_failure(cache, monkeypatch):
-    """yfinance 回空清單視為失敗（觸發降級），不寫入空快取。"""
-
-    class FakeTicker:
-        def __init__(self, ticker):
-            pass
-
-        def get_news(self, count):
-            return []
-
+    """個股串流與搜尋備援都回空清單才視為失敗（觸發降級），不寫入空快取。"""
     provider = YFinanceNewsProvider(cache=cache, bucket_seconds=3600)
-    monkeypatch.setattr("yfinance.Ticker", FakeTicker)
+    monkeypatch.setattr("yfinance.Ticker", _EmptyTicker)
+    monkeypatch.setattr("yfinance.Search", _fake_search([]))
     with pytest.raises(NewsProviderError):
         provider.get_news("MSFT", limit=5)
+
+
+def test_empty_ticker_stream_falls_back_to_search_and_keeps_only_related(cache, monkeypatch):
+    """個股串流回空 → 改走搜尋端點；搜尋會帶出只是順帶提到的文章，只留 relatedTickers 含該代號者。"""
+    search_news = [
+        {"title": "TSMC beats", "link": "https://x/1", "publisher": "Reuters",
+         "providerPublishTime": 1791102000, "relatedTickers": ["NVDA", "TSM"]},
+        {"title": "Unrelated story", "link": "https://x/2", "publisher": "Zacks",
+         "providerPublishTime": 1791102100, "relatedTickers": ["AAPL"]},
+    ]
+    provider = YFinanceNewsProvider(cache=cache, bucket_seconds=3600)
+    monkeypatch.setattr("yfinance.Ticker", _EmptyTicker)
+    monkeypatch.setattr("yfinance.Search", _fake_search(search_news))
+
+    result = provider.get_news("TSM", limit=5)
+    assert not result.stale
+    assert [(a.title, a.source, a.url) for a in result.articles] == [("TSMC beats", "Reuters", "https://x/1")]
+
+
+def test_search_fallback_keeps_everything_when_related_tickers_field_is_absent(cache, monkeypatch):
+    search_news = [{"title": "Some story", "link": "https://x/1", "publisher": "CNBC", "providerPublishTime": 1791102000}]
+    provider = YFinanceNewsProvider(cache=cache, bucket_seconds=3600)
+    monkeypatch.setattr("yfinance.Ticker", _EmptyTicker)
+    monkeypatch.setattr("yfinance.Search", _fake_search(search_news))
+    assert [a.title for a in provider.get_news("TSM", limit=5).articles] == ["Some story"]
+
+
+def test_stale_fallback_is_logged_not_silent(cache, monkeypatch, caplog):
+    """新聞源失敗退回舊快取時必須留下紀錄——否則排程全綠、網站卻停在舊資料，沒人會發現。"""
+    provider = YFinanceNewsProvider(cache=cache, bucket_seconds=3600)
+    cache.write("AAPL", bucket=1, articles=[a.to_dict() for a in _articles(1)])
+    monkeypatch.setattr(provider, "_fetch", lambda t, n: (_ for _ in ()).throw(ConnectionError("斷網")))
+    with caplog.at_level("WARNING", logger="newssent"):
+        assert provider.get_news("AAPL", limit=5).stale is True
+    assert any("AAPL" in r.getMessage() and "斷網" in r.getMessage() for r in caplog.records)

@@ -38,6 +38,7 @@ def get_news(
             NewsItem(
                 title=a.title,
                 url=a.url,
+                source=a.source,
                 published_at=a.published_at,
                 sentiment="neutral",
                 confidence=0.5,
@@ -50,6 +51,7 @@ def get_news(
         NewsItem(
             title=c.article.title,
             url=c.article.url,
+            source=c.article.source,
             published_at=c.article.published_at,
             sentiment=c.label,
             confidence=round(c.confidence, 4),

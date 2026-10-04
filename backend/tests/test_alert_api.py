@@ -51,6 +51,9 @@ def test_alerts_lists_only_triggered_stocks_by_default(alert_client):
     assert top["score_change"] < 0
     assert len(top["recent"]) == 5
     assert len(top["evidence"]) == 3
+    # 佐證標題要能標示來源並連回原文（標題的著作權屬原媒體；網站不轉載內文）
+    assert all(e["source"] == "測試社" for e in top["evidence"])
+    assert all(e["url"].startswith(f"https://example.invalid/2330.TW/{AS_OF}/") for e in top["evidence"])
     assert body["summary"] == {"high": 1, "watch": 0, "normal": 1, "insufficient": len(ALERT_UNIVERSE) - 2}
     assert body["universe_size"] == len(ALERT_UNIVERSE)
     assert body["window_closed"] is True

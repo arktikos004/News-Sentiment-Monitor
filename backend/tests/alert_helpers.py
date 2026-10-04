@@ -41,7 +41,7 @@ def fill(
         articles = [
             Article(
                 title=f"{ticker} {session} #{k}",
-                url="",
+                url=f"https://example.invalid/{ticker}/{session}/{k}",
                 published_at=(base + timedelta(minutes=k)).isoformat(),
                 source="測試社",
             )

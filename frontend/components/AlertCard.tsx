@@ -92,7 +92,18 @@ export default function AlertCard({ alert, index = 0 }: { alert: StockAlert; ind
                   <li key={`${e.title}-${e.published_at}`} className="flex gap-3">
                     <span className="mt-2 size-1.5 shrink-0 rounded-full" style={{ background: lv.color }} />
                     <div className="min-w-0">
-                      <p className="text-body text-ink">{e.title}</p>
+                      {e.url ? (
+                        <a
+                          href={e.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-body text-ink underline-offset-2 hover:text-brand hover:underline"
+                        >
+                          {e.title}
+                        </a>
+                      ) : (
+                        <p className="text-body text-ink">{e.title}</p>
+                      )}
                       <p className="mt-0.5 flex flex-wrap gap-x-3 text-meta text-ink-3">
                         <span>{e.source}</span>
                         <span>{relativeTime(e.published_at)}</span>

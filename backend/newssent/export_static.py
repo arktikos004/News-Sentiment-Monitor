@@ -87,12 +87,21 @@ def run_export(
     t0 = time.monotonic()
     tickers = list(tickers)
     ok = 0
+    stale_tickers: list[str] = []
+    latest_published = ""
     for t in tickers:
         for endpoint in ("sentiment", "news"):
             body = get(f"/api/stocks/{t}/{endpoint}")
             if body is not None:
                 write(f"stocks/{t}/{endpoint}.json", body)
                 ok += 1
+                if endpoint == "news":
+                    if body.get("stale"):
+                        stale_tickers.append(t)
+                    latest_published = max([latest_published, *(a.get("published_at") or "" for a in body["articles"])])
+    # 新聞源失敗時 API 會退回舊快取（stale）而且照樣回 200：覆蓋率看不出來，必須另外量
+    if tickers and len(stale_tickers) * 2 > len(tickers):
+        log(f"::warning::{len(stale_tickers)}/{len(tickers)} 檔的新聞是舊快取（新聞源失敗？），最新一則發布於 {latest_published or '無'}")
     coverage = ok / (2 * len(tickers)) if tickers else 1.0
     log(f"個股 {len(tickers)} 檔：覆蓋率 {coverage:.0%}（{time.monotonic() - t0:.0f}s）")
     if coverage < MIN_TICKER_COVERAGE:
@@ -126,6 +135,9 @@ def run_export(
         "alerts_status": alerts_status,
         "tickers": tickers,
         "coverage": round(coverage, 4),
+        # 新聞新鮮度：新聞源失敗時不會讓排程失敗，靠這兩個欄位才看得出網站停在舊資料
+        "news_stale_tickers": stale_tickers,
+        "news_latest_published_at": latest_published or None,
         "failures": failures,
         "commit": os.environ.get("GITHUB_SHA"),
         "run_url": _run_url(),

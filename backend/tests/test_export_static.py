@@ -57,6 +57,22 @@ def test_writes_site_layout_and_meta(client_with_model, alert_store, tmp_path):
     assert json.loads((out / "tickers.json").read_text(encoding="utf-8"))["names"]["AAPL"] == "Apple"
 
 
+def test_meta_records_news_freshness(client_with_model, alert_store, tmp_path, sample_articles):
+    """新聞源失敗時 API 退回舊快取而且照樣回 200：覆蓋率看不出來，要靠 meta 的新鮮度欄位。"""
+    from newssent.api.main import app
+
+    client = _use_store(client_with_model, alert_store)
+    meta = _export(client, tmp_path / "fresh")
+    assert meta["news_stale_tickers"] == []
+    assert meta["news_latest_published_at"] == "2026-07-01T10:00:00Z"
+
+    app.state.news_provider = FakeProvider(sample_articles, stale=True)
+    messages: list[str] = []
+    meta = run_export(client, tmp_path / "stale", tickers=["AAPL"], session_limit=10_000, log=messages.append)
+    assert meta["news_stale_tickers"] == ["AAPL"]
+    assert any(m.startswith("::warning::") and "舊快取" in m for m in messages)
+
+
 def test_all_insufficient_boards_are_not_published(client_with_model, alert_store, tmp_path):
     # 換新評分器、還沒有任何分數：看板全是「資料不足」，不發布，但新聞與情緒照常
     alert_store.save_sessions(SESSIONS)

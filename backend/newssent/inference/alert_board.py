@@ -32,6 +32,7 @@ LEVEL_ORDER = {AlertLevel.HIGH: 0, AlertLevel.WATCH: 1, AlertLevel.NORMAL: 2, Al
 class Evidence:
     title: str
     source: str
+    url: str
     published_at: datetime
     score: float
 
@@ -85,7 +86,7 @@ def assess_ticker(
         opened = session_open(span[-2])
         todays = sorted(
             (
-                Evidence(r.title, r.source, r.published_at, headline_score(r.p_negative, r.p_positive))
+                Evidence(r.title, r.source, r.url, r.published_at, headline_score(r.p_negative, r.p_positive))
                 for r in rows
                 if r.published_at >= opened
             ),

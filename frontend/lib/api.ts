@@ -39,6 +39,7 @@ export interface SentimentResponse {
 export interface NewsItem {
   title: string;
   url: string;
+  source?: string; // 媒體名稱；沒有時顯示網域
   published_at: string;
   sentiment: SentimentLabel;
   confidence: number;
@@ -71,6 +72,7 @@ export interface DailySentimentPoint {
 export interface AlertEvidence {
   title: string;
   source: string;
+  url?: string; // 原文連結
   published_at: string; // ISO8601 UTC
   score: number;
 }
