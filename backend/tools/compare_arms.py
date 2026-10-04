@@ -3,7 +3,7 @@
 用法（backend/ 目錄執行）:
     python tools/compare_arms.py                     # 全跑（含 LLM 覆核，需本機 Ollama）
     python tools/compare_arms.py --no-llm            # 只比模型組
-    python tools/compare_arms.py --llm-model qwen2.5:14b
+    python tools/compare_arms.py --llm-cache-only    # 只用 docs/ 的 LLM 判讀快取（不需 Ollama；快取不全就停）
 
 對照組：
     A0 baseline      現行 production：PhraseBank 句子層級（量語氣）
@@ -119,7 +119,9 @@ def save_llm_cache(llm_model: str, rows: list[dict], labels: list[str | None]) -
         writer.writerows(existing + fresh)
 
 
-def run_llm(rows: list[dict], llm_model: str) -> tuple[list[str | None], float | None]:
+def run_llm(
+    rows: list[dict], llm_model: str, cache_only: bool = False
+) -> tuple[list[str | None], float | None]:
     """對全部標題各判一次（policy 差異由呼叫端套用，不必重跑 LLM）。
 
     回傳 (逐則標籤, 每則平均秒數)；全部命中快取時秒數為 None。
@@ -127,6 +129,12 @@ def run_llm(rows: list[dict], llm_model: str) -> tuple[list[str | None], float |
     import time
 
     cache = load_llm_cache(llm_model)
+    if cache_only:
+        missing = [r for r in rows if (r["ticker"], r["title"]) not in cache]
+        if missing:
+            raise SystemExit(f"--llm-cache-only：{llm_model} 的快取缺 {len(missing)} 則，無法重算")
+        print(f"  {llm_model}：全部取自快取（{len(rows)} 則）")
+        return [cache[(r["ticker"], r["title"])] for r in rows], None
     reviewer = OllamaReviewer(model=llm_model)
     if not reviewer.available():
         raise SystemExit(f"Ollama 不可用或未安裝模型 {llm_model}（可用 --no-llm 跳過 LLM 組）")
@@ -372,6 +380,11 @@ def main() -> int:
     parser.add_argument("--llm-models", nargs="+", default=[DEFAULT_LLM_MODEL])
     parser.add_argument("--no-llm", action="store_true", help="跳過 LLM 覆核組")
     parser.add_argument(
+        "--llm-cache-only",
+        action="store_true",
+        help="只用 docs/spot_check_llm_review.csv 的快取重算（不需 Ollama；快取不全就停止）",
+    )
+    parser.add_argument(
         "--samples",
         nargs="+",
         default=None,
@@ -414,7 +427,7 @@ def main() -> int:
     llm_notes: list[str] = []
     if not args.no_llm:
         for llm_model in args.llm_models:
-            llm_labels, secs = run_llm(rows, llm_model)
+            llm_labels, secs = run_llm(rows, llm_model, cache_only=args.llm_cache_only)
             latency = f"{secs:.1f} s" if secs else "（快取）"
             add(f"B1 A0＋{llm_model} 覆核非中性", apply_policy(base_preds, llm_labels, "non_neutral"), latency)
             add(f"B2 A0＋{llm_model} 覆核全部", apply_policy(base_preds, llm_labels, "all"), latency)
