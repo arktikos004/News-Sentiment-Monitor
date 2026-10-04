@@ -115,8 +115,8 @@ export default function SettingsPage() {
           <Note icon={Scale} tint="bg-surface-3 text-ink-2">
             情緒指數是機器學習模型的統計輸出，僅供學術研究與參考，不構成任何投資建議。
           </Note>
-          <Note icon={GraduationCap} tint="bg-surface-3 text-ink-2">
-            基於自然語言處理之新聞情緒分析與即時監控系統（研究原型）
+          <Note icon={Newspaper} tint="bg-surface-3 text-ink-2">
+            資料來源：美股標題取自 Yahoo Finance，台股標題經 FinMind 彙整各媒體。本站只顯示標題、媒體名稱與原文連結，不轉載內文，每檔最多 20 則；著作權屬原媒體。
           </Note>
         </Group>
       </main>
