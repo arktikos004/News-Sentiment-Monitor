@@ -165,7 +165,8 @@ python tools/timestamp_lag.py              # 發布→抓取時間落差實測
   [確認實驗結果](docs/confirmation_2026-09-03.md)（H1 未獲確認，誠實記為失敗）、
   [預訓練污染分析](docs/pretraining_contamination.md)、[時間戳語意](docs/timestamp_semantics.md)
 - **台股預警**：[回測預先聲明](docs/alert_backtest_prereg.md)、[回測結果](docs/alert_backtest.md)（p = 0.983，不得宣稱提前預警）、
-  [Codex 裁判資格考預先聲明](docs/judge_qualification_prereg.md)（合格標準 strict，尚待執行）
+  [Codex 裁判資格考預先聲明](docs/judge_qualification_prereg.md)（合格標準 strict，尚待執行）、
+  [中文小模型蒸餾的初步實驗](docs/distill_pilot.md)（[預先聲明](docs/distill_pilot_prereg.md)；離線、未上線，判定為部分可行）
 - **實驗**：[實驗 #6 任務定義修正](docs/experiment_target_sentiment.md)（候選結論，含警語）、
   [模型比較](docs/model_comparison.md)、[選型依據](docs/model_selection.md)、[實驗設計](docs/experiment_design.md)
 - **線上抽測**：[人工複核](docs/online_spot_check.md)、[07-17 批](docs/online_spot_check_2026-07-17.md)
