@@ -77,6 +77,12 @@ def fetch_twse_sessions(start: date, end: date, token: str = "") -> list[date]:
     return [d for d in fetch_trading_dates(start, end, token=token) if d <= end]
 
 
+def scoring_target(ticker: str, name: str) -> str:
+    """送給評分器的目標公司（名稱＋代號，例：台積電（2330））。
+    離線蒸餾實驗（tools/distill_pilot.py）的學生模型也用這個函式組輸入，才與教師評分時看到的一致。"""
+    return f"{name}（{ticker.split('.')[0]}）"
+
+
 def record(
     store: ScoreStore,
     client: DailyNewsClient,
@@ -107,10 +113,9 @@ def record(
             fetched[ticker] += len(articles)
 
     for ticker, name in tickers.items():
-        stock_id = ticker.split(".")[0]
         pending = store.unscored(ticker, scorer.version, since=score_since or start)
         to_score = [title for title in pending if not is_price_report(title)]
-        target = f"{name}（{stock_id}）"
+        target = scoring_target(ticker, name)
         failed = 0
         for i in range(0, len(to_score), SCORE_BATCH):
             batch = to_score[i: i + SCORE_BATCH]
