@@ -7,8 +7,8 @@
 | 工具 | 提供者 | 用在哪個階段 | 用途 |
 | --- | --- | --- | --- |
 | Claude Code（Claude 系列模型） | Anthropic（美國） | 開發 | 撰寫與重構程式碼、測試與技術文件；依開發者指定的方向實作實驗腳本；程式碼審查 |
-| Gemma 3（`gemma3:27b`），本機 Ollama | Google（美國） | 系統內、實驗 | 台股預警的標題評分（2026-09-26 以前）、預警回測、實驗 #6 的 LLM 覆核比較組 |
-| Gemma 4（`gemma-4-26b-a4b-it`），經 Gemini API | Google（美國） | 系統內 | 台股預警的標題評分（2026-09-27 起）。送出的只有公司名稱與新聞標題 |
+| Gemma 3（`gemma3:27b`），本機 Ollama | Google（美國） | 系統內、實驗 | 台股預警的標題評分（2026-09-26 以前）、預警回測、實驗 #6 的 LLM 覆核比較組；中文小模型蒸餾實驗的參考評分者（只用來對照，不當訓練標籤） |
+| Gemma 4（`gemma-4-26b-a4b-it`），經 Gemini API | Google（美國） | 系統內、實驗 | 台股預警的標題評分（2026-09-27 起）。送出的只有公司名稱與新聞標題。這些評分也是中文小模型蒸餾實驗的訓練標籤（離線、未上線） |
 | Gemini 3.5 Flash-Lite、Gemma 4 31B，經 Gemini API | Google（美國） | 實測 | 2026-09-27 評估雲端評分器的候選，實測後未採用（`tools/gemini_probe.py`） |
 | 未記錄名稱的 AI 助手 | 不明 | 標注 | 2026-07-17 批 30 則抽測標題的第一輪標注，之後由開發者逐則複核（29 則維持、1 則修改）。這一批只當參考，不列為盲標 |
 | Codex | OpenAI（美國） | 規劃中 | 預先聲明了「裁判資格考」（`docs/judge_qualification_prereg.md`），**尚未執行**，目前沒有任何結果依賴它 |
@@ -16,6 +16,10 @@
 - 用 AI 協助完成的 commit 都以 `Co-Authored-By: Claude …` 標註，可在 git 歷史逐筆查到。
 - 協作流程記錄在 [docs/agents/](docs/agents/)：由一個主工作階段規劃工作項目，再交給多個各自獨立的工作階段平行實作、審查與整合。
 - **正式情緒模型不是生成式 AI。** `bert-combined` 是以人工標注語料微調的判別式分類模型；訓練標籤沒有任何一筆由模型產生。
+- **實驗中的中文小模型，訓練標籤全部由語言模型產生。** 2026-10 的離線初步實驗以 Gemma 4 對 2026-09-22 以前 5,820 則台股中文標題的評分當標籤
+  （訓練 4,929 則、早停用的驗證 891 則），微調 `google-bert/bert-base-chinese`，量它與 Gemma 4 判讀的一致程度
+  （[預先聲明](docs/distill_pilot_prereg.md)、[結果](docs/distill_pilot.md)）。這個模型本身是判別式分類模型，但標籤來自生成式 AI；
+  它沒有接上線上系統，權重只留在開發者本機。
 
 ## 中國大陸廠牌的生成式 AI
 
@@ -30,7 +34,8 @@
 - 研究問題與任務定義：把「句子語氣」改成「對該標的的方向」這個任務定義的修正，以及要用什麼指標驗收。
 - 線上抽測的人工標注（120 則，見 [DATA_SOURCES.md](DATA_SOURCES.md) 的說明）。
 - 預先聲明的撰寫與遵守：假說、指標、檢定與裁決規則事先定稿，確認實驗未獲確認時照規則記為失敗
-  （[docs/preregistration_2026-08-14.md](docs/preregistration_2026-08-14.md)、[docs/confirmation_2026-09-03.md](docs/confirmation_2026-09-03.md)）。
+  （[docs/preregistration_2026-08-14.md](docs/preregistration_2026-08-14.md)、[docs/confirmation_2026-09-03.md](docs/confirmation_2026-09-03.md)）；
+  蒸餾實驗的判定門檻也由開發者事先定案（[docs/distill_pilot_prereg.md](docs/distill_pilot_prereg.md)）。
 - 每一項實驗要不要採用的裁決，以及資料來源、授權與對外公開範圍的決定。
 - 所有程式與文件變更的審閱，以及是否合併與部署的決定。
 
