@@ -75,6 +75,25 @@ class AlertEvidence(BaseModel):
     score: float
 
 
+class Announcement(BaseModel):
+    day: date = Field(description="發言日期")
+    time: str = Field(description="發言時間 HH:MM:SS（台北）")
+    subject: str = Field(description="主旨（全文請至公開資訊觀測站；說明欄可能含個人資料，本站不收）")
+    clause: str = Field(description="符合條款，例如「第51款」")
+    clarification: bool = Field(description="主旨含「澄清」：公司澄清媒體報導")
+
+
+class AnnouncementCheck(BaseModel):
+    """新聞與公告對照：預警當日往前 3 個交易日（含當日），公司有沒有發布重大訊息。"""
+
+    window_start: date
+    window_end: date
+    data_since: date = Field(description="已累積的公告最早發言日：早於此日的區間沒有對照資料")
+    data_through: date = Field(description="已累積的公告最新發言日：當天的公告要隔天清晨才出")
+    count: int
+    items: list[Announcement]
+
+
 class StockAlert(BaseModel):
     ticker: str
     name: str
@@ -90,6 +109,9 @@ class StockAlert(BaseModel):
     recent_score: float | None = Field(description="近 5 個交易日依則數加權的分數")
     recent: list[DailySentimentPoint]
     evidence: list[AlertEvidence] = Field(description="當日最負面的標題（最多 3 則），供人工覆核")
+    announcements: AnnouncementCheck | None = Field(
+        default=None, description="公司重大訊息對照；還沒有累積任何公告資料時為 null"
+    )
 
 
 class AlertSummary(BaseModel):

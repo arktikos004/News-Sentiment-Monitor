@@ -43,6 +43,13 @@ jobs:
           ref: state
           path: _state
 
+      - name: 取出公司重大訊息（新聞與公告對照；mops-data 分支）
+        continue-on-error: true # 取不到時預警照常，只是卡片上沒有公告對照
+        uses: actions/checkout@v4
+        with:
+          ref: mops-data
+          path: _mops
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12.10"
@@ -105,6 +112,10 @@ jobs:
           print("損毀：" + "、".join(bad) if bad else "ok")
           sys.exit(1 if bad else 0)
           PY
+
+      - name: 抓證交所最新一期重大訊息（只供本次匯出；累積由 mops.yml 負責 commit）
+        working-directory: backend
+        run: python -m newssent.data.mops fetch --out ../_mops || echo "重大訊息暫時抓不到，公告對照沿用已累積的資料"
 
       - name: 匯出靜態 JSON（含發布關卡）
         working-directory: backend

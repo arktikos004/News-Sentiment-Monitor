@@ -14,6 +14,7 @@ from newssent.api.routers import alerts, meta, sentiment
 from newssent.config import (
     ALERT_SCORE_DB_PATH,
     ALLOWED_ORIGINS,
+    MOPS_DATA_DIR,
     NEWS_CACHE_BUCKET_SECONDS,
     NEWS_CACHE_DB_PATH,
     NEWS_PROVIDER,
@@ -50,6 +51,8 @@ async def lifespan(app: FastAPI):
     # 情緒預警只讀分數庫（由 alert_recorder 離線寫入），請求路徑上不打外部 API、不跑 LLM
     score_store = ScoreStore(ALERT_SCORE_DB_PATH)
     app.state.score_store = score_store
+    # 新聞與公告對照讀累積的重大訊息檔（mops-data 分支）；目錄不存在時預警照常、只是沒有對照
+    app.state.mops_dir = MOPS_DATA_DIR
 
     try:
         app.state.analyzer = Analyzer.from_registry(PRODUCTION_MODEL)

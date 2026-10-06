@@ -1,0 +1,67 @@
+# 每日收集證交所「上市公司每日重大訊息」開放資料到 mops-data 分支（新聞與公告對照的資料來源）。
+#
+# 這份資料只提供最新一期（每天清晨約 05:00 換成前一個發言日的全部公告）、無法指定日期——漏收的那一期補不回來，所以：
+#   - 每天排三次（台北 07:00、12:30、20:30），週末照跑；同一期已收過的公告自動略過，稍後多出的公告只補上。
+#   - 平臺登錄的 CSV 與證交所 OpenAPI 兩個出口都抓，一邊失敗不影響另一邊。
+#   - mops-data 分支只用一般 commit 累積，從不 force push。
+#   - 只用 Python 標準函式庫（不安裝後端相依），避免別的套件出問題連帶漏收。
+#   - 只收主旨等欄位：「說明」全文可能含個人資料（人事異動的姓名與經歷），不收（見 newssent/data/mops.py）。
+# 資料依政府資料開放授權條款釋出，顯名說明見 mops-data 分支的 README.md 與每個檔案的 meta.attribution。
+name: mops
+
+on:
+  schedule:
+    - cron: "0 23 * * *" # 台北 07:00（daily 07:30 那次就能用上前一天的公告）
+    - cron: "30 4 * * *" # 台北 12:30
+    - cron: "30 12 * * *" # 台北 20:30
+  workflow_dispatch:
+
+permissions:
+  contents: write # 推 mops-data 分支
+
+concurrency:
+  group: mops
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 取出 mops-data 分支
+        uses: actions/checkout@v4
+        with:
+          ref: mops-data
+          path: _mops
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.10"
+
+      - name: 抓取兩個官方出口目前這一期（政府資料開放平臺 CSV、OpenAPI）
+        env:
+          PYTHONPATH: backend
+          PYTHONIOENCODING: utf-8
+        run: python -m newssent.data.mops fetch --out _mops
+
+      - name: 提交新資料（一般 commit）
+        run: |
+          cd _mops
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            latest=$(find t187ap04_l -name '*.json' 2>/dev/null | sort | tail -n 1 | xargs -r basename -s .json)
+            echo "::notice title=重大訊息::沒有新的公告（已收到出表日期 ${latest:-無}）"
+            exit 0
+          fi
+          files=$(git diff --cached --name-only | xargs -n1 basename | sort -u | tr '\n' ' ')
+          echo "::notice title=重大訊息::新增或補上 ${files}"
+          git commit -qm "mops: ${files}"
+          for attempt in 1 2 3; do
+            git push -q origin HEAD:mops-data && exit 0
+            git pull -q --rebase origin mops-data
+          done
+          exit 1
