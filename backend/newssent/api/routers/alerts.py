@@ -13,10 +13,13 @@ from newssent.api.schemas import (
     AlertSessionsResponse,
     AlertsResponse,
     AlertSummary,
+    Announcement,
+    AnnouncementCheck,
     DailySentimentPoint,
     StockAlert,
 )
-from newssent.config import ALERT_SCORER, ALERT_UNIVERSE
+from newssent.config import ALERT_ANNOUNCEMENT_SESSIONS, ALERT_SCORER, ALERT_UNIVERSE, MOPS_DATA_DIR
+from newssent.data import mops
 from newssent.data.score_store import ScoreStore
 from newssent.inference.alert_board import TickerAlert, build_board
 from newssent.inference.alerts import AlertLevel, AlertParams, extend_sessions, session_open
@@ -30,7 +33,27 @@ def _round(value: float | None) -> float | None:
     return None if value is None else round(value, 4)
 
 
-def _to_item(alert: TickerAlert) -> StockAlert:
+def _announcements(
+    items: tuple[mops.Announcement, ...], ticker: str, start: date, end: date
+) -> AnnouncementCheck | None:
+    """新聞與公告對照：區間內該公司的重大訊息。還沒有任何公告資料時回 None（不能說成「沒有公告」）。"""
+    if not items:
+        return None
+    found = mops.between(items, ticker.removesuffix(".TW"), start, end)
+    return AnnouncementCheck(
+        window_start=start,
+        window_end=end,
+        data_since=items[0].day,
+        data_through=items[-1].day,
+        count=len(found),
+        items=[
+            Announcement(day=a.day, time=a.time, subject=a.subject, clause=a.clause, clarification=a.clarification)
+            for a in found
+        ],
+    )
+
+
+def _to_item(alert: TickerAlert, announcements: AnnouncementCheck | None = None) -> StockAlert:
     a = alert.assessment
     return StockAlert(
         ticker=alert.ticker,
@@ -59,6 +82,7 @@ def _to_item(alert: TickerAlert) -> StockAlert:
             )
             for e in alert.evidence
         ],
+        announcements=announcements,
     )
 
 
@@ -96,6 +120,9 @@ def get_alerts(
     board = build_board(store, ALERT_UNIVERSE, ALERT_SCORER, sessions, as_of, params, today_utc=now.date())
     counts = Counter(alert.assessment.level for alert in board)
     shown = board if include_all else [a for a in board if a.assessment.level in TRIGGERED]
+    announced = mops.load_announcements(getattr(request.app.state, "mops_dir", MOPS_DATA_DIR))
+    idx = sessions.index(as_of)
+    window = (sessions[max(0, idx - ALERT_ANNOUNCEMENT_SESSIONS + 1)], as_of)
     return AlertsResponse(
         as_of=as_of,
         window_closed=now >= session_open(as_of),
@@ -103,5 +130,5 @@ def get_alerts(
         params=asdict(params),
         universe_size=len(board),
         summary=AlertSummary(**{level.value: counts.get(level, 0) for level in AlertLevel}),
-        alerts=[_to_item(a) for a in shown],
+        alerts=[_to_item(a, _announcements(announced, a.ticker, *window)) for a in shown],
     )

@@ -26,5 +26,8 @@ backend/data/*.zip
 backend/news_cache.db
 backend/alert_scores.db
 
+# 排程取出的其他分支（公司重大訊息 mops-data）；本機以 MOPS_DATA_DIR 指定時也可能放在這裡
+_mops/
+
 # 環境變數 — NewsAPI 金鑰只放 .env，絕不進版控
 .env

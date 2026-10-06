@@ -149,6 +149,10 @@ ALERT_PRICE_REPORT_PATTERNS: tuple[str, ...] = (
 ALERT_MARKET_UTC_OFFSET_HOURS = 8
 ALERT_MARKET_OPEN_HOUR = 9
 ALERT_SCORE_DB_PATH = BACKEND_ROOT / "alert_scores.db"
+# 新聞與公告對照：證交所每日重大訊息（mops-data 分支的工作目錄；CI 取出在 repo 根目錄的 _mops，
+# 本機以環境變數 MOPS_DATA_DIR 指定）。對照區間＝預警當日往前 3 個交易日（含當日）
+MOPS_DATA_DIR = Path(os.environ.get("MOPS_DATA_DIR") or BACKEND_ROOT.parent / "_mops")
+ALERT_ANNOUNCEMENT_SESSIONS = 3
 # 台股中文新聞源：FinMind TaiwanStockNews（免費；註冊 token 讓每小時額度 300→600）
 FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 # 評分器：production 的 bert-combined 以英文語料訓練，**讀不懂中文標題**，不能直接用在台股新聞。

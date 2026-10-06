@@ -1,17 +1,103 @@
 "use client";
 
 /**
- * 台股預警的單檔卡片：等級、z 值、近 5 日走勢、當日最負面的證據標題（最多 3 則，供人工覆核）。
+ * 台股預警的單檔卡片：等級、z 值、近 5 日走勢、當日最負面的證據標題（最多 3 則，供人工覆核），
+ * 以及新聞與公告對照：公司近 3 個交易日有沒有發布重大訊息（證交所開放資料，只收主旨）。
  * 紅／琥珀代表示警等級，不代表漲跌方向（台股慣例漲紅跌綠，與美股分頁相反）。
  * 台股代號過不了 /api/stocks 的代號驗證，所以不連到美股的總覽與新聞頁。
  */
 
-import { ChevronDown, CircleCheck, CircleHelp, Info, Siren, TriangleAlert, type LucideIcon } from "lucide-react";
+import {
+  ChevronDown,
+  CircleCheck,
+  CircleHelp,
+  FileQuestion,
+  Info,
+  Megaphone,
+  Siren,
+  TriangleAlert,
+  type LucideIcon,
+} from "lucide-react";
 import AlertTrend from "@/components/AlertTrend";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import type { AlertLevel, StockAlert } from "@/lib/api";
+import type { AlertLevel, AnnouncementCheck, StockAlert } from "@/lib/api";
 import { relativeTime, signed } from "@/lib/format";
 import { delay } from "@/lib/motion";
+
+// 公開資訊觀測站沒有穩定的單則公告連結，只能連到首頁、請使用者以代號查詢
+const MOPS_URL = "https://mops.twse.com.tw/";
+
+/**
+ * 新聞與公告對照。區間早於公告資料的起點時不顯示（不能把「沒有資料」說成「沒有公告」）；
+ * 區間有一部分在資料範圍外時加註，例如當天的公告要隔天清晨才出。
+ * 「沒有公告」只在示警的卡片上說：沒有示警時，新聞本來就不需要公司證實。
+ */
+function Announcements({ check, code, triggered }: { check: AnnouncementCheck; code: string; triggered: boolean }) {
+  // 日期都是 YYYY-MM-DD，可以直接比字串
+  if (check.window_end < check.data_since) return null;
+  if (check.count === 0 && !triggered) return null;
+  const pending = check.window_end > check.data_through;
+  const span =
+    check.data_since === check.data_through
+      ? `公告資料目前只有 ${check.data_since} 一天`
+      : `公告資料涵蓋 ${check.data_since} 至 ${check.data_through}`;
+  const note =
+    check.window_start < check.data_since || pending
+      ? `${span}${pending ? "，之後的公告隔天清晨才會出現" : ""}。`
+      : "";
+
+  if (check.count === 0) {
+    return (
+      <p className="mt-4 flex items-start gap-2 rounded-xl bg-surface-2 px-3 py-2.5 text-meta text-ink-3">
+        <FileQuestion size={14} className="mt-0.5 shrink-0" />
+        <span>
+          公司近 3 個交易日沒有發布重大訊息：新聞內容尚未經公司公告證實。{note}
+        </span>
+      </p>
+    );
+  }
+
+  return (
+    <Collapsible defaultOpen={triggered} className="mt-4 rounded-xl border border-hairline">
+      <CollapsibleTrigger className="group flex min-h-11 w-full items-center justify-between px-3 text-meta font-semibold text-ink-2">
+        <span className="flex items-center gap-1.5">
+          <Megaphone size={14} className="text-brand" />
+          公司重大訊息（近 3 個交易日 {check.count} 則）
+        </span>
+        <ChevronDown size={16} className="text-ink-3 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+        <ul className="space-y-3 border-t border-hairline px-3 py-3">
+          {check.items.map((a) => (
+            <li key={`${a.day}-${a.time}-${a.subject}`} className="min-w-0">
+              <p className="text-body text-ink">
+                {a.clarification && (
+                  <span className="mr-1.5 inline-flex rounded-full bg-warn-soft px-2 py-0.5 align-middle text-meta font-semibold text-warn">
+                    澄清
+                  </span>
+                )}
+                {a.subject}
+              </p>
+              <p className="mt-0.5 flex flex-wrap gap-x-3 text-meta text-ink-3">
+                <span className="font-mono tabular-nums">
+                  {a.day} {a.time.slice(0, 5)}
+                </span>
+                <span>符合條款{a.clause}</span>
+              </p>
+            </li>
+          ))}
+        </ul>
+        <p className="border-t border-hairline px-3 py-2.5 text-meta text-ink-3">
+          全文請至
+          <a href={MOPS_URL} target="_blank" rel="noopener noreferrer" className="mx-1 text-brand underline-offset-2 hover:underline">
+            公開資訊觀測站
+          </a>
+          以代號 {code} 查詢。{note}
+        </p>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 export const LEVEL: Record<
   AlertLevel,
@@ -117,6 +203,10 @@ export default function AlertCard({ alert, index = 0 }: { alert: StockAlert; ind
               </ul>
             </CollapsibleContent>
           </Collapsible>
+        )}
+
+        {alert.announcements && (
+          <Announcements check={alert.announcements} code={alert.ticker.replace(/\.TW$/, "")} triggered={triggered} />
         )}
       </div>
     </li>

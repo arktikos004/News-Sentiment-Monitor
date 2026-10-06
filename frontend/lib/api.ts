@@ -77,6 +77,25 @@ export interface AlertEvidence {
   score: number;
 }
 
+/** 證交所每日重大訊息（只收主旨；說明欄可能含個人資料，本站不收） */
+export interface Announcement {
+  day: string; // 發言日期 YYYY-MM-DD
+  time: string; // 發言時間 HH:MM:SS（台北）
+  subject: string;
+  clause: string; // 符合條款，例如「第51款」
+  clarification: boolean; // 主旨含「澄清」：公司澄清媒體報導
+}
+
+/** 新聞與公告對照：預警當日往前 3 個交易日（含當日）的重大訊息 */
+export interface AnnouncementCheck {
+  window_start: string;
+  window_end: string;
+  data_since: string; // 已累積的公告最早發言日：早於此日的區間沒有對照資料
+  data_through: string; // 已累積的公告最新發言日：當天的公告要隔天清晨才出
+  count: number;
+  items: Announcement[];
+}
+
 export interface StockAlert {
   ticker: string;
   name: string;
@@ -92,6 +111,7 @@ export interface StockAlert {
   recent_score: number | null;
   recent: DailySentimentPoint[];
   evidence: AlertEvidence[];
+  announcements?: AnnouncementCheck | null; // 舊版靜態檔沒有此欄；還沒累積任何公告資料時為 null
 }
 
 export interface AlertSummary {

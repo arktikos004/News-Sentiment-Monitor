@@ -121,6 +121,8 @@ export default function AlertsPage() {
 
   const idx = sessions && asOf ? sessions.indexOf(asOf) : -1;
   const loading = !error && !data;
+  // 有任何一張卡帶重大訊息對照時，頁尾顯名資料來源
+  const announcedSince = data?.alerts.find((a) => a.announcements)?.announcements?.data_since;
 
   return (
     <>
@@ -276,6 +278,21 @@ export default function AlertsPage() {
             )}
           </div>
         ) : null}
+
+        {announcedSince && (
+          <p className="px-1 text-meta text-ink-3">
+            公司重大訊息的資料來源：臺灣證券交易所（政府資料開放平臺「上市公司每日重大訊息」資料集），依
+            <a
+              href="https://data.gov.tw/license"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mx-1 text-brand underline-offset-2 hover:underline"
+            >
+              政府資料開放授權條款
+            </a>
+            利用。本站自 {announcedSince} 起逐日累積，只收主旨。
+          </p>
+        )}
       </main>
     </>
   );
