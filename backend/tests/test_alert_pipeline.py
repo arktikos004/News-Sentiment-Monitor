@@ -6,7 +6,7 @@ from newssent.data.finmind_news import FINMIND_PROVIDER
 from newssent.data.provider import Article
 from newssent.data.score_store import ScoreStore
 from newssent.inference.alert_board import assess_ticker, build_board
-from newssent.inference.alert_recorder import record
+from newssent.inference.alert_recorder import record, scoring_target
 from newssent.inference.alerts import AlertLevel, session_open
 from tests.alert_helpers import CALM_DAYS, fill, weekdays
 
@@ -129,6 +129,20 @@ def test_price_reports_are_stored_but_not_sent_to_the_scorer(store):
     record(store, client, scorer, {"2330.TW": "台積電"}, date(2025, 1, 20), date(2025, 1, 20), now=_utc(2025, 3, 1), log=_quiet)
     assert scorer.seen == ["台積電8月營收創新高"]
     assert store.unscored("2330.TW", SCORER) == ["台積電跌40元至2410"]  # 原始標題仍保留在庫裡
+
+
+def test_scorer_receives_company_name_and_code_as_target(store):
+    # 蒸餾實驗（tools/distill_pilot.py）的學生以 scoring_target 組輸入：教師收到的必須是同一個字串
+    targets: list[str] = []
+
+    class RecordingScorer(FlakyScorer):
+        def score(self, target: str, titles: list[str]):
+            targets.append(target)
+            return super().score(target, titles)
+
+    record(store, FakeClient(), RecordingScorer(), {"2330.TW": "台積電"}, date(2025, 1, 20), date(2025, 1, 20),
+           now=_utc(2025, 3, 1), log=_quiet)
+    assert targets == [scoring_target("2330.TW", "台積電")] == ["台積電（2330）"]
 
 
 
