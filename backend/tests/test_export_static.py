@@ -43,7 +43,7 @@ def test_writes_site_layout_and_meta(client_with_model, alert_store, tmp_path):
     meta = _export(client, out, alerts_status="ok")
 
     for rel in ["model.json", "tickers.json", "stocks/AAPL/sentiment.json", "stocks/AAPL/news.json",
-                "alerts/sessions.json", "meta.json"]:
+                "alerts/sessions.json", "alerts/panel.json", "alerts/whatif.json", "meta.json"]:
         assert (out / rel).is_file(), rel
 
     calendar = json.loads((out / "alerts/sessions.json").read_text(encoding="utf-8"))
@@ -55,6 +55,21 @@ def test_writes_site_layout_and_meta(client_with_model, alert_store, tmp_path):
     assert meta["alerts_latest"] == calendar["latest"]
     assert meta["alerts_status"] == "ok"
     assert json.loads((out / "tickers.json").read_text(encoding="utf-8"))["names"]["AAPL"] == "Apple"
+
+
+def test_panel_failure_does_not_block_the_export(client_with_model, alert_store, tmp_path, monkeypatch):
+    """產業儀表板與 what-if 是非必要的新功能：出錯時看板照常匯出，錯誤記在 meta.failures。"""
+    from newssent.api.routers import alerts as alerts_router
+
+    def broken(*_args, **_kwargs):
+        raise RuntimeError("面板壞了")
+
+    monkeypatch.setattr(alerts_router, "load_panel", broken)
+    fill(alert_store, "2330.TW", SESSIONS, ["negative"] * 3, ALERT_SCORER)
+    out = tmp_path / "data"
+    meta = _export(_use_store(client_with_model, alert_store), out)
+    assert (out / "alerts/sessions.json").is_file() and not (out / "alerts/panel.json").exists()
+    assert sum("面板壞了" in f for f in meta["failures"]) == 2
 
 
 def test_meta_records_news_freshness(client_with_model, alert_store, tmp_path, sample_articles):

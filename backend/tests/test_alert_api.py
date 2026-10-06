@@ -125,6 +125,30 @@ def test_announcements_are_null_without_any_announcement_data(alert_client):
     assert body["alerts"][0]["announcements"] is None
 
 
+def test_panel_agrees_with_the_board_and_groups_by_industry(alert_client):
+    panel = alert_client.get(f"/api/alerts/panel?as_of={AS_OF}").json()
+    board = alert_client.get(f"/api/alerts?as_of={AS_OF}&include_all=true").json()
+    k = panel["sessions"].index(AS_OF)
+    by_ticker = {t["ticker"]: t for t in panel["tickers"]}
+    assert len(by_ticker) == len(ALERT_UNIVERSE)
+    for a in board["alerts"]:
+        row = by_ticker[a["ticker"]]
+        assert (row["level"][k], row["z"][k], row["n"][k]) == (a["level"], a["z_score"], a["article_count"])
+    assert sorted(t for g in panel["industries"] for t in g["tickers"]) == sorted(ALERT_UNIVERSE)
+    assert all("title" not in t for t in panel["tickers"])  # 面板只有衍生數值，不帶標題
+
+
+def test_whatif_shape_and_default_point(alert_client):
+    out = alert_client.get(f"/api/alerts/whatif?as_of={AS_OF}").json()
+    grid, days = out["grid"], len(out["sessions"])
+    assert len(out["counts"]) == len(grid["baseline"]) and len(out["counts"][0]) == len(grid["min_articles"])
+    assert len(out["counts"][0][0]) == len(grid["z"]) and len(out["counts"][0][0][0]) == days
+    b, m, z = grid["baseline"].index(20), grid["min_articles"].index(2), grid["z"].index(-1.5)
+    k = out["sessions"].index(AS_OF)
+    board = alert_client.get(f"/api/alerts?as_of={AS_OF}").json()
+    assert out["counts"][b][m][z][k] == board["summary"]["high"] + board["summary"]["watch"]
+
+
 def test_include_all_lists_insufficient_with_reason(alert_client):
     body = alert_client.get(f"/api/alerts?as_of={AS_OF}&include_all=true").json()
     assert len(body["alerts"]) == len(ALERT_UNIVERSE)

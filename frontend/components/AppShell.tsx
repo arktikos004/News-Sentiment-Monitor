@@ -6,7 +6,7 @@
  * 分頁切換走 client-side navigation，root layout 與共用狀態不會重建。
  */
 
-import { BellRing, Gauge, ListOrdered, Newspaper, SlidersHorizontal } from "lucide-react";
+import { BellRing, Gauge, LayoutGrid, ListOrdered, Newspaper, SlidersHorizontal } from "lucide-react";
 import { MotionConfig, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,6 +21,7 @@ const TABS = [
   { href: "/news", label: "新聞", Icon: Newspaper },
   { href: "/watchlist", label: "追蹤", Icon: ListOrdered },
   { href: "/alerts", label: "預警", Icon: BellRing },
+  { href: "/sectors", label: "產業", Icon: LayoutGrid },
   { href: "/settings", label: "設定", Icon: SlidersHorizontal },
 ] as const;
 

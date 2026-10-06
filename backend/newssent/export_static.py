@@ -122,6 +122,18 @@ def run_export(
     write("alerts/sessions.json", {"sessions": exported, "latest": latest})
     log(f"預警看板 {len(exported)} 個交易日（最新 {latest}，{time.monotonic() - t0:.0f}s）")
 
+    # 產業情緒儀表板與門檻 what-if：非必要。TestClient 會把端點裡沒接住的例外直接拋出，
+    # 所以連例外也接住——新功能出錯時只記在 failures，看板與個股照常部署
+    for url, relpath in (("/api/alerts/panel", "alerts/panel.json"), ("/api/alerts/whatif", "alerts/whatif.json")):
+        try:
+            body = get(url)
+        except Exception as exc:
+            failures.append(f"{url} → {exc!r}")
+            log(f"[略過] {url}：{exc!r}")
+            continue
+        if body is not None:
+            write(relpath, body)
+
     prev_latest = (prev_meta or {}).get("alerts_latest")
     if prev_latest and (latest is None or latest < prev_latest):
         raise ExportError(f"預警最新交易日倒退：本次 {latest}、上一版 {prev_latest}（分數庫還原失敗？）")

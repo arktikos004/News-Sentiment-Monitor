@@ -134,3 +134,43 @@ class AlertsResponse(BaseModel):
     universe_size: int
     summary: AlertSummary
     alerts: list[StockAlert]
+
+
+# --- 產業情緒儀表板（GET /api/alerts/panel）與警示門檻 what-if（GET /api/alerts/whatif）---
+
+
+class PanelTicker(BaseModel):
+    ticker: str
+    name: str
+    industry: str
+    score: list[float | None] = Field(description="逐日情緒分數 [−1, +1]；null＝當日無標題")
+    n: list[int] = Field(description="逐日標題則數")
+    z: list[float | None] = Field(description="逐日 z 值；null＝資料不足")
+    level: list[AlertLevelName]
+
+
+class PanelIndustry(BaseModel):
+    name: str = Field(description="證交所產業別")
+    tickers: list[str]
+
+
+class AlertPanelResponse(BaseModel):
+    """全池逐日面板（線上預設參數）：與預警看板同一條計算路徑，只有衍生數值、沒有標題。"""
+
+    sessions: list[date]
+    scorer: str
+    params: dict[str, float]
+    industries: list[PanelIndustry]
+    tickers: list[PanelTicker]
+
+
+class AlertWhatIfResponse(BaseModel):
+    """門檻 what-if：每組參數逐日的示警檔數（只算工作量，不重算事件命中率）。"""
+
+    sessions: list[date]
+    scorer: str
+    grid: dict[str, list[float]] = Field(description="baseline（基準天數）、min_articles（最少則數）、z（門檻，由寬到嚴）")
+    default: dict[str, float] = Field(description="線上預設值")
+    universe_size: int
+    counts: list[list[list[list[int]]]] = Field(description="counts[基準][則數][z][日]＝z 低於門檻的檔數")
+    judged: list[list[list[int]]] = Field(description="judged[基準][則數][日]＝可判斷（非資料不足）的檔數")
