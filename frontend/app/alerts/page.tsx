@@ -58,6 +58,12 @@ function snapToSession(sessions: string[], day: string): string {
   return pick;
 }
 
+/** 從產業儀表板點進來時網址帶 ?date=YYYY-MM-DD（整頁載入）：對齊到 ≤ 它的交易日；沒帶就是 null */
+function requestedSession(sessions: string[]): string | null {
+  const day = new URLSearchParams(window.location.search).get("date");
+  return day && /^\d{4}-\d{2}-\d{2}$/.test(day) ? snapToSession(sessions, day) : null;
+}
+
 const SUMMARY: { level: AlertLevel; label: string }[] = [
   { level: "high", label: "高度異常" },
   { level: "watch", label: "留意" },
@@ -91,7 +97,7 @@ export default function AlertsPage() {
     api
       .alertSessions()
       .then((r) => {
-        remember({ sessions: r.sessions, latest: r.latest, asOf: cache.asOf ?? r.latest });
+        remember({ sessions: r.sessions, latest: r.latest, asOf: cache.asOf ?? requestedSession(r.sessions) ?? r.latest });
         setSessions(r.sessions);
         setLatest(r.latest);
         setAsOfState(cache.asOf);

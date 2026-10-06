@@ -32,6 +32,11 @@
   --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(2, 6, 12, 0.35);
   --shadow-float: 0 16px 40px rgba(2, 6, 12, 0.6);
   --glow: rgba(90, 169, 230, 0.12);
+  /* 產業情緒熱度圖的發散色：藍＝正面、紅＝負面、灰＝中性（台股頁避開綠色，免得和「跌」混淆）；
+     兩極以 OKLab 往中性灰混色，亮度單調（app/sectors/page.tsx） */
+  --div-pos: #3987e5;
+  --div-neg: #e66767;
+  --div-mid: #383835;
   color-scheme: dark;
 }
 
@@ -62,6 +67,9 @@
   --shadow-card: 0 1px 2px rgba(14, 26, 38, 0.05), 0 8px 24px rgba(14, 26, 38, 0.06);
   --shadow-float: 0 16px 40px rgba(14, 26, 38, 0.18);
   --glow: rgba(31, 111, 178, 0.08);
+  --div-pos: #2a78d6;
+  --div-neg: #e34948;
+  --div-mid: #f0efec;
   color-scheme: light;
 }
 

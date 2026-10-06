@@ -136,6 +136,34 @@ export interface AlertSessionsResponse {
   latest: string;
 }
 
+/** 全池逐日面板（產業情緒儀表板）：與預警看板同一條計算路徑，只有衍生數值、沒有標題 */
+export interface AlertPanelResponse {
+  sessions: string[];
+  scorer: string;
+  params: Record<string, number>;
+  industries: { name: string; tickers: string[] }[];
+  tickers: {
+    ticker: string;
+    name: string;
+    industry: string;
+    score: (number | null)[]; // 逐日情緒分數 [−1, +1]；null＝當日無標題
+    n: number[];
+    z: (number | null)[];
+    level: AlertLevel[];
+  }[];
+}
+
+/** 警示門檻 what-if：counts[基準][則數][z][日]＝z 低於門檻的檔數（只算工作量，不是命中率） */
+export interface AlertWhatIfResponse {
+  sessions: string[];
+  scorer: string;
+  grid: { baseline: number[]; min_articles: number[]; z: number[] };
+  default: { baseline: number; min_articles: number; z: number };
+  universe_size: number;
+  counts: number[][][][];
+  judged: number[][][];
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -184,6 +212,8 @@ const liveApi = {
     return request<AlertsResponse>(`/api/alerts${qs ? `?${qs}` : ""}`);
   },
   alertSessions: () => request<AlertSessionsResponse>("/api/alerts/sessions"),
+  alertPanel: () => request<AlertPanelResponse>("/api/alerts/panel"),
+  alertWhatIf: () => request<AlertWhatIfResponse>("/api/alerts/whatif"),
 };
 
 /** 美股代號格式（與後端 deps.py 一致）；提交前先擋掉明顯錯誤格式 */
@@ -235,6 +265,8 @@ const staticApi: typeof liveApi = {
   news: (ticker) => staticGet(`/stocks/${enc(ticker)}/news.json`),
   modelInfo: () => staticGet("/model.json"),
   alertSessions: staticCalendar,
+  alertPanel: () => staticGet("/alerts/panel.json"),
+  alertWhatIf: () => staticGet("/alerts/whatif.json"),
   alerts: async (asOf, includeAll = false) => {
     const day = asOf ?? (await staticCalendar()).latest;
     let board: ExportedBoard;
