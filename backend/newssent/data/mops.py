@@ -69,12 +69,29 @@ def roc_to_date(roc: str) -> date:
 
 
 def format_time(hhmmss: str) -> str:
-    """發言時間 → 'HH:MM:SS'：'70003' → '07:00:03'（來源省略小時的前導零）。"""
+    """發言時間 → 'HH:MM:SS'：'70003' → '07:00:03'、'500' → '00:05:00'。
+
+    來源把整個數字的前導零都省略：凌晨 0 點的公告只剩 1～4 碼（2026-10-08 那一期因此被整期拒收，已修正）。
+    """
     digits = hhmmss.strip()
-    if not digits.isdigit() or not 5 <= len(digits) <= 6:
+    if not digits.isdigit() or len(digits) > 6:
         raise MopsError(f"無法解析的發言時間：{hhmmss!r}")
     digits = digits.zfill(6)
+    if int(digits[:2]) > 23 or int(digits[2:4]) > 59 or int(digits[4:]) > 59:
+        raise MopsError(f"無法解析的發言時間：{hhmmss!r}")
     return f"{digits[:2]}:{digits[2:4]}:{digits[4:]}"
+
+
+def unreadable(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """發言日期或時間解析不了的列：照樣存檔（原值不改），讀取端會略過它們；收集時只示警。"""
+    bad = []
+    for r in rows:
+        try:
+            roc_to_date(r["發言日期"])
+            format_time(r["發言時間"])
+        except (MopsError, ValueError):
+            bad.append(r)
+    return bad
 
 
 def _get(url: str) -> bytes:
@@ -111,16 +128,16 @@ def parse(body: bytes, url: str) -> list[dict[str, str]]:
 
 
 def issue_date(rows: list[dict[str, str]], today: date | None = None) -> date | None:
-    """這一期的出表日期；空的一期（當天沒有任何公告）回傳 None。日期必須一致且不在未來。"""
+    """這一期的出表日期；空的一期（當天沒有任何公告）回傳 None。日期必須一致且不在未來。
+
+    個別列的發言日期或時間解析不了不拒收整期（錯過的一期補不回來）：見 unreadable()。
+    """
     if not rows:
         return None
     dates = {r["出表日期"] for r in rows}
     if len(dates) != 1:
         raise MopsError(f"{DATASET} 混有多個出表日期：{sorted(dates)[:5]}")
     day = roc_to_date(dates.pop())
-    for r in rows:  # 讀取端靠發言日期與時間查詢，存檔前就要能解析
-        roc_to_date(r["發言日期"])
-        format_time(r["發言時間"])
     if day > (today or datetime.now(_TAIPEI).date()):
         raise MopsError(f"{DATASET} 的出表日期 {day} 在未來，內容可疑")
     return day
@@ -248,13 +265,17 @@ def _cmd_fetch(args: argparse.Namespace) -> int:
         print(json.dumps({"error": str(exc)}, ensure_ascii=False))
         return 1
     days = []
+    odd: list[dict[str, str]] = []
     for day, rows, url in available:
         path, added = store(Path(args.out), day, rows, url)
         days.append({"date": day.isoformat(), "rows": len(rows), "source_url": url, "added": added})
+        odd.extend(r for r in unreadable(rows) if r not in odd)
     print(json.dumps({"days": days, "outlet_errors": outlet_errors}, ensure_ascii=False))
     prefix = "::warning title=重大訊息::" if os.environ.get("GITHUB_ACTIONS") == "true" else "警告："
     for problem in outlet_errors:  # 只剩一個出口不算失敗，但要看得到
         print(f"{prefix}有一個出口抓不到——{' '.join(problem.split())}", file=sys.stderr)
+    for r in odd:  # 已原樣存檔，網站讀取時會略過；要看得到才知道格式又變了
+        print(f"{prefix}發言日期或時間解析不了（已存檔、網站略過）：{r['公司代號']} {r['發言日期']} {r['發言時間']!r}", file=sys.stderr)
     return 0
 
 
