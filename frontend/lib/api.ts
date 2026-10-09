@@ -92,6 +92,7 @@ export interface AnnouncementCheck {
   window_end: string;
   data_since: string; // 已累積的公告最早發言日：早於此日的區間沒有對照資料
   data_through: string; // 已累積的公告最新發言日：當天的公告要隔天清晨才出
+  missing_days?: string[]; // 區間內漏收的交易日（不能當成沒有公告）；舊版靜態檔沒有此欄
   count: number;
   items: Announcement[];
 }

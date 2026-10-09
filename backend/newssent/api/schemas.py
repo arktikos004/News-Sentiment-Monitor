@@ -90,6 +90,10 @@ class AnnouncementCheck(BaseModel):
     window_end: date
     data_since: date = Field(description="已累積的公告最早發言日：早於此日的區間沒有對照資料")
     data_through: date = Field(description="已累積的公告最新發言日：當天的公告要隔天清晨才出")
+    missing_days: list[date] = Field(
+        default_factory=list,
+        description="區間內的交易日中整天沒有任何公告資料的日子（那一期漏收）：不能當成公司沒有公告",
+    )
     count: int
     items: list[Announcement]
 

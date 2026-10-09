@@ -47,17 +47,20 @@ def _round(value: float | None) -> float | None:
 
 
 def _announcements(
-    items: tuple[mops.Announcement, ...], ticker: str, start: date, end: date
+    items: tuple[mops.Announcement, ...], ticker: str, window: list[date], missing: list[date]
 ) -> AnnouncementCheck | None:
-    """新聞與公告對照：區間內該公司的重大訊息。還沒有任何公告資料時回 None（不能說成「沒有公告」）。"""
+    """新聞與公告對照：區間（window 的交易日）內該公司的重大訊息。
+    還沒有任何公告資料時回 None；區間內有漏收的日子時一併列出——兩者都不能說成「沒有公告」。"""
     if not items:
         return None
+    start, end = window[0], window[-1]
     found = mops.between(items, ticker.removesuffix(".TW"), start, end)
     return AnnouncementCheck(
         window_start=start,
         window_end=end,
         data_since=items[0].day,
         data_through=items[-1].day,
+        missing_days=missing,
         count=len(found),
         items=[
             Announcement(day=a.day, time=a.time, subject=a.subject, clause=a.clause, clarification=a.clarification)
@@ -201,7 +204,8 @@ def get_alerts(
     shown = board if include_all else [a for a in board if a.assessment.level in TRIGGERED]
     announced = mops.load_announcements(getattr(request.app.state, "mops_dir", MOPS_DATA_DIR))
     idx = sessions.index(as_of)
-    window = (sessions[max(0, idx - ALERT_ANNOUNCEMENT_SESSIONS + 1)], as_of)
+    window = sessions[max(0, idx - ALERT_ANNOUNCEMENT_SESSIONS + 1) : idx + 1]
+    missing = mops.missing_days(announced, window)
     return AlertsResponse(
         as_of=as_of,
         window_closed=now >= session_open(as_of),
@@ -209,5 +213,5 @@ def get_alerts(
         params=asdict(params),
         universe_size=len(board),
         summary=AlertSummary(**{level.value: counts.get(level, 0) for level in AlertLevel}),
-        alerts=[_to_item(a, _announcements(announced, a.ticker, *window)) for a in shown],
+        alerts=[_to_item(a, _announcements(announced, a.ticker, window, missing)) for a in shown],
     )

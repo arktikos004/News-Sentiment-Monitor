@@ -18,6 +18,7 @@ from newssent.data.mops import (
     format_time,
     issue_date,
     load_announcements,
+    missing_days,
     parse,
     roc_to_date,
     store,
@@ -182,3 +183,15 @@ def test_load_and_query_announcements(tmp_path):
     assert tsmc[1].time == "15:05:01"
     assert between(items, "2330", date(2026, 10, 3), date(2026, 10, 4)) == []
     assert load_announcements(tmp_path / "missing") == ()
+
+
+def test_missing_days_are_trading_days_without_any_announcement():
+    """漏收的那一期：已累積範圍內整天沒有任何一家公司公告的交易日。範圍外的日子不算（另有說明）。"""
+    items = tuple(
+        mops.Announcement(day=d, time="17:30:00", code=c, company=c, subject="公告", clause="第51款")
+        for d, c in ((date(2026, 10, 5), "2330"), (date(2026, 10, 6), "2317"), (date(2026, 10, 8), "1101"))
+    )
+    window = [date(2026, 10, 2), date(2026, 10, 5), date(2026, 10, 6), date(2026, 10, 7), date(2026, 10, 8), date(2026, 10, 9)]
+    assert missing_days(items, window) == [date(2026, 10, 7)]
+    assert missing_days(items, [date(2026, 10, 5), date(2026, 10, 6)]) == []
+    assert missing_days((), window) == []

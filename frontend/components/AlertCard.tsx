@@ -30,6 +30,7 @@ const MOPS_URL = "https://mops.twse.com.tw/";
 /**
  * 新聞與公告對照。區間早於公告資料的起點時不顯示（不能把「沒有資料」說成「沒有公告」）；
  * 區間有一部分在資料範圍外時加註，例如當天的公告要隔天清晨才出。
+ * 區間內有漏收的日子時，同樣不能說「沒有公告」，改說明哪天漏收。
  * 「沒有公告」只在示警的卡片上說：沒有示警時，新聞本來就不需要公司證實。
  */
 function Announcements({ check, code, triggered }: { check: AnnouncementCheck; code: string; triggered: boolean }) {
@@ -45,13 +46,18 @@ function Announcements({ check, code, triggered }: { check: AnnouncementCheck; c
     check.window_start < check.data_since || pending
       ? `${span}${pending ? "，之後的公告隔天清晨才會出現" : ""}。`
       : "";
+  const missing = check.missing_days ?? [];
+  const gap = missing.length > 0 ? `${missing.join("、")} 的公告資料漏收，` : "";
 
   if (check.count === 0) {
     return (
       <p className="mt-4 flex items-start gap-2 rounded-xl bg-surface-2 px-3 py-2.5 text-meta text-ink-3">
         <FileQuestion size={14} className="mt-0.5 shrink-0" />
         <span>
-          公司近 3 個交易日沒有發布重大訊息：新聞內容尚未經公司公告證實。{note}
+          {gap
+            ? `${gap}無法確認公司近 3 個交易日是否發布重大訊息。`
+            : "公司近 3 個交易日沒有發布重大訊息：新聞內容尚未經公司公告證實。"}
+          {note}
         </span>
       </p>
     );
@@ -92,7 +98,7 @@ function Announcements({ check, code, triggered }: { check: AnnouncementCheck; c
           <a href={MOPS_URL} target="_blank" rel="noopener noreferrer" className="mx-1 text-brand underline-offset-2 hover:underline">
             公開資訊觀測站
           </a>
-          以代號 {code} 查詢。{note}
+          以代號 {code} 查詢。{gap && `${gap}可能還有未列出的公告。`}{note}
         </p>
       </CollapsibleContent>
     </Collapsible>
