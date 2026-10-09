@@ -26,6 +26,7 @@ import re
 import sys
 import time
 import urllib.request
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -255,6 +256,19 @@ def load_announcements(data_dir: Path) -> tuple[Announcement, ...]:
 def between(items: tuple[Announcement, ...], code: str, start: date, end: date) -> list[Announcement]:
     """某公司發言日期落在 [start, end] 的公告（含兩端），依時間排序。"""
     return [a for a in items if a.code == code and start <= a.day <= end]
+
+
+def missing_days(items: tuple[Announcement, ...], days: Iterable[date]) -> list[date]:
+    """days（交易日）之中、已累積範圍內卻整天沒有任何一家公司公告的日子：那一期漏收。
+
+    交易日每天都有數十則重大訊息，整天掛零只會是沒收到；這些日子不能當成「公司沒有公告」。
+    已累積範圍外的日子不算（由 data_since／data_through 另外說明）。
+    """
+    if not items:
+        return []
+    covered = {a.day for a in items}
+    first, last = items[0].day, items[-1].day
+    return [d for d in days if first <= d <= last and d not in covered]
 
 
 def _cmd_fetch(args: argparse.Namespace) -> int:

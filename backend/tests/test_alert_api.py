@@ -51,13 +51,26 @@ def _announce(mops_dir: Path, issued: date, rows: list[tuple[str, date, str]]) -
 
 @pytest.fixture
 def announced_client(tmp_path):
-    """2330 在對照區間（當日往前 3 個交易日）內外各一則；2317 只有當日一則。"""
+    """2330 在對照區間（當日往前 3 個交易日）內外各一則；2317 只有當日一則。每個交易日都有公告（沒有漏收）。"""
     store = ScoreStore(tmp_path / "alerts.db")
     fill(store, "2330.TW", SESSIONS, ["negative"] * 3, ALERT_SCORER)
     fill(store, "2317.TW", SESSIONS, CALM_DAYS[0], ALERT_SCORER)
     mops_dir = tmp_path / "mops"
     _announce(mops_dir, SESSIONS[-3], [("2330", SESSIONS[-4], "公告本公司董事會決議")])
+    _announce(mops_dir, SESSIONS[-2], [("1101", SESSIONS[-3], "公告本公司財務報告")])
     _announce(mops_dir, SESSIONS[-1], [("2330", SESSIONS[-2], "澄清工商時報報導"), ("2317", SESSIONS[-1], "公告取得設備")])
+    yield from _client_with_store(store, mops_dir)
+    store.close()
+
+
+@pytest.fixture
+def gapped_client(tmp_path):
+    """公告資料中間漏收兩個交易日（SESSIONS[-3]、[-2] 整天沒有任何公告）。"""
+    store = ScoreStore(tmp_path / "alerts.db")
+    fill(store, "2330.TW", SESSIONS, ["negative"] * 3, ALERT_SCORER)
+    mops_dir = tmp_path / "mops"
+    _announce(mops_dir, SESSIONS[-3], [("1101", SESSIONS[-4], "公告本公司董事會決議")])
+    _announce(mops_dir, SESSIONS[-1], [("2317", SESSIONS[-1], "公告取得設備")])
     yield from _client_with_store(store, mops_dir)
     store.close()
 
@@ -117,6 +130,15 @@ def test_alerts_attach_company_announcements(announced_client):
     }
     assert by_ticker["2317.TW"]["count"] == 1
     assert by_ticker["2412.TW"]["count"] == 0 and by_ticker["2412.TW"]["items"] == []
+    assert all(check["missing_days"] == [] for check in by_ticker.values())
+
+
+def test_missed_issues_are_listed_so_zero_is_not_read_as_no_announcement(gapped_client):
+    """漏收的交易日要列出來：那幾天的「0 則」不代表公司沒有公告。"""
+    body = gapped_client.get(f"/api/alerts?as_of={AS_OF}").json()
+    [tsmc] = [a["announcements"] for a in body["alerts"] if a["ticker"] == "2330.TW"]
+    assert tsmc["count"] == 0
+    assert tsmc["missing_days"] == [SESSIONS[-3].isoformat(), SESSIONS[-2].isoformat()]
 
 
 def test_announcements_are_null_without_any_announcement_data(alert_client):
