@@ -65,8 +65,13 @@ def test_dates_and_times():
     assert roc_to_date("1151005") == date(2026, 10, 5)
     assert format_time("70003") == "07:00:03"
     assert format_time("181254") == "18:12:54"
-    with pytest.raises(MopsError):
-        format_time("7:00")
+    # 來源省略所有前導零：凌晨 0 點的公告只剩 1～4 碼（2026-10-08 那一期曾因此被整期拒收）
+    assert format_time("3015") == "00:30:15"
+    assert format_time("500") == "00:05:00"
+    assert format_time("0") == "00:00:00"
+    for bad in ("7:00", "1234567", "250000", "126000", ""):
+        with pytest.raises(MopsError):
+            format_time(bad)
 
 
 def test_parse_keeps_only_the_listed_fields_from_both_outlets():
@@ -97,6 +102,20 @@ def test_issue_date_checks_consistency_and_future():
     mixed = rows + [dict(rows[0], 出表日期="1151007")]
     with pytest.raises(MopsError, match="多個出表日期"):
         issue_date(mixed, today=date(2026, 10, 7))
+
+
+def test_one_odd_row_does_not_lose_the_whole_issue(monkeypatch, tmp_path, capsys):
+    """錯過的一期補不回來：個別列的時間格式怪，整期照存（原值不改），網站讀取時略過那一列，排程示警。"""
+    rows = [_row(), _row("2317", at="3015"), _row("2454", at="99:99")]
+    _serve(monkeypatch, csv=None, api=_api_body(rows))
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    assert mops.main(["fetch", "--out", str(tmp_path)]) == 0
+    captured = capsys.readouterr()
+    assert json.loads(captured.out)["days"][0]["added"] == 3
+    assert "2454" in captured.err and "99:99" in captured.err and "2317" not in captured.err
+    items = load_announcements(tmp_path)
+    assert sorted(a.code for a in items) == ["2317", "2330"]  # 解析不了的那一列不進網站
+    assert next(a for a in items if a.code == "2317").time == "00:30:15"
 
 
 def test_store_merges_new_rows_and_never_rewrites_old_ones(tmp_path):
