@@ -304,6 +304,11 @@ def _retry_delay(body: dict) -> float | None:
     return None
 
 
+def should_review(model_label: str, policy: str) -> bool:
+    """這一則要不要交給 LLM 重判：all＝全部；non_neutral＝只重判模型給了方向的。"""
+    return policy == "all" or model_label != "neutral"
+
+
 def hybrid_review(
     items: Iterable[tuple[str, str, str]],
     reviewer: OllamaReviewer,
@@ -315,8 +320,7 @@ def hybrid_review(
 
     out: list[ReviewedLabel] = []
     for target, headline, model_label in items:
-        should_review = policy == "all" or model_label != "neutral"
-        if not should_review:
+        if not should_review(model_label, policy):
             out.append(ReviewedLabel(model_label, "model", model_label, None))
             continue
         llm_label = reviewer.judge(target, headline)

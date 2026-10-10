@@ -14,13 +14,12 @@ import json
 import pytest
 
 from newssent.inference.llm_review import _SYSTEM_PROMPT
+from newssent.ml.stats import cohen_kappa, mcnemar_exact
 from tools.judge_qualify import (
     MISSING,
     audit_events,
     build_prompt,
-    cohen_kappa,
     judge_rules,
-    mcnemar,
     parse_batch_output,
     score,
     verdict,
@@ -112,7 +111,7 @@ def test_mcnemar_counts_discordant_cells():
     human = ["negative"] * 10
     model = ["neutral"] * 10
     judge = ["negative"] * 10
-    a_only, b_only, p = mcnemar(human, model, judge)
+    a_only, b_only, p = mcnemar_exact(human, model, judge)
     assert (a_only, b_only) == (0, 10) and p < 0.01
 
 

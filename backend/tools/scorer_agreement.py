@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import math
 import sqlite3
 import sys
 from collections import Counter, defaultdict
@@ -36,6 +35,7 @@ from newssent.config import (  # noqa: E402
     LABEL_NAMES,
 )
 from newssent.inference.alerts import daily_scores, headline_score, is_price_report  # noqa: E402
+from newssent.ml.stats import cohen_kappa, spearman, wilson  # noqa: E402
 
 # --- 預先聲明的門檻（docs/scorer_switch_prereg.md）；改動必須先改該文件並 commit ---
 KAPPA_ADOPT = 0.60
@@ -47,32 +47,6 @@ MIN_PAIRS = 200
 def _label(neg: float, neu: float, pos: float) -> str:
     probs = (neg, neu, pos)
     return LABEL_NAMES[max(range(3), key=probs.__getitem__)]
-
-
-def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
-    if n == 0:
-        return (math.nan, math.nan)
-    p = k / n
-    denom = 1 + z * z / n
-    center = (p + z * z / (2 * n)) / denom
-    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
-    return (center - half, center + half)
-
-
-def cohen_kappa(pairs: list[tuple[str, str]]) -> float:
-    n = len(pairs)
-    if n == 0:
-        return math.nan
-    po = sum(a == b for a, b in pairs) / n
-    ca, cb = Counter(a for a, _ in pairs), Counter(b for _, b in pairs)
-    pe = sum(ca[label] * cb[label] for label in LABEL_NAMES) / (n * n)
-    return (po - pe) / (1 - pe) if pe < 1 else math.nan
-
-
-def spearman(xs: list[float], ys: list[float]) -> float:
-    from scipy.stats import spearmanr
-
-    return float(spearmanr(xs, ys).statistic) if len(xs) >= 3 else math.nan
 
 
 def verdict(kappa: float, coverage: float, n_pairs: int) -> str:
@@ -140,7 +114,7 @@ def run(db_path: Path, new: str, legacy: str) -> dict:
                 ys.append(n.score)
     conn.close()
 
-    kappa = cohen_kappa(labels)
+    kappa = cohen_kappa([a for a, _ in labels], [b for _, b in labels], LABEL_NAMES)
     return {
         "new": new,
         "legacy": legacy,

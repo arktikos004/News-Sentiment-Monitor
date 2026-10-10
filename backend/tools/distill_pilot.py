@@ -64,8 +64,8 @@ from newssent.inference.alerts import (  # noqa: E402
 from newssent.ml.dataset import Split, grouped_stratified_split  # noqa: E402
 from newssent.ml.evaluate import benchmark_cpu_ms, benchmark_gpu_ms  # noqa: E402
 from newssent.ml.models.base import SentimentModel, align_proba  # noqa: E402
+from newssent.ml.stats import cohen_kappa, spearman, wilson  # noqa: E402
 from newssent.text.preprocess import build_target_text  # noqa: E402
-from tools.scorer_agreement import cohen_kappa, spearman, wilson  # noqa: E402
 
 # --- 預先聲明的設定與判定門檻（docs/distill_pilot_prereg.md）；改動必須先改該文件並 commit ---
 TEST_START = "2026-09-22T00:00:00+00:00"  # 發布時間（UTC）在此（含）之後＝測試集
@@ -196,7 +196,7 @@ def agreement_metrics(y_true: list[int], y_pred: list[int]) -> dict:
         "agree": agree,
         "agreement": agree / n if n else math.nan,
         "agreement_ci": wilson(agree, n),
-        "kappa": cohen_kappa([(LABEL_NAMES[a], LABEL_NAMES[b]) for a, b in zip(y_true, y_pred)]),
+        "kappa": cohen_kappa([LABEL_NAMES[a] for a in y_true], [LABEL_NAMES[b] for b in y_pred], LABEL_NAMES),
         "macro_f1": float(f1_score(y_true, y_pred, labels=[0, 1, 2], average="macro", zero_division=0)) if n else math.nan,
         "neg_hit": neg_hit,
         "neg_total": neg_total,

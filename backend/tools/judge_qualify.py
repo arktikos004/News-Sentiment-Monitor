@@ -31,13 +31,13 @@ import tempfile
 import time
 from collections import Counter
 from datetime import datetime, timezone
-from math import comb
 from pathlib import Path
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BACKEND_ROOT))
 
 from newssent.config import LABEL_NAMES, company_name  # noqa: E402
+from newssent.ml.stats import cohen_kappa, mcnemar_exact  # noqa: E402
 
 DOCS_DIR = BACKEND_ROOT.parent / "docs"
 EXAM_CSVS = [
@@ -272,14 +272,6 @@ def run_codex_batch(items: list[tuple[str, str]], codex_bin: str) -> dict[str, s
 # --- 計分 ---
 
 
-def cohen_kappa(human: list[str], pred: list[str]) -> float:
-    n = len(human)
-    po = sum(h == p for h, p in zip(human, pred)) / n
-    ch, cp = Counter(human), Counter(pred)
-    pe = sum(ch[k] * cp[k] for k in set(ch) | set(cp)) / (n * n)
-    return 1.0 if pe == 1 else (po - pe) / (1 - pe)
-
-
 def score(human: list[str], pred: list[str]) -> dict:
     neg = [p for h, p in zip(human, pred) if h == "negative"]
     return {
@@ -293,17 +285,6 @@ def score(human: list[str], pred: list[str]) -> dict:
         "missing": sum(p == MISSING for p in pred),
         "confusion": Counter(zip(human, pred)),
     }
-
-
-def mcnemar(human: list[str], a: list[str], b: list[str]) -> tuple[int, int, float]:
-    """配對精確檢定（雙尾二項），只看不一致格；與 compare_arms.mcnemar_p 同一算法。"""
-    a_only = sum(1 for h, x, y in zip(human, a, b) if x == h and y != h)
-    b_only = sum(1 for h, x, y in zip(human, a, b) if y == h and x != h)
-    n = a_only + b_only
-    if n == 0:
-        return a_only, b_only, 1.0
-    tail = sum(comb(n, i) for i in range(min(a_only, b_only) + 1)) / (2**n)
-    return a_only, b_only, min(1.0, 2 * tail)
 
 
 def verdict(rule: str, judge: dict, model: dict | None, p_value: float | None) -> tuple[bool, list[str]]:
@@ -349,7 +330,7 @@ def write_report(rows, judge_preds, model_preds, stats) -> None:
     ms = score(human, model_preds) if model_preds else None
     a_only = b_only = p_value = None
     if model_preds:
-        a_only, b_only, p_value = mcnemar(human, model_preds, judge_preds)
+        a_only, b_only, p_value = mcnemar_exact(human, model_preds, judge_preds)
     passed, reasons = verdict(PASS_RULE, js, ms, p_value)
 
     out = [

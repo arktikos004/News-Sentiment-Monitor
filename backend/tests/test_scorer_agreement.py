@@ -6,23 +6,29 @@ import math
 
 import pytest
 
+from newssent.config import LABEL_NAMES
+from newssent.ml.stats import cohen_kappa, wilson
 from tools import scorer_agreement as sa
+
+
+def _kappa(pairs: list[tuple[str, str]]) -> float:
+    return cohen_kappa([a for a, _ in pairs], [b for _, b in pairs], LABEL_NAMES)
 
 
 def test_kappa_perfect_chance_and_opposite():
     same = [("negative", "negative"), ("neutral", "neutral"), ("positive", "positive")] * 10
-    assert sa.cohen_kappa(same) == pytest.approx(1.0)
+    assert _kappa(same) == pytest.approx(1.0)
     # 新評分器永遠答 neutral：一致率 1/3，但 κ＝0（等於猜）
     constant = [(a, "neutral") for a, _ in same]
-    assert sa.cohen_kappa(constant) == pytest.approx(0.0)
+    assert _kappa(constant) == pytest.approx(0.0)
     swapped = [("negative", "positive"), ("positive", "negative")] * 10
-    assert sa.cohen_kappa(swapped) < 0
+    assert _kappa(swapped) < 0
 
 
 def test_wilson_interval_contains_point_estimate():
-    lo, hi = sa.wilson(80, 100)
+    lo, hi = wilson(80, 100)
     assert lo < 0.8 < hi
-    assert all(math.isnan(x) for x in sa.wilson(0, 0))
+    assert all(math.isnan(x) for x in wilson(0, 0))
 
 
 @pytest.mark.parametrize(

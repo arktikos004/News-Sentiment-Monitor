@@ -34,8 +34,10 @@ from newssent.config import LABEL_NAMES, company_name  # noqa: E402
 from newssent.inference.llm_review import (  # noqa: E402
     DEFAULT_LLM_MODEL,
     OllamaReviewer,
+    should_review,
 )
 from newssent.ml import registry  # noqa: E402
+from newssent.ml.stats import mcnemar_exact  # noqa: E402
 from newssent.text.preprocess import build_target_text, clean_text  # noqa: E402
 
 DOCS_DIR = BACKEND_ROOT.parent / "docs"
@@ -160,31 +162,19 @@ def run_llm(
 
 
 def mcnemar_p(rows: list[dict], preds_a: list[str], preds_b: list[str]) -> tuple[int, int, float]:
-    """配對比較兩方案的 McNemar 精確檢定（雙尾二項）。
+    """兩方案對人工標注的 McNemar 精確檢定（算法見 newssent.ml.stats.mcnemar_exact）。
 
-    60 則樣本下，兩個方案的一致率差幾個百分點很可能只是噪音。McNemar 只看
-    「A 對 B 錯」與「A 錯 B 對」的**不一致格**，正是配對設計該用的檢定。
+    60 則樣本下，兩個方案的一致率差幾個百分點很可能只是噪音，所以一律附配對檢定。
     """
-    from math import comb
-
-    human = [r["human"] for r in rows]
-    b_only = sum(1 for h, a, b in zip(human, preds_a, preds_b) if b == h and a != h)
-    a_only = sum(1 for h, a, b in zip(human, preds_a, preds_b) if a == h and b != h)
-    n = a_only + b_only
-    if n == 0:
-        return a_only, b_only, 1.0
-    k = min(a_only, b_only)
-    tail = sum(comb(n, i) for i in range(k + 1)) / (2**n)
-    return a_only, b_only, min(1.0, 2 * tail)
+    return mcnemar_exact([r["human"] for r in rows], preds_a, preds_b)
 
 
 def apply_policy(base: list[str], llm: list[str | None], policy: str) -> list[str]:
-    """policy=non_neutral 只覆核模型給了方向者；all 覆核全部。LLM 失敗則維持原判。"""
-    out = []
-    for b, l in zip(base, llm):
-        should = policy == "all" or b != "neutral"
-        out.append(l if (should and l is not None) else b)
-    return out
+    """依覆核範圍（llm_review.should_review）採用 LLM 的判讀；LLM 失敗則維持原判。"""
+    return [
+        llm_label if llm_label is not None and should_review(model_label, policy) else model_label
+        for model_label, llm_label in zip(base, llm)
+    ]
 
 
 def score(rows: list[dict], preds: list[str]) -> dict:
