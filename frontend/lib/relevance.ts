@@ -36,3 +36,16 @@ export function mentionsTicker(ticker: string, title: string): boolean | null {
   if (new RegExp(`(^|[^a-z])${ticker.toLowerCase()}([^a-z]|$)`).test(t)) return true;
   return (NAMES[ticker] ?? []).some((n) => t.includes(n));
 }
+
+/**
+ * 標題提到了哪些追蹤中的美股（新聞列的關鍵字標籤用）。代號要是全大寫的獨立字，避免 ARM、MU 這類一般英文字誤判；
+ * 公司名稱不分大小寫。ETF 只認代號。
+ */
+export function mentionedTickers(title: string): string[] {
+  const lower = title.toLowerCase();
+  const found = Object.entries(NAMES)
+    .filter(([ticker, names]) => new RegExp(`\\b${ticker}\\b`).test(title) || names.some((n) => lower.includes(n)))
+    .map(([ticker]) => ticker);
+  for (const etf of ETF) if (new RegExp(`\\b${etf}\\b`).test(title)) found.push(etf);
+  return found;
+}
