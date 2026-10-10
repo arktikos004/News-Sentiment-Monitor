@@ -281,6 +281,8 @@ components:
 - **警示等級徽章：** 全圓角，淡底配同色字，meta 600，前面一個 12px 圖示（高度異常 Siren、留意 TriangleAlert、正常 CircleCheck、資料不足 CircleHelp）。正常與資料不足用 `surface-2` 底。
 - **情緒標籤（美股）：** 全圓角，`pos`／`neu`／`neg` 淡底配同色字，附趨勢圖示與 Mono 信心百分比。
 - **提醒標籤：** `surface-2` 底、`ink-2` 字，附 CircleAlert；「澄清」公告用鋼藍淡底。
+- **關鍵字標籤（美股新聞）：** 標題下方一列全圓角小標籤，meta 字級、不可點。標題提到的其他追蹤標的用 `steel-blue-soft` 底、鋼藍 Mono 代號（最多 2 個）；主題（財報、分析師、股價異動、大盤…）用 `surface-2` 底、`ink-2` 字（最多 3 個）。主題來自 `lib/topics.ts` 的固定英文詞表，只比對標題文字，不影響情緒分數。
+- **關鍵字篩選（新聞分頁）：** 情緒篩選下方一列可切換的全圓角膠囊，36px 高、1px 髮絲線框，附 Mono 則數；選中改為鋼藍框、鋼藍淡底、600。可複選，列出符合任一個的新聞；下方一行 meta 說明比對方式。
 
 ### Cards / Containers
 - **Corner Style:** 18px。

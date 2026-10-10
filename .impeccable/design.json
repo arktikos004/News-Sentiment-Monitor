@@ -807,6 +807,20 @@
       "css": ".ds-chips{display:flex;gap:4px}.ds-chip{min-height:36px;padding:0 12px;border:0;border-radius:9999px;background:var(--surface-2,#1a2533);color:var(--ink-2,#a6b5c8);font:400 .75rem/1.4 \"IBM Plex Sans\",\"PingFang TC\",system-ui,sans-serif;cursor:pointer;transition:color .15s}.ds-chip:hover{color:var(--ink,#e8eef6)}.ds-chip[aria-pressed=true]{background:var(--brand,#5aa9e6);color:var(--brand-fg,#06101a);font-weight:600}.ds-chip:focus-visible{outline:2px solid var(--brand,#5aa9e6);outline-offset:2px}"
     },
     {
+      "name": "Keyword Tag",
+      "kind": "chip",
+      "description": "美股新聞標題下方的關鍵字標籤：其他追蹤標的用鋼藍淡底與 Mono 代號，主題用 surface-2 底與 ink-2 字；不可點。主題來自固定英文詞表（lib/topics.ts），只比對標題文字。",
+      "html": "<div class=\"ds-tags\"><span class=\"ds-tag ds-tag-ticker\">NVDA</span><span class=\"ds-tag\">股價異動</span><span class=\"ds-tag\">AI</span></div>",
+      "css": ".ds-tags { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.75rem; line-height: 1.4; } .ds-tag { border-radius: 9999px; padding: 2px 8px; background: var(--surface-2); color: var(--ink-2); } .ds-tag-ticker { background: var(--brand-soft); color: var(--brand); font-family: var(--font-mono); }"
+    },
+    {
+      "name": "Keyword Filter Chip",
+      "kind": "chip",
+      "description": "新聞分頁情緒篩選下方的關鍵字篩選膠囊：36px 高、髮絲線框、附 Mono 則數；選中改為鋼藍框與鋼藍淡底。可複選，列出符合任一個的新聞。",
+      "html": "<button type=\"button\" class=\"ds-kw\" aria-pressed=\"true\">大盤 <span class=\"ds-kw-n\">7</span></button>",
+      "css": ".ds-kw { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border: 1px solid var(--hairline); border-radius: 9999px; background: var(--surface); color: var(--ink-2); font: inherit; font-size: 0.75rem; cursor: pointer; } .ds-kw[aria-pressed=\"true\"] { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); font-weight: 600; } .ds-kw-n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink-3); }"
+    },
+    {
       "name": "Icon Button",
       "kind": "button",
       "refersTo": "icon-button",
