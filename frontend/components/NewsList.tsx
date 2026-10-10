@@ -48,7 +48,7 @@ function NewsRow({ a }: { a: NewsItem }) {
         <span className="h-1 flex-1 overflow-hidden rounded-full bg-surface-2">
           <span className={`block h-full rounded-full ${BAR[token]}`} style={{ width: percent(a.confidence) }} />
         </span>
-        {a.url && <ExternalLink size={13} className="text-ink-3 opacity-0 transition-opacity group-hover:opacity-100" />}
+        {a.url && <ExternalLink size={13} className="text-ink-3" aria-label="另開新分頁" />}
       </div>
     </>
   );

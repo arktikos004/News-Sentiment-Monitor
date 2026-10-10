@@ -20,7 +20,7 @@ const TABS = [
   { href: "/", label: "總覽", Icon: Gauge },
   { href: "/news", label: "新聞", Icon: Newspaper },
   { href: "/watchlist", label: "追蹤", Icon: ListOrdered },
-  { href: "/alerts", label: "預警", Icon: BellRing },
+  { href: "/alerts", label: "警示", Icon: BellRing },
   { href: "/sectors", label: "產業", Icon: LayoutGrid },
   { href: "/settings", label: "設定", Icon: SlidersHorizontal },
 ] as const;
@@ -88,7 +88,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         aria-label="主選單"
         className="fixed inset-x-0 bottom-0 z-30 border-t border-hairline bg-background/75 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl backdrop-saturate-150 lg:hidden"
       >
-        <ul className="grid h-16 grid-cols-5 px-2">
+        {/* 六個分頁各佔一欄（之前用 5 欄，第 6 個會掉到第二列、疊在內容上） */}
+        <ul className="grid h-16 grid-cols-6 px-1">
+
           {TABS.map(({ href, label, Icon }) => {
             const active = isActive(pathname, href);
             return (

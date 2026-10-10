@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "財經新聞情緒監控",
     short_name: "新聞情緒",
-    description: "美股財經新聞情緒指數與台股情緒預警（研究原型）",
+    description: "美股財經新聞情緒指數與台股情緒警示（研究原型）",
     lang: "zh-Hant",
     start_url: "/",
     scope: "/",

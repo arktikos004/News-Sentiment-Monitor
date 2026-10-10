@@ -179,7 +179,7 @@ function Heatmap({ panel }: { panel: AlertPanelResponse }) {
           </p>
           {/* 整頁載入：預警頁從網址讀 ?date=，對齊到 ≤ 它的交易日 */}
           <a href={`/alerts?date=${picked.day}`} className="mt-1 inline-block font-semibold text-brand hover:underline">
-            看 {picked.day} 的預警看板與佐證標題 →
+            看 {picked.day} 的警示看板與證據標題
           </a>
         </div>
       )}
@@ -418,7 +418,7 @@ export default function SectorsPage() {
         {whatIf ? <WhatIf data={whatIf} /> : !error && <Skeleton className="h-72 w-full rounded-2xl" />}
         <p className="px-1 text-meta text-ink-3">
           產業別取自證交所開放資料「上市公司每月營業收入彙總表」。分數是標題情緒的平均（−1 到 +1），只呈現衍生數值；
-          佐證標題（每檔最多 3 則）與連回原文的連結在預警頁。
+          證據標題（每檔最多 3 則）與原文連結在警示頁。
         </p>
       </main>
     </>

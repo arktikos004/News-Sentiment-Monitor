@@ -17,11 +17,12 @@ export default function NewsPage() {
       <TickerBar />
       <StatusBanner error={error} stale={news?.stale} mock={news?.is_mock} onRetry={refresh} />
       <main className="mx-auto w-full max-w-3xl px-4 lg:px-8">
+        <h1 className="sr-only">新聞</h1>
         {news ? (
           <NewsList
             articles={news.articles}
             withFilters
-            filterBarClassName="sticky top-[calc(env(safe-area-inset-top)+4rem)] z-10 -mx-4 bg-background/80 px-4 backdrop-blur-xl lg:-mx-8 lg:px-8"
+            filterBarClassName="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-10 -mx-4 bg-background/80 px-4 backdrop-blur-xl lg:-mx-8 lg:px-8"
           />
         ) : !error ? (
           <div className="space-y-3 pt-3">
