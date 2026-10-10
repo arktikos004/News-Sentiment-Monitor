@@ -6,7 +6,7 @@
  * 錯誤處理對應 Phase 0 凍結契約（422/404/503），訊息對照在 app-state.describeError。
  */
 
-import { ChevronDown, ChevronRight, Hash, RefreshCw, SearchX } from "lucide-react";
+import { ChevronDown, ChevronRight, CircleAlert, Hash, RefreshCw, SearchX } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -20,7 +20,7 @@ import SentimentScale from "@/components/SentimentScale";
 import Skeleton from "@/components/Skeleton";
 import StatusBanner from "@/components/StatusBanner";
 import { IconButton, PageTitle, TopBar } from "@/components/TopBar";
-import { announcementStatus } from "@/lib/announcements";
+import { announcementStatus, uniqueEvidence } from "@/lib/announcements";
 import type { AlertsResponse, NewsItem } from "@/lib/api";
 import { useAppState } from "@/lib/app-state";
 import { signed } from "@/lib/format";
@@ -29,7 +29,7 @@ import { press } from "@/lib/motion";
 
 const PREVIEW = 5;
 const WEEKDAY = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
-const STATUS_TEXT = { brand: "text-brand", neutral: "text-ink-3", warn: "text-warn" } as const;
+const STATUS_TEXT = { brand: "text-brand", neutral: "text-ink-3", caveat: "text-ink-2" } as const;
 
 function HeroSkeleton() {
   return (
@@ -105,7 +105,7 @@ function TodayAlerts() {
           {triggered.map((a) => {
             const lv = LEVEL[a.level];
             const status = announcementStatus(a.announcements);
-            const first = a.evidence[0];
+            const first = uniqueEvidence(a.evidence)[0];
             return (
               <li key={a.ticker}>
                 <a
@@ -123,7 +123,11 @@ function TodayAlerts() {
                     <span className="mt-0.5 block truncate text-meta text-ink-2">
                       {first ? first.title : `當日 ${a.article_count} 則標題都沒有負面評分`}
                     </span>
-                    <span className={`block text-meta ${STATUS_TEXT[status.tone]}`}>{status.text}</span>
+                    {/* keep-all：只在空格與標點後換行，「尚未」這類詞不會被拆成兩行 */}
+                    <span className={`flex items-center gap-1 text-meta [word-break:keep-all] ${STATUS_TEXT[status.tone]}`}>
+                      {status.tone === "caveat" && <CircleAlert size={12} className="shrink-0" aria-hidden="true" />}
+                      {status.text}
+                    </span>
                   </span>
                   <span className="shrink-0 text-right">
                     <span className={`block font-mono text-body font-semibold tabular-nums ${lv.value}`}>{signed(a.z_score)}</span>
@@ -251,7 +255,7 @@ export default function OverviewPage() {
                   )}
                 </div>
                 {ready ? (
-                  <NewsList articles={news.articles} limit={PREVIEW} />
+                  <NewsList articles={news.articles} limit={PREVIEW} ticker={ticker ?? undefined} />
                 ) : (
                   <div className="card divide-y divide-hairline">
                     {Array.from({ length: PREVIEW }, (_, i) => (

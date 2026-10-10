@@ -3,6 +3,7 @@
 /**
  * 新聞列表：由新到舊，每則附情緒標籤、信心條、來源網域與相對時間，點擊開原文。
  * 完整版（新聞分頁）有情緒篩選：選中的底色膠囊會滑動，切換時列表項目以 layout 動畫進出與重排。
+ * 帶 ticker 時，標題沒提到這檔（代號或公司名）的新聞會加註；總覽的精簡預覽另把有提到的排前面。
  */
 
 import { ExternalLink, Minus, TrendingDown, TrendingUp } from "lucide-react";
@@ -11,6 +12,7 @@ import { useMemo, useState } from "react";
 import type { NewsItem, SentimentLabel } from "@/lib/api";
 import { hostname, LABEL_TEXT, LABEL_TOKEN, percent, relativeTime } from "@/lib/format";
 import { delay, EASE_OUT, snappy, stagger } from "@/lib/motion";
+import { mentionsTicker } from "@/lib/relevance";
 
 const PILL = { pos: "bg-pos-soft text-pos", neu: "bg-neu-soft text-neu", neg: "bg-neg-soft text-neg" } as const;
 const BAR = { pos: "bg-pos", neu: "bg-neu", neg: "bg-neg" } as const;
@@ -28,10 +30,11 @@ function byNewest(a: NewsItem, b: NewsItem) {
   return (Date.parse(b.published_at) || 0) - (Date.parse(a.published_at) || 0);
 }
 
-function NewsRow({ a }: { a: NewsItem }) {
+function NewsRow({ a, ticker }: { a: NewsItem; ticker?: string }) {
   const token = LABEL_TOKEN[a.sentiment];
   const Icon = ICON[a.sentiment];
   const host = hostname(a.url);
+  const offTopic = ticker != null && mentionsTicker(ticker, a.title) === false;
   const body = (
     <>
       <div className="flex items-center gap-2 text-meta">
@@ -41,6 +44,7 @@ function NewsRow({ a }: { a: NewsItem }) {
           <span className="font-mono tabular-nums">{percent(a.confidence)}</span>
         </span>
         <span className="min-w-0 flex-1 truncate text-ink-3">{a.source || host}</span>
+        {offTopic && <span className="shrink-0 rounded-full bg-surface-2 px-2 py-0.5 text-ink-3">標題沒提到 {ticker}</span>}
         <span className="shrink-0 text-ink-3">{relativeTime(a.published_at)}</span>
       </div>
       <p className="mt-2 text-body text-ink transition-colors group-hover:text-brand">{a.title}</p>
@@ -64,16 +68,24 @@ function NewsRow({ a }: { a: NewsItem }) {
 export default function NewsList({
   articles,
   limit,
+  ticker,
   withFilters = false,
   filterBarClassName = "",
 }: {
   articles: NewsItem[];
   limit?: number;
+  ticker?: string;
   withFilters?: boolean;
   filterBarClassName?: string;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
-  const sorted = useMemo(() => [...articles].sort(byNewest), [articles]);
+  const sorted = useMemo(() => {
+    const newest = [...articles].sort(byNewest);
+    if (!limit || !ticker) return newest;
+    // 精簡預覽：標題有提到這檔的排前面（sort 是穩定排序，各組內仍由新到舊）
+    const off = (a: NewsItem) => (mentionsTicker(ticker, a.title) === false ? 1 : 0);
+    return newest.sort((a, b) => off(a) - off(b));
+  }, [articles, limit, ticker]);
 
   if (articles.length === 0) {
     return <p className="py-4 text-body text-ink-3">這檔股票近期沒有新聞，換一檔或稍後再重新整理。</p>;
@@ -126,7 +138,7 @@ export default function NewsList({
                 animate={{ opacity: 1, y: 0, transition: stagger(i) }}
                 exit={{ opacity: 0, transition: { duration: 0.15, ease: EASE_OUT } }}
               >
-                <NewsRow a={a} />
+                <NewsRow a={a} ticker={ticker} />
               </motion.li>
             ))}
           </AnimatePresence>
@@ -135,7 +147,7 @@ export default function NewsList({
         <ul className="card divide-y divide-hairline overflow-hidden">
           {shown.map((a, i) => (
             <li key={`${a.url}-${a.title}`} className="animate-rise" style={delay(i, 80)}>
-              <NewsRow a={a} />
+              <NewsRow a={a} ticker={ticker} />
             </li>
           ))}
         </ul>

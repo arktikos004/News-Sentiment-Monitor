@@ -1,6 +1,6 @@
 "use client";
 
-/** 設定：外觀、模型資訊、研究說明（含未複製的確認實驗與預警回測結論）、免責聲明。iOS 式分組卡片。 */
+/** 設定：外觀、模型資訊、研究說明（含未複製的確認實驗與警示回測結論）、免責聲明。iOS 式分組卡片。 */
 
 import { BadgeCheck, CalendarDays, Cpu, FlaskConical, Newspaper, Palette, Scale, ShieldAlert, Siren, Target } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -22,14 +22,31 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-function Row({ icon: Icon, tint, label, children }: { icon: LucideIcon; tint: string; label: string; children?: React.ReactNode }) {
+/** stack：值是較長的文字（例如模型版本）時，窄螢幕改成值在標籤下方，不在字中間斷行 */
+function Row({
+  icon: Icon,
+  tint,
+  label,
+  stack = false,
+  children,
+}: {
+  icon: LucideIcon;
+  tint: string;
+  label: string;
+  stack?: boolean;
+  children?: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-14 items-center gap-3 px-4 py-2.5">
       <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${tint}`}>
         <Icon size={16} />
       </span>
-      <span className="flex-1 whitespace-nowrap text-body text-ink">{label}</span>
-      <span className="min-w-0 break-all text-right">{children}</span>
+      <div
+        className={`flex min-w-0 flex-1 ${stack ? "flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3" : "items-center justify-between gap-3"}`}
+      >
+        <span className="whitespace-nowrap text-body text-ink">{label}</span>
+        <span className={`min-w-0 break-words ${stack ? "sm:text-right" : "text-right"}`}>{children}</span>
+      </div>
     </div>
   );
 }
@@ -85,13 +102,13 @@ export default function SettingsPage() {
             </Note>
           ) : (
             <>
-              <Row icon={Cpu} tint="bg-brand-soft text-brand" label="模型版本">
+              <Row icon={Cpu} tint="bg-brand-soft text-brand" label="模型版本" stack>
                 {value(modelInfo.model_version)}
               </Row>
-              <Row icon={BadgeCheck} tint="bg-pos-soft text-pos" label="測試集 Macro F1">
+              <Row icon={BadgeCheck} tint="bg-pos-soft text-pos" label="測試集 Macro F1" stack>
                 {value(modelInfo.test_macro_f1?.toFixed(4) ?? "—")}
               </Row>
-              <Row icon={CalendarDays} tint="bg-surface-3 text-ink-2" label="訓練日期">
+              <Row icon={CalendarDays} tint="bg-surface-3 text-ink-2" label="訓練日期" stack>
                 {value(modelInfo.trained_at?.slice(0, 10) ?? "—")}
               </Row>
             </>
@@ -112,7 +129,7 @@ export default function SettingsPage() {
             改用這個模型時量到的人工一致率提升（46.7% → 61.7%），在 2026-09-03 事先聲明的確認實驗中沒有重現（p = 0.804），所以不宣稱模型變得更準。
           </Note>
           <Note icon={ShieldAlert} tint="bg-neg-soft text-neg">
-            台股警示在歷史回測中，事前示警率與隨機響鈴無法區分（p = 0.983），只能當作開盤前的即時示警，不是提前預警。
+            台股警示在歷史回測中，事前示警率與隨機響鈴無法區分（p = 0.983），只能當作開盤前的即時警示，不是提前預警。
             {STATIC_DATA && "回測以本機 gemma3:27b 評分；公開站改用雲端託管模型評分，尚未重新回測。"}
           </Note>
           <p className="px-4 py-3 text-meta text-ink-3">完整紀錄在專案的 docs/ 資料夾（confirmation_2026-09-03.md、alert_backtest.md）。</p>

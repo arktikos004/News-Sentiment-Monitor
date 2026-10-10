@@ -6,9 +6,10 @@ import { motion } from "motion/react";
 import { alertPaletteStore, setAlertPalette, type AlertPalette } from "@/lib/alert-palette";
 import { snappy } from "@/lib/motion";
 
+// 色票讀主題變數（globals.css），淺色主題下顯示的就是淺色主題的實際色值
 const OPTIONS: { value: AlertPalette; text: string; swatch: [string, string] }[] = [
-  { value: "amber", text: "琥珀", swatch: ["#f59e42", "#e3c25b"] },
-  { value: "red", text: "紅色", swatch: ["#f46268", "#e8a33d"] },
+  { value: "amber", text: "琥珀", swatch: ["var(--swatch-amber-high)", "var(--swatch-amber-watch)"] },
+  { value: "red", text: "紅色", swatch: ["var(--swatch-red-high)", "var(--swatch-red-watch)"] },
 ];
 
 export default function AlertPaletteToggle() {

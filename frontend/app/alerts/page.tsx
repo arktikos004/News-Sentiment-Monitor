@@ -9,14 +9,14 @@
  * - 依回測的預先聲明：固定揭露「事前示警率與隨機響鈴無法區分」，也不提供任何「精選命中日」捷徑
  */
 
-import { CalendarDays, ChevronLeft, ChevronRight, Clock, ExternalLink, Info, RotateCcw } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, Clock, ExternalLink, Info, RotateCcw } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import AlertCard, { LEVEL } from "@/components/AlertCard";
 import Skeleton from "@/components/Skeleton";
 import StatusBanner from "@/components/StatusBanner";
 import { IconButton, PageTitle, TopBar } from "@/components/TopBar";
-import { announcementStatus } from "@/lib/announcements";
+import { announcementStatus, uniqueEvidence } from "@/lib/announcements";
 import { api, ApiError, STATIC_DATA, type AlertLevel, type AlertsResponse, type StockAlert } from "@/lib/api";
 import { signed } from "@/lib/format";
 import { press, snappy } from "@/lib/motion";
@@ -81,10 +81,11 @@ const SUMMARY: { level: AlertLevel; label: string }[] = [
   { level: "insufficient", label: "資料不足" },
 ];
 
+// 資料限制的提醒用中性色加圖示：琥珀與紅色只代表警示等級
 const STATUS_TEXT = {
   brand: "text-brand",
   neutral: "text-ink-3",
-  warn: "text-warn",
+  caveat: "text-ink-2",
 } as const;
 
 function sortAlerts(list: StockAlert[], key: SortKey): StockAlert[] {
@@ -153,8 +154,11 @@ function AlertList({
                   <span className="block truncate text-body font-semibold text-ink">
                     {a.name} <span className="font-mono text-meta font-normal text-ink-3">{a.ticker.replace(/\.TW$/, "")}</span>
                   </span>
-                  <span className={`block truncate text-meta ${STATUS_TEXT[status.tone]}`}>
-                    {a.evidence.length} 則證據，{status.text}
+                  <span className={`flex items-center gap-1 text-meta ${STATUS_TEXT[status.tone]}`}>
+                    {status.tone === "caveat" && <CircleAlert size={12} className="shrink-0" aria-hidden="true" />}
+                    <span className="truncate">
+                      {uniqueEvidence(a.evidence).length} 則證據，{status.text}
+                    </span>
                   </span>
                 </span>
                 <span className="shrink-0 text-right">
@@ -180,6 +184,8 @@ export default function AlertsPage() {
   const [error, setError] = useState<string | null>(null);
   const [retryToken, setRetryToken] = useState(0);
   const dateInput = useRef<HTMLInputElement>(null);
+  // 網址帶 t= 時，手機的單欄卡片清單要捲到那一檔（大螢幕右欄直接顯示它）
+  const pendingScroll = useRef<string | null>(null);
 
   const setAsOf = (d: string) => {
     remember({ asOf: d });
@@ -202,6 +208,7 @@ export default function AlertsPage() {
       .alertSessions()
       .then((r) => {
         const want = requested(r.sessions);
+        pendingScroll.current = want.ticker;
         remember({ sessions: r.sessions, latest: r.latest, asOf: cache.asOf ?? want.asOf ?? r.latest, selected: cache.selected ?? want.ticker });
         setSessions(r.sessions);
         setLatest(r.latest);
@@ -230,6 +237,14 @@ export default function AlertsPage() {
       cancelled = true;
     };
   }, [asOf, includeAll, key, retryToken]);
+
+  useEffect(() => {
+    const t = pendingScroll.current;
+    if (!t || !data) return;
+    pendingScroll.current = null;
+    if (window.matchMedia("(min-width: 1024px)").matches) return;
+    document.getElementById(`alert-${t.replace(/\.TW$/, "")}`)?.scrollIntoView({ block: "start" });
+  }, [data]);
 
   const idx = sessions && asOf ? sessions.indexOf(asOf) : -1;
   const loading = !error && !data;
@@ -326,8 +341,8 @@ export default function AlertsPage() {
         )}
 
         {data && !data.window_closed && (
-          <p className="flex items-center gap-2 rounded-2xl bg-warn-soft px-4 py-2.5 text-meta text-warn">
-            <Clock size={15} className="shrink-0" />
+          <p className="flex items-center gap-2 rounded-2xl bg-brand-soft px-4 py-2.5 text-meta text-ink">
+            <Clock size={15} className="shrink-0 text-brand" aria-hidden="true" />
             這個交易日還沒開盤，標題仍在累積，結果可能再變。
           </p>
         )}
@@ -386,7 +401,7 @@ export default function AlertsPage() {
           <>
             <ul className="space-y-4 lg:hidden">
               {sortAlerts(data.alerts, "z").map((a, i) => (
-                <AlertCard key={a.ticker} alert={a} index={i} />
+                <AlertCard key={a.ticker} alert={a} index={i} marked={a.ticker === selected} />
               ))}
             </ul>
             <div className="hidden lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-6">

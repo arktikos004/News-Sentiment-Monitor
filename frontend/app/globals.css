@@ -2,8 +2,9 @@
 @import "tw-animate-css";
 
 /* ── 設計 token（行情板）───────────────────────────────────────────
-   預設深色：夜盤藍底、鋼藍品牌色（brand）。綠／紅／灰只表示新聞情緒（美股慣例：正綠負紅），
-   琥珀只表示預警的 watch 等級。每處顏色都搭配文字，不以顏色單獨承載語意。
+   預設深色：夜盤藍底、鋼藍品牌色（brand）。綠／紅／灰表示美股新聞情緒（美股慣例：正綠負紅）。
+   台股頁的琥珀只表示警示等級（設定頁可改成紅色）；還沒開盤、資料過期、公告漏收這類資料限制與系統提醒
+   用中性灰或鋼藍加圖示，不借用警示色。每處顏色都搭配文字，不以顏色單獨承載語意。
    下半段是 shadcn/ui 元件用的別名（foreground、card、primary、muted…），全部指回上面的 token。 */
 :root {
   --background: #0b121c;
@@ -33,6 +34,11 @@
   --alert-high-soft: var(--neg-soft);
   --alert-watch: var(--warn);
   --alert-watch-soft: var(--warn-soft);
+  /* 設定頁配色選項的色票：兩種配色在目前主題下的實際色值，與下方琥珀色階同步 */
+  --swatch-amber-high: #f59e42;
+  --swatch-amber-watch: #e3c25b;
+  --swatch-red-high: var(--neg);
+  --swatch-red-watch: var(--warn);
 
   --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(2, 6, 12, 0.35);
   --shadow-float: 0 16px 40px rgba(2, 6, 12, 0.6);
@@ -68,6 +74,8 @@
   --neg-soft: rgba(192, 38, 45, 0.1);
   --warn: #9a6212;
   --warn-soft: rgba(154, 98, 18, 0.12);
+  --swatch-amber-high: #a84a05;
+  --swatch-amber-watch: #7d5c00;
 
   --shadow-card: 0 1px 2px rgba(14, 26, 38, 0.05), 0 8px 24px rgba(14, 26, 38, 0.06);
   --shadow-float: 0 16px 40px rgba(14, 26, 38, 0.18);

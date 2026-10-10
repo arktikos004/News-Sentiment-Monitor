@@ -2,15 +2,15 @@
 
 /**
  * 產業情緒儀表板：49 檔依證交所產業別彙總成「產業 × 交易日」熱度圖。點產業名稱展開個股，
- * 點一格看當天的數字並連到那天的預警看板（佐證標題最多 3 則在那裡）。
- * 下半部是警示門檻 what-if：調整基準天數、最少則數與 z 門檻，看每天會有幾檔示警，
+ * 點一格看當天的數字並連到那天的警示看板（佐證標題最多 3 則在那裡）。
+ * 下半部是警示門檻模擬：調整基準天數、最少則數與 z 門檻，看每天會有幾檔觸發警示，
  * 並反推「每天最多 N 檔」需要的門檻。只算工作量，不重算命中率（那是新的成效數字，要先預先聲明）。
  *
  * 熱度圖用發散色（藍＝正面、紅＝負面、灰＝中性；globals.css 的 --div-*），台股頁不用綠色，
  * 免得和「跌」混淆。沒有新聞的日子留白，不和「中性」混在一起。
  */
 
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Minus, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import StatusBanner from "@/components/StatusBanner";
 import Skeleton from "@/components/Skeleton";
@@ -55,7 +55,7 @@ function Cells({ cells, days, label, onPick, members }: {
           key={days[j]}
           type="button"
           onClick={() => onPick({ label, day: days[j], cell: c, members })}
-          aria-label={`${label} ${days[j]}：分數 ${signed(c.score)}，${c.n} 則${c.alerts ? `，${c.alerts} 檔示警` : ""}`}
+          aria-label={`${label} ${days[j]}：分數 ${signed(c.score)}，${c.n} 則${c.alerts ? `，${c.alerts} 檔觸發警示` : ""}`}
           className="relative flex h-5 items-center justify-center rounded-[3px] outline-offset-1"
           style={c.score == null ? { boxShadow: "inset 0 0 0 1px var(--hairline)" } : { background: cellColor(c.score) }}
         >
@@ -149,7 +149,7 @@ function Heatmap({ panel }: { panel: AlertPanelResponse }) {
         </div>
       </div>
 
-      {/* 圖例：發散色＋無新聞＋示警記號 */}
+      {/* 圖例：發散色＋無新聞＋警示記號 */}
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-meta text-ink-3">
         <span className="flex items-center gap-1">
           負面
@@ -164,7 +164,7 @@ function Heatmap({ panel }: { panel: AlertPanelResponse }) {
         </span>
         <span className="flex items-center gap-1">
           <span className="inline-block size-1.5 rounded-full bg-ink" />
-          當天有股票示警
+          當天有股票觸發警示
         </span>
       </div>
 
@@ -174,10 +174,10 @@ function Heatmap({ panel }: { panel: AlertPanelResponse }) {
             <span className="font-semibold text-ink">{picked.label}</span> · {picked.day}：分數{" "}
             <span className="font-mono tabular-nums text-ink">{signed(picked.cell.score)}</span>，{picked.cell.n} 則標題
             {picked.members != null
-              ? `，${picked.members} 檔中 ${picked.cell.alerts} 檔示警`
+              ? `，${picked.members} 檔中 ${picked.cell.alerts} 檔觸發警示`
               : `，z ${signed(picked.cell.z ?? null)}（${LEVEL_TEXT[picked.cell.level ?? "insufficient"]}）`}
           </p>
-          {/* 整頁載入：預警頁從網址讀 ?date=，對齊到 ≤ 它的交易日 */}
+          {/* 整頁載入：警示頁從網址讀 ?date=，對齊到 ≤ 它的交易日 */}
           <a href={`/alerts?date=${picked.day}`} className="mt-1 inline-block font-semibold text-brand hover:underline">
             看 {picked.day} 的警示看板與證據標題
           </a>
@@ -195,7 +195,7 @@ function Heatmap({ panel }: { panel: AlertPanelResponse }) {
               <th className="py-1 text-left font-medium">產業</th>
               <th className="py-1 text-right font-medium">分數</th>
               <th className="py-1 text-right font-medium">標題</th>
-              <th className="py-1 text-right font-medium">示警</th>
+              <th className="py-1 text-right font-medium">警示</th>
             </tr>
           </thead>
           <tbody className="font-mono tabular-nums text-ink-2">
@@ -271,9 +271,9 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
 
   return (
     <section className="card p-4">
-      <h2 className="text-body font-semibold text-ink">警示門檻 what-if</h2>
+      <h2 className="text-body font-semibold text-ink">警示門檻模擬</h2>
       <p className="mt-1 text-meta text-ink-3">
-        調整參數，看每天會有幾檔示警。只算工作量；換門檻後的事件命中率是新的成效數字，要先寫預先聲明才計算。
+        調整參數，看每天會有幾檔觸發警示。只算工作量；換門檻後的事件命中率是新的成效數字，要先寫預先聲明才計算。
       </p>
 
       <div className="mt-3 space-y-3">
@@ -281,7 +281,7 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
         <Segmented label="當日至少幾則標題" values={g.min_articles} value={minArticles} format={(v) => `${v} 則`} onChange={setMinArticles} />
         <div>
           <p className="mb-1 flex justify-between text-meta text-ink-3">
-            <span>示警門檻（z 低於）</span>
+            <span>警示門檻（z 低於）</span>
             <span className="font-mono tabular-nums text-ink">z &lt; {signed(g.z[zi])}</span>
           </p>
           <input
@@ -291,7 +291,7 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
             step={1}
             value={zi}
             onChange={(e) => setZi(Number(e.target.value))}
-            aria-label="示警門檻"
+            aria-label="警示門檻"
             className="w-full accent-[var(--brand)]"
           />
           <p className="flex justify-between text-meta text-ink-3">
@@ -312,7 +312,7 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
               [
                 ["平均每天", `${avg.toFixed(1)} 檔`],
                 ["最多一天", `${most} 檔`],
-                ["有示警的日子", `${busy}／${days.length}`],
+                ["有警示的日子", `${busy}／${days.length}`],
               ] as const
             ).map(([k, v]) => (
               <div key={k} className="rounded-xl bg-surface-2 px-3 py-2">
@@ -322,13 +322,13 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
             ))}
           </dl>
 
-          {/* 逐日示警檔數（單一數列，不需圖例）；水平線＝下方設定的每天上限 */}
-          <div className="relative mt-4 h-28" role="img" aria-label={`逐日示警檔數，平均 ${avg.toFixed(1)} 檔，最多 ${most} 檔`}>
+          {/* 逐日觸發警示的檔數（單一數列，不需圖例）；水平線＝下方設定的每天上限 */}
+          <div className="relative mt-4 h-28" role="img" aria-label={`逐日觸發警示的檔數，平均 ${avg.toFixed(1)} 檔，最多 ${most} 檔`}>
             <div className="flex h-full items-end gap-[2px]">
               {days.map(({ s, k }, j) => (
                 <span
                   key={s}
-                  title={`${s}：${counts[j]} 檔示警（可判斷 ${data.judged[bi][mi][k]} 檔）`}
+                  title={`${s}：${counts[j]} 檔觸發警示（可判斷 ${data.judged[bi][mi][k]} 檔）`}
                   className="flex-1 rounded-t-[4px] bg-brand"
                   style={{ height: `${(counts[j] / scale) * 100}%`, minHeight: counts[j] ? 2 : 0, maxWidth: 24 }}
                 />
@@ -346,12 +346,22 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
           <div className="mt-4 rounded-xl bg-surface-2 px-3 py-3 text-meta text-ink-2">
             <div className="flex flex-wrap items-center gap-2">
               <span>目標搜尋：每天最多</span>
-              <button type="button" aria-label="減少" onClick={() => setCap(Math.max(1, cap - 1))} className="size-8 rounded-full bg-surface text-ink">
-                −
+              <button
+                type="button"
+                aria-label="減少"
+                onClick={() => setCap(Math.max(1, cap - 1))}
+                className="flex size-11 items-center justify-center rounded-full bg-surface text-ink transition-colors hover:bg-surface-3"
+              >
+                <Minus size={16} aria-hidden="true" />
               </button>
               <span className="font-mono text-body font-semibold tabular-nums text-ink">{cap}</span>
-              <button type="button" aria-label="增加" onClick={() => setCap(Math.min(15, cap + 1))} className="size-8 rounded-full bg-surface text-ink">
-                +
+              <button
+                type="button"
+                aria-label="增加"
+                onClick={() => setCap(Math.min(15, cap + 1))}
+                className="flex size-11 items-center justify-center rounded-full bg-surface text-ink transition-colors hover:bg-surface-3"
+              >
+                <Plus size={16} aria-hidden="true" />
               </button>
               <span>檔</span>
             </div>
@@ -417,8 +427,7 @@ export default function SectorsPage() {
         {panel ? <Heatmap panel={panel} /> : !error && <Skeleton className="h-96 w-full rounded-2xl" />}
         {whatIf ? <WhatIf data={whatIf} /> : !error && <Skeleton className="h-72 w-full rounded-2xl" />}
         <p className="px-1 text-meta text-ink-3">
-          產業別取自證交所開放資料「上市公司每月營業收入彙總表」。分數是標題情緒的平均（−1 到 +1），只呈現衍生數值；
-          證據標題（每檔最多 3 則）與原文連結在警示頁。
+          產業別取自證交所開放資料「上市公司每月營業收入彙總表」。分數是標題情緒的平均（−1 到 +1），只呈現衍生數值；證據標題（每檔最多 3 則）與原文連結在警示頁。
         </p>
       </main>
     </>
