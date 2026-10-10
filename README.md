@@ -1,6 +1,6 @@
 # 基於自然語言處理之新聞情緒分析與即時監控系統
 
-個人研究原型。透過 NLP 技術自動擷取美股財經新聞並即時分析市場情緒，將非結構化文字轉化為可量化的情緒指標，輔助投資決策。
+個人研究原型。從財經新聞標題判斷「這則新聞對這支股票是好消息還是壞消息」，算成情緒分數：美股看個股新聞情緒的變化；台股在每個交易日開盤前，找出新聞情緒異常、需要先查證的個股，並對照公司的重大訊息。分數供研究與查證參考，不構成投資建議。
 
 資料來源與授權見 [DATA_SOURCES.md](./DATA_SOURCES.md)，套件授權見 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)，生成式 AI 的使用見 [AI_USE.md](./AI_USE.md)。
 
@@ -103,7 +103,7 @@ docs/               # 架構圖、模型比較/選型、實驗設計、線上抽
 |---|---|
 | 台股情緒異常預警（`/api/alerts`） | 49 檔台股、FinMind 中文新聞、LLM 評分；當日分數對前 20 個交易日的 z 值，z < −1.5 留意、z < −2 高度異常 |
 | 預先聲明的歷史回測（[報告](docs/alert_backtest.md)） | 21 件大跌事件，事前 5 日內示警 4/17，與隨機響鈴無法區分（**p = 0.983**）——**不得宣稱「提前預警」**，只呈現開盤前的即時示警與證據標題 |
-| 前端改為分頁式 App | 總覽／新聞／追蹤／預警／設定；手機底部分頁列、電腦左側欄；可加到主畫面（PWA） |
+| 前端改為分頁式 App | 總覽／新聞／追蹤／警示／產業／設定；手機底部分頁列、電腦左側欄；可加到主畫面（PWA）。總覽以台股今日警示開場；警示頁在大螢幕分成清單與證據兩欄；設定頁可選台股警示配色（預設琥珀，可改紅色） |
 
 ## 啟動方式
 
@@ -114,8 +114,8 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install torch --index-url https://download.pytorch.org/whl/cu128   # NVIDIA GPU
 pip install -e ".[dev]"
-pytest                                    # 152 項測試應全部通過
-pytest -m leakage                         # 18 項洩漏防治（pre-push 閘門跑的就是這組）
+pytest                                    # 240 項測試應全部通過
+pytest -m leakage                         # 23 項洩漏防治（pre-push 閘門跑的就是這組）
 powershell -File ../scripts/install_hooks.ps1   # 安裝 pre-push 閘門（測不過不准 push）
 uvicorn newssent.api.main:app --port 8001 # 啟動 API（:8000 讓給 stock 專案）
 
@@ -138,7 +138,7 @@ npm run build; npm start                   # 正式模式，手機開 http://<�
 - Android Chrome 只有在 HTTPS 或 localhost 下才會以 App 形式安裝；區網 http 只會是一般捷徑（開在瀏覽器裡）。
 - **限流是共用的**：後端每個 IP 每分鐘 30 次、所有端點合計；經 Next 轉送後所有裝置都算同一個 IP。
   前端已把資料快取在本次開啟內（切分頁不重抓），單人 demo 夠用；多台裝置同時操作可能看到「查詢太頻繁」。
-- 預警分頁的資料來自 `backend/alert_scores.db`，要看最新交易日得先跑 `python -m newssent.inference.alert_recorder`；
+- 警示分頁的資料來自 `backend/alert_scores.db`，要看最新交易日得先跑 `python -m newssent.inference.alert_recorder`；
   沒跑的話預設日期會顯示「資料不足」，用日期切換看歷史交易日即可。
 
 訓練與比較：
@@ -164,7 +164,7 @@ python tools/timestamp_lag.py              # 發布→抓取時間落差實測
 - **方法論**：[預先聲明](docs/preregistration_2026-08-14.md)（假說與裁決規則事先定死）、
   [確認實驗結果](docs/confirmation_2026-09-03.md)（H1 未獲確認，誠實記為失敗）、
   [預訓練污染分析](docs/pretraining_contamination.md)、[時間戳語意](docs/timestamp_semantics.md)
-- **台股預警**：[回測預先聲明](docs/alert_backtest_prereg.md)、[回測結果](docs/alert_backtest.md)（p = 0.983，不得宣稱提前預警）、
+- **台股警示**：[回測預先聲明](docs/alert_backtest_prereg.md)、[回測結果](docs/alert_backtest.md)（p = 0.983，不得宣稱提前預警）、
   [Codex 裁判資格考預先聲明](docs/judge_qualification_prereg.md)（合格標準 strict，尚待執行）、
   [中文小模型蒸餾的初步實驗](docs/distill_pilot.md)（[預先聲明](docs/distill_pilot_prereg.md)；離線、未上線，判定為部分可行）
 - **實驗**：[實驗 #6 任務定義修正](docs/experiment_target_sentiment.md)（候選結論，含警語）、

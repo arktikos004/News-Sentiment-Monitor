@@ -16,7 +16,7 @@ npm run lint
 | `DEV_ORIGINS` | dev 模式允許的區網來源（逗號分隔，例如 `192.168.1.23`） |
 | `NEXT_PUBLIC_API_BASE` | 設了就改成瀏覽器直連後端（需自行處理後端 CORS），一般不用設 |
 
-目錄：`app/` 五個分頁與 manifest、圖示；`components/` 介面元件（`components/ui/` 是 shadcn/ui 產生的元件）；
+目錄：`app/` 六個分頁（總覽、新聞、追蹤、警示、產業、設定）與 manifest、圖示；`components/` 介面元件（`components/ui/` 是 shadcn/ui 產生的元件）；
 `lib/` API client、共用狀態、主題、格式化與動態參數（`lib/motion.ts`）。
 
 動畫分工：大量元素的進場用 `globals.css` 的 CSS keyframes（`animate-rise`／`grow-x`／`grow-y`，只動 transform／opacity）；
