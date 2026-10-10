@@ -1,0 +1,915 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-10T12:10:38+00:00",
+  "title": "Design System: 財經新聞情緒監控",
+  "extensions": {
+    "colorMeta": {
+      "night-ground": {
+        "role": "neutral",
+        "displayName": "夜盤藍底 Night Ground",
+        "canonical": "#0b121c",
+        "tonalRamp": [
+          "#050b15",
+          "#1d242f",
+          "#38404c",
+          "#555e6b",
+          "#757e8b",
+          "#959fad",
+          "#bbc5d4",
+          "#e5efff"
+        ],
+        "oklch": "oklch(18.0% 0.023 257.3)"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "卡片層 Surface",
+        "canonical": "#121b27",
+        "tonalRamp": [
+          "#040b16",
+          "#1b2531",
+          "#36414e",
+          "#545f6d",
+          "#737e8e",
+          "#94a0b0",
+          "#b9c5d6",
+          "#e5f0fe"
+        ],
+        "oklch": "oklch(21.9% 0.027 255.8)"
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "次層 Surface-2",
+        "canonical": "#1a2533",
+        "tonalRamp": [
+          "#030b18",
+          "#1a2533",
+          "#354150",
+          "#525f6f",
+          "#717f90",
+          "#92a0b2",
+          "#b7c6d8",
+          "#e4f0ff"
+        ],
+        "oklch": "oklch(26.1% 0.031 254.8)"
+      },
+      "surface-3": {
+        "role": "neutral",
+        "displayName": "選中底 Surface-3",
+        "canonical": "#223042",
+        "tonalRamp": [
+          "#020b1b",
+          "#172536",
+          "#324154",
+          "#4f5f73",
+          "#6e7f94",
+          "#8fa0b6",
+          "#b4c6dd",
+          "#e5f0fe"
+        ],
+        "oklch": "oklch(30.5% 0.038 255.0)"
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "邊線 Border",
+        "canonical": "#223044",
+        "tonalRamp": [
+          "#020b1c",
+          "#172438",
+          "#324155",
+          "#4f5f75",
+          "#6e7e96",
+          "#8fa0b8",
+          "#b4c6df",
+          "#e5effe"
+        ],
+        "oklch": "oklch(30.6% 0.041 257.3)"
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "髮絲線 Hairline",
+        "canonical": "rgba(255, 255, 255, 0.06)"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "墨色 Ink",
+        "canonical": "#e8eef6",
+        "tonalRamp": [
+          "#080b10",
+          "#20242a",
+          "#3b4046",
+          "#595e65",
+          "#787e85",
+          "#999fa6",
+          "#bfc5cc",
+          "#e9eff7"
+        ],
+        "oklch": "oklch(94.7% 0.013 255.5)"
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "次要墨色 Ink-2",
+        "canonical": "#a6b5c8",
+        "tonalRamp": [
+          "#030b18",
+          "#192533",
+          "#344151",
+          "#515f70",
+          "#717f90",
+          "#91a0b2",
+          "#b6c6d9",
+          "#e4f0fe"
+        ],
+        "oklch": "oklch(76.8% 0.032 254.4)"
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "詮釋資料墨色 Ink-3",
+        "canonical": "#7a8ca3",
+        "tonalRamp": [
+          "#010b1c",
+          "#162537",
+          "#314155",
+          "#4e5f74",
+          "#6d7f95",
+          "#8ea0b8",
+          "#b3c6df",
+          "#e5f0fe"
+        ],
+        "oklch": "oklch(63.4% 0.040 254.7)"
+      },
+      "steel-blue": {
+        "role": "primary",
+        "displayName": "鋼藍 Steel Blue",
+        "canonical": "#5aa9e6",
+        "tonalRamp": [
+          "#000c1d",
+          "#002641",
+          "#00436c",
+          "#00639b",
+          "#3384be",
+          "#57a6e3",
+          "#90cbfc",
+          "#e1f1fe"
+        ],
+        "oklch": "oklch(71.0% 0.119 243.9)"
+      },
+      "steel-blue-fg": {
+        "role": "primary",
+        "displayName": "鋼藍上的字 Steel Blue FG",
+        "canonical": "#06101a",
+        "tonalRamp": [
+          "#030c16",
+          "#1a2530",
+          "#35414d",
+          "#525f6c",
+          "#717f8d",
+          "#92a0ae",
+          "#b7c6d5",
+          "#e2f0fe"
+        ],
+        "oklch": "oklch(16.9% 0.026 248.3)"
+      },
+      "steel-blue-soft": {
+        "role": "primary",
+        "displayName": "鋼藍淡底 Steel Blue Soft",
+        "canonical": "rgba(90, 169, 230, 0.14)"
+      },
+      "pos": {
+        "role": "secondary",
+        "displayName": "美股正面綠 Positive",
+        "canonical": "#3fcf8e",
+        "tonalRamp": [
+          "#001005",
+          "#002d19",
+          "#004d2f",
+          "#007046",
+          "#149461",
+          "#1dbb7b",
+          "#57e2a0",
+          "#c5fedd"
+        ],
+        "oklch": "oklch(76.3% 0.154 159.3)"
+      },
+      "neu": {
+        "role": "secondary",
+        "displayName": "中性灰藍 Neutral",
+        "canonical": "#8a9aae",
+        "tonalRamp": [
+          "#020b19",
+          "#182535",
+          "#334152",
+          "#505f71",
+          "#6f7f92",
+          "#90a0b4",
+          "#b5c6db",
+          "#e4f0fe"
+        ],
+        "oklch": "oklch(68.0% 0.035 254.1)"
+      },
+      "neg": {
+        "role": "secondary",
+        "displayName": "美股負面紅 Negative",
+        "canonical": "#f46268",
+        "tonalRamp": [
+          "#220001",
+          "#4c000a",
+          "#790b1d",
+          "#ac172e",
+          "#d3434d",
+          "#fa676d",
+          "#ffaaa8",
+          "#ffe9e7"
+        ],
+        "oklch": "oklch(68.4% 0.180 20.8)"
+      },
+      "warn": {
+        "role": "tertiary",
+        "displayName": "警告琥珀 Warn（紅色配色的留意）",
+        "canonical": "#e8a33d",
+        "tonalRamp": [
+          "#170700",
+          "#341f00",
+          "#583801",
+          "#7f5305",
+          "#a77017",
+          "#d28f21",
+          "#fbb551",
+          "#feebd4"
+        ],
+        "oklch": "oklch(76.5% 0.140 72.9)"
+      },
+      "alert-amber-high": {
+        "role": "tertiary",
+        "displayName": "高度異常琥珀 Alert High",
+        "canonical": "#f59e42",
+        "tonalRamp": [
+          "#190500",
+          "#391c00",
+          "#5d3503",
+          "#864e09",
+          "#b06b1a",
+          "#dd8825",
+          "#fdb26a",
+          "#ffead8"
+        ],
+        "oklch": "oklch(77.1% 0.147 63.6)"
+      },
+      "alert-amber-watch": {
+        "role": "tertiary",
+        "displayName": "留意金黃 Alert Watch",
+        "canonical": "#e3c25b",
+        "tonalRamp": [
+          "#120a00",
+          "#2e2300",
+          "#4f3e00",
+          "#725b00",
+          "#977a0e",
+          "#bb9b2f",
+          "#e2c15a",
+          "#feeebd"
+        ],
+        "oklch": "oklch(82.3% 0.127 91.6)"
+      },
+      "div-pos": {
+        "role": "tertiary",
+        "displayName": "熱度圖正面藍",
+        "canonical": "#3987e5",
+        "tonalRamp": [
+          "#000927",
+          "#00234e",
+          "#073f7b",
+          "#105cae",
+          "#2e7dda",
+          "#5aa0f8",
+          "#9dc7fe",
+          "#e4f0ff"
+        ],
+        "oklch": "oklch(62.2% 0.161 255.1)"
+      },
+      "div-neg-red": {
+        "role": "tertiary",
+        "displayName": "熱度圖負面紅（紅色配色）",
+        "canonical": "#e66767",
+        "tonalRamp": [
+          "#220000",
+          "#4b000a",
+          "#7b0418",
+          "#a42a31",
+          "#ca4e50",
+          "#f17170",
+          "#fdaba8",
+          "#fee9e7"
+        ],
+        "oklch": "oklch(66.9% 0.159 22.3)"
+      },
+      "div-neg-amber": {
+        "role": "tertiary",
+        "displayName": "熱度圖負面琥珀（預設）",
+        "canonical": "#d9822b",
+        "tonalRamp": [
+          "#1a0400",
+          "#391b00",
+          "#603300",
+          "#8a4c01",
+          "#b56712",
+          "#de8631",
+          "#feb16f",
+          "#feeadb"
+        ],
+        "oklch": "oklch(68.6% 0.144 60.4)"
+      },
+      "div-mid": {
+        "role": "neutral",
+        "displayName": "熱度圖中性",
+        "canonical": "#383835",
+        "tonalRamp": [
+          "#0b0b09",
+          "#242421",
+          "#40403d",
+          "#5e5e5a",
+          "#7d7d7a",
+          "#9f9f9b",
+          "#c4c4c1",
+          "#efefeb"
+        ],
+        "oklch": "oklch(34.0% 0.005 106.7)"
+      },
+      "light-ground": {
+        "role": "neutral",
+        "displayName": "淺色主題頁面底 Light Ground",
+        "canonical": "#f2f5f9",
+        "tonalRamp": [
+          "#090b0e",
+          "#222427",
+          "#3e4043",
+          "#5b5e61",
+          "#7b7d81",
+          "#9c9fa2",
+          "#c1c4c8",
+          "#eceff3"
+        ],
+        "oklch": "oklch(96.9% 0.006 255.5)"
+      },
+      "light-surface": {
+        "role": "neutral",
+        "displayName": "卡片層 Surface（淺色主題）",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ],
+        "oklch": "oklch(100.0% 0.000 89.9)"
+      },
+      "light-surface-2": {
+        "role": "neutral",
+        "displayName": "次層 Surface-2（淺色主題）",
+        "canonical": "#eef2f7",
+        "tonalRamp": [
+          "#090b0e",
+          "#212428",
+          "#3d4044",
+          "#5b5e62",
+          "#7a7e82",
+          "#9b9fa3",
+          "#c1c4c9",
+          "#ebeff4"
+        ],
+        "oklch": "oklch(96.0% 0.008 253.9)"
+      },
+      "light-surface-3": {
+        "role": "neutral",
+        "displayName": "選中底 Surface-3（淺色主題）",
+        "canonical": "#e2e8f0",
+        "tonalRamp": [
+          "#080b10",
+          "#20242a",
+          "#3b4046",
+          "#595e65",
+          "#787e85",
+          "#999fa6",
+          "#bfc5cc",
+          "#e9eff7"
+        ],
+        "oklch": "oklch(92.9% 0.013 255.5)"
+      },
+      "light-border": {
+        "role": "neutral",
+        "displayName": "邊線 Border（淺色主題）",
+        "canonical": "#d6dfe9",
+        "tonalRamp": [
+          "#060c12",
+          "#1e252c",
+          "#394149",
+          "#575e67",
+          "#767e87",
+          "#979fa9",
+          "#bcc5cf",
+          "#e6f0fa"
+        ],
+        "oklch": "oklch(90.0% 0.017 250.9)"
+      },
+      "light-ink": {
+        "role": "neutral",
+        "displayName": "墨色 Ink（淺色主題）",
+        "canonical": "#0e1a26",
+        "tonalRamp": [
+          "#030c17",
+          "#192532",
+          "#34414f",
+          "#515f6e",
+          "#707f8e",
+          "#91a0b0",
+          "#b6c6d7",
+          "#e2f0ff"
+        ],
+        "oklch": "oklch(21.3% 0.029 249.4)"
+      },
+      "light-ink-2": {
+        "role": "neutral",
+        "displayName": "次要墨色 Ink-2（淺色主題）",
+        "canonical": "#3f5266",
+        "tonalRamp": [
+          "#000c1b",
+          "#142537",
+          "#2f4255",
+          "#4c6074",
+          "#6b8095",
+          "#8ca1b7",
+          "#b1c7de",
+          "#e2f0ff"
+        ],
+        "oklch": "oklch(43.1% 0.041 250.1)"
+      },
+      "light-ink-3": {
+        "role": "neutral",
+        "displayName": "詮釋資料墨色 Ink-3（淺色主題）",
+        "canonical": "#56677b",
+        "tonalRamp": [
+          "#020b1b",
+          "#162536",
+          "#314154",
+          "#4e5f73",
+          "#6d7f94",
+          "#8ea0b6",
+          "#b3c6dd",
+          "#e4f0fe"
+        ],
+        "oklch": "oklch(50.7% 0.038 252.7)"
+      },
+      "light-steel-blue": {
+        "role": "primary",
+        "displayName": "鋼藍 Steel Blue（淺色主題）",
+        "canonical": "#1f6fb2",
+        "tonalRamp": [
+          "#000b21",
+          "#002545",
+          "#014272",
+          "#0660a2",
+          "#3582c6",
+          "#58a4eb",
+          "#95cafe",
+          "#e2f0ff"
+        ],
+        "oklch": "oklch(52.9% 0.129 248.8)"
+      },
+      "light-pos": {
+        "role": "secondary",
+        "displayName": "美股正面綠 Positive（淺色主題）",
+        "canonical": "#0f8a4f",
+        "tonalRamp": [
+          "#001004",
+          "#012d16",
+          "#064d2a",
+          "#0f7040",
+          "#229458",
+          "#4db778",
+          "#76de9d",
+          "#c7fed9"
+        ],
+        "oklch": "oklch(55.8% 0.134 154.8)"
+      },
+      "light-neu": {
+        "role": "secondary",
+        "displayName": "中性灰藍 Neutral（淺色主題）",
+        "canonical": "#5e6e80",
+        "tonalRamp": [
+          "#020c19",
+          "#172534",
+          "#324152",
+          "#505f71",
+          "#6f7f92",
+          "#8fa0b4",
+          "#b4c6da",
+          "#e3f0ff"
+        ],
+        "oklch": "oklch(53.2% 0.034 251.5)"
+      },
+      "light-neg": {
+        "role": "secondary",
+        "displayName": "美股負面紅 Negative（淺色主題）",
+        "canonical": "#c0262d",
+        "tonalRamp": [
+          "#230000",
+          "#4b0006",
+          "#7b0412",
+          "#af0c1f",
+          "#d73f40",
+          "#fe6460",
+          "#fdaca5",
+          "#fee9e7"
+        ],
+        "oklch": "oklch(52.7% 0.189 24.7)"
+      },
+      "light-warn": {
+        "role": "tertiary",
+        "displayName": "警告琥珀 Warn（紅色配色的留意）（淺色主題）",
+        "canonical": "#9a6212",
+        "tonalRamp": [
+          "#180600",
+          "#361e00",
+          "#5b3600",
+          "#835103",
+          "#a86f25",
+          "#cc914a",
+          "#f4b670",
+          "#ffebd6"
+        ],
+        "oklch": "oklch(54.5% 0.113 68.8)"
+      },
+      "light-alert-amber-high": {
+        "role": "tertiary",
+        "displayName": "高度異常琥珀 Alert High（淺色主題）",
+        "canonical": "#a84a05",
+        "tonalRamp": [
+          "#1e0100",
+          "#3f1600",
+          "#692b00",
+          "#964103",
+          "#be5e25",
+          "#e4804a",
+          "#ffae85",
+          "#ffeae0"
+        ],
+        "oklch": "oklch(52.3% 0.141 47.6)"
+      },
+      "light-alert-amber-watch": {
+        "role": "tertiary",
+        "displayName": "留意金黃 Alert Watch（淺色主題）",
+        "canonical": "#7d5c00",
+        "tonalRamp": [
+          "#140900",
+          "#312100",
+          "#523c05",
+          "#76580d",
+          "#9a782b",
+          "#bc994f",
+          "#e3bf75",
+          "#feedcb"
+        ],
+        "oklch": "oklch(49.6% 0.102 84.1)"
+      },
+      "light-div-pos": {
+        "role": "tertiary",
+        "displayName": "熱度圖正面藍（淺色主題）",
+        "canonical": "#2a78d6",
+        "tonalRamp": [
+          "#000828",
+          "#00224e",
+          "#003d80",
+          "#005bb6",
+          "#2f7ddb",
+          "#5aa0f9",
+          "#9dc7ff",
+          "#e4f0ff"
+        ],
+        "oklch": "oklch(57.5% 0.163 255.5)"
+      },
+      "light-div-neg-red": {
+        "role": "tertiary",
+        "displayName": "熱度圖負面紅（紅色配色）（淺色主題）",
+        "canonical": "#e34948",
+        "tonalRamp": [
+          "#210000",
+          "#4b0005",
+          "#7c0210",
+          "#b0081d",
+          "#d73d3e",
+          "#ff635f",
+          "#feaba4",
+          "#fee9e7"
+        ],
+        "oklch": "oklch(62.3% 0.191 24.9)"
+      },
+      "light-div-neg-amber": {
+        "role": "tertiary",
+        "displayName": "熱度圖負面琥珀（預設）（淺色主題）",
+        "canonical": "#c76a14",
+        "tonalRamp": [
+          "#1b0400",
+          "#3c1900",
+          "#623103",
+          "#8d4909",
+          "#bd6100",
+          "#e28337",
+          "#fdb07a",
+          "#feeadd"
+        ],
+        "oklch": "oklch(62.0% 0.146 55.4)"
+      },
+      "light-div-mid": {
+        "role": "neutral",
+        "displayName": "熱度圖中性（淺色主題）",
+        "canonical": "#f0efec",
+        "tonalRamp": [
+          "#0c0b09",
+          "#252422",
+          "#40403d",
+          "#5e5d5b",
+          "#7e7d7a",
+          "#9f9e9b",
+          "#c5c4c1",
+          "#efeeeb"
+        ],
+        "oklch": "oklch(95.2% 0.004 91.4)"
+      }
+    },
+    "typographyMeta": {
+      "hero": {
+        "displayName": "Hero",
+        "purpose": "美股情緒指數的大數字，一頁最多一個。"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "頁面標題、卡片內公司名、區塊標題。"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "新聞標題、證據標題、說明文字；強調用 600。"
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "時間、來源、單位、狀態列、徽章。"
+      },
+      "numeric": {
+        "displayName": "Numeric",
+        "purpose": "z 值、交易日、警示摘要檔數；Plex Mono 加 tabular-nums。"
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-card",
+        "value": "0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(2,6,12,0.35)",
+        "light": "0 1px 2px rgba(14,26,38,0.05), 0 8px 24px rgba(14,26,38,0.06)",
+        "purpose": "所有卡片、側欄選中項、分段控制選中膠囊。"
+      },
+      {
+        "name": "shadow-float",
+        "value": "0 16px 40px rgba(2,6,12,0.6)",
+        "light": "0 16px 40px rgba(14,26,38,0.18)",
+        "purpose": "toast 等浮層。"
+      },
+      {
+        "name": "glow",
+        "value": "radial-gradient(120% 40rem at 50% -10rem, rgba(90,169,230,0.12), transparent 70%)",
+        "light": "radial-gradient(120% 40rem at 50% -10rem, rgba(31,111,178,0.08), transparent 70%)",
+        "purpose": "頁首鋼藍光暈，疊在頁面底色上。"
+      },
+      {
+        "name": "glass-bar",
+        "value": "background: color-mix(in srgb, var(--background) 75%, transparent); backdrop-filter: blur(24px) saturate(1.5)",
+        "purpose": "頂列與手機底部分頁列的毛玻璃。"
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "全站進場與收合的緩動。"
+      },
+      {
+        "name": "rise",
+        "value": "0.32s cubic-bezier(0.22,1,0.36,1); from opacity 0, translateY(8px)",
+        "purpose": "卡片與清單項進場，前 8 項每項延遲 35–40ms。"
+      },
+      {
+        "name": "grow-x",
+        "value": "0.6s cubic-bezier(0.22,1,0.36,1); from scaleX(0)",
+        "purpose": "長條與信心條長出。"
+      },
+      {
+        "name": "grow-y",
+        "value": "0.4s ease-out; from opacity 0, scaleY(0)",
+        "purpose": "直條長出。"
+      },
+      {
+        "name": "shimmer",
+        "value": "1.6s ease-in-out infinite; translateX(-100%→100%)",
+        "purpose": "骨架流光。"
+      },
+      {
+        "name": "spring-snappy",
+        "value": "spring stiffness 520, damping 38, mass 0.7",
+        "purpose": "分頁與分段控制的選中膠囊滑動。"
+      },
+      {
+        "name": "spring-soft",
+        "value": "spring stiffness 180, damping 26, mass 0.9",
+        "purpose": "數值標記、長條。"
+      },
+      {
+        "name": "press",
+        "value": "scale(0.97)",
+        "purpose": "按下回饋。"
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: 動畫與轉場縮到 0.01ms",
+        "purpose": "遵守使用者的減少動態設定。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ],
+    "themes": {
+      "default": "dark",
+      "switch": ":root[data-theme=\"light\"]",
+      "alertPalette": {
+        "attribute": "data-alert-palette",
+        "default": "amber",
+        "options": [
+          "amber",
+          "red"
+        ],
+        "red": "--alert-high: var(--neg); --alert-watch: var(--warn); --div-neg: #e66767 / #e34948"
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Hairline Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "所有內容卡片：18px、1px 髮絲線、內側高光加柔和陰影。",
+      "html": "<section class=\"ds-card\"><h2 class=\"ds-card-title\">熱門關鍵字</h2><p class=\"ds-card-body\">卡片內容放在 surface 底上，次層用 surface-2。</p></section>",
+      "css": ".ds-card{border-radius:18px;border:1px solid var(--hairline,rgba(255,255,255,.06));background:var(--surface,#121b27);box-shadow:var(--shadow-card,0 1px 0 rgba(255,255,255,.04) inset,0 8px 24px rgba(2,6,12,.35));padding:20px;color:var(--ink,#e8eef6);font-family:\"IBM Plex Sans\",\"PingFang TC\",\"Noto Sans TC\",\"Microsoft JhengHei\",system-ui,sans-serif}.ds-card-title{margin:0 0 16px;font-size:.9375rem;font-weight:600;color:var(--ink-2,#a6b5c8)}.ds-card-body{margin:0;font-size:.9375rem;line-height:1.55}"
+    },
+    {
+      "name": "Alert Level Badge",
+      "kind": "chip",
+      "refersTo": "badge-alert-high",
+      "description": "台股警示等級徽章，讀 --alert-high／--alert-watch，預設琥珀。",
+      "html": "<span class=\"ds-badge ds-badge-high\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 18v-6a5 5 0 1 1 10 0v6\"/><path d=\"M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z\"/><path d=\"M21 12h1\"/><path d=\"M18.5 4.5 18 5\"/><path d=\"M2 12h1\"/><path d=\"M12 2v1\"/><path d=\"m4.929 4.929.707.707\"/><path d=\"M12 12v6\"/></svg>高度異常</span> <span class=\"ds-badge ds-badge-watch\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg>留意</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;gap:4px;border-radius:9999px;padding:2px 10px;font-size:.75rem;line-height:1.4;font-weight:600;font-family:\"IBM Plex Sans\",\"PingFang TC\",system-ui,sans-serif}.ds-badge-high{background:var(--alert-high-soft,rgba(245,158,66,.14));color:var(--alert-high,#f59e42)}.ds-badge-watch{background:var(--alert-watch-soft,rgba(227,194,91,.13));color:var(--alert-watch,#e3c25b)}"
+    },
+    {
+      "name": "Caveat Tag",
+      "kind": "chip",
+      "refersTo": "badge-caveat",
+      "description": "資料限制提醒：中性底加圖示，不借警示色。",
+      "html": "<span class=\"ds-caveat\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" x2=\"12\" y1=\"8\" y2=\"12\"/><line x1=\"12\" x2=\"12.01\" y1=\"16\" y2=\"16\"/></svg>10/8–10/9 未發布，之後尚未收錄</span>",
+      "css": ".ds-caveat{display:inline-flex;align-items:center;gap:4px;border-radius:9999px;padding:2px 8px;font-size:.75rem;line-height:1.4;font-weight:600;background:var(--surface-2,#1a2533);color:var(--ink-2,#a6b5c8);word-break:keep-all;font-family:\"IBM Plex Sans\",\"PingFang TC\",system-ui,sans-serif}"
+    },
+    {
+      "name": "Sentiment Pill (US)",
+      "kind": "chip",
+      "refersTo": "pill-sentiment-pos",
+      "description": "美股情緒標籤：綠正紅負，附圖示與 Mono 信心。",
+      "html": "<span class=\"ds-pill ds-pill-pos\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\"/><polyline points=\"16 7 22 7 22 13\"/></svg>正面 <span class=\"ds-num\">92%</span></span> <span class=\"ds-pill ds-pill-neg\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polyline points=\"22 17 13.5 8.5 8.5 13.5 2 7\"/><polyline points=\"16 17 22 17 22 11\"/></svg>負面 <span class=\"ds-num\">99%</span></span>",
+      "css": ".ds-pill{display:inline-flex;align-items:center;gap:4px;border-radius:9999px;padding:2px 8px;font-size:.75rem;line-height:1.4;font-weight:600;font-family:\"IBM Plex Sans\",system-ui,sans-serif}.ds-pill-pos{background:var(--pos-soft,rgba(63,207,142,.14));color:var(--pos,#3fcf8e)}.ds-pill-neg{background:var(--neg-soft,rgba(244,98,104,.14));color:var(--neg,#f46268)}.ds-num{font-family:\"IBM Plex Mono\",ui-monospace,monospace;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "input",
+      "refersTo": "segmented",
+      "description": "膠囊形分段控制；選中底在選項間滑動。",
+      "html": "<div class=\"ds-seg\" role=\"group\" aria-label=\"列出哪些股票\"><button class=\"ds-seg-opt\" aria-pressed=\"true\">需要查證 2 檔</button><button class=\"ds-seg-opt\" aria-pressed=\"false\">全部 49 檔</button></div>",
+      "css": ".ds-seg{display:inline-grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:9999px;border:1px solid var(--hairline,rgba(255,255,255,.06));background:var(--surface,#121b27);min-width:320px}.ds-seg-opt{min-height:40px;border:0;border-radius:9999px;background:transparent;color:var(--ink-3,#7a8ca3);font:400 .9375rem/1.55 \"IBM Plex Sans\",\"PingFang TC\",system-ui,sans-serif;cursor:pointer;transition:color .15s,background .25s cubic-bezier(.22,1,.36,1)}.ds-seg-opt:hover{color:var(--ink-2,#a6b5c8)}.ds-seg-opt[aria-pressed=true]{background:var(--surface-3,#223042);color:var(--ink,#e8eef6);font-weight:600}.ds-seg-opt:focus-visible{outline:2px solid var(--brand,#5aa9e6);outline-offset:2px}.ds-seg-opt:active{transform:scale(.97)}"
+    },
+    {
+      "name": "Choice Chip",
+      "kind": "button",
+      "refersTo": "chip-choice-active",
+      "description": "參數選擇膠囊（門檻模擬）：選中用鋼藍實底。",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"false\">10 日</button><button class=\"ds-chip\" aria-pressed=\"true\">20 日</button><button class=\"ds-chip\" aria-pressed=\"false\">40 日</button></div>",
+      "css": ".ds-chips{display:flex;gap:4px}.ds-chip{min-height:36px;padding:0 12px;border:0;border-radius:9999px;background:var(--surface-2,#1a2533);color:var(--ink-2,#a6b5c8);font:400 .75rem/1.4 \"IBM Plex Sans\",\"PingFang TC\",system-ui,sans-serif;cursor:pointer;transition:color .15s}.ds-chip:hover{color:var(--ink,#e8eef6)}.ds-chip[aria-pressed=true]{background:var(--brand,#5aa9e6);color:var(--brand-fg,#06101a);font-weight:600}.ds-chip:focus-visible{outline:2px solid var(--brand,#5aa9e6);outline-offset:2px}"
+    },
+    {
+      "name": "Icon Button",
+      "kind": "button",
+      "refersTo": "icon-button",
+      "description": "44px 圓形圖示按鈕，hover 換次層底。",
+      "html": "<button class=\"ds-icon-btn\" aria-label=\"重新整理\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"/><path d=\"M21 3v5h-5\"/><path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\"/><path d=\"M8 16H3v5\"/></svg></button>",
+      "css": ".ds-icon-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:9999px;background:transparent;color:var(--ink-2,#a6b5c8);cursor:pointer;transition:background .15s,color .15s}.ds-icon-btn:hover{background:var(--surface-2,#1a2533);color:var(--ink,#e8eef6)}.ds-icon-btn:focus-visible{outline:2px solid var(--brand,#5aa9e6);outline-offset:2px}.ds-icon-btn:active{transform:scale(.97)}"
+    },
+    {
+      "name": "Mobile Tab Bar",
+      "kind": "nav",
+      "refersTo": "nav-tab-active",
+      "description": "手機底部 6 分頁列，毛玻璃，選中項是鋼藍淡底膠囊。",
+      "html": "<nav class=\"ds-tabbar\" aria-label=\"主選單\"><a class=\"ds-tab\" href=\"#\">總覽</a><a class=\"ds-tab\" href=\"#\">新聞</a><a class=\"ds-tab\" href=\"#\">追蹤</a><a class=\"ds-tab\" href=\"#\" aria-current=\"page\">警示</a><a class=\"ds-tab\" href=\"#\">產業</a><a class=\"ds-tab\" href=\"#\">設定</a></nav>",
+      "css": ".ds-tabbar{display:grid;grid-template-columns:repeat(6,1fr);height:64px;padding:0 4px;border-top:1px solid var(--hairline,rgba(255,255,255,.06));background:color-mix(in srgb,var(--background,#0b121c) 75%,transparent);backdrop-filter:blur(24px) saturate(1.5)}.ds-tab{position:relative;display:flex;align-items:center;justify-content:center;padding-top:22px;color:var(--ink-3,#7a8ca3);font:400 .75rem/1.4 \"IBM Plex Sans\",\"PingFang TC\",system-ui,sans-serif;text-decoration:none;transition:color .15s}.ds-tab::before{content:\"\";position:absolute;top:6px;width:56px;height:32px;border-radius:9999px}.ds-tab:hover{color:var(--ink-2,#a6b5c8)}.ds-tab[aria-current=page]{color:var(--brand,#5aa9e6);font-weight:600}.ds-tab[aria-current=page]::before{background:var(--brand-soft,rgba(90,169,230,.14))}.ds-tab:focus-visible{outline:2px solid var(--brand,#5aa9e6);outline-offset:2px}"
+    },
+    {
+      "name": "Status Strip",
+      "kind": "custom",
+      "refersTo": "status-strip",
+      "description": "頂列下方固定高度的狀態列；有問題的項目轉鋼藍加圖示並排到最前。",
+      "html": "<dl class=\"ds-strip\" aria-label=\"資料狀態\"><div class=\"ds-strip-item\"><dt>資料更新</dt><dd class=\"ds-strip-warn\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg>10/8 14:02，可能已過期</dd></div><div class=\"ds-strip-item\"><dt>台股警示</dt><dd>10/12，2 檔需要查證</dd></div><div class=\"ds-strip-item\"><dt>台股評分</dt><dd>正常</dd></div></dl>",
+      "css": ".ds-strip{display:flex;align-items:center;gap:0 16px;height:32px;margin:0;padding:0 16px;border-top:1px solid var(--hairline,rgba(255,255,255,.06));font:400 .75rem/1.4 \"IBM Plex Sans\",\"PingFang TC\",system-ui,sans-serif;white-space:nowrap;overflow-x:auto}.ds-strip-item{display:flex;align-items:center;gap:6px}.ds-strip dt{color:var(--ink-3,#7a8ca3)}.ds-strip dd{margin:0;display:flex;align-items:center;gap:4px;font-weight:600;color:var(--ink,#e8eef6)}.ds-strip dd.ds-strip-warn{color:var(--brand,#5aa9e6)}"
+    },
+    {
+      "name": "Sector Heatmap Cells",
+      "kind": "custom",
+      "refersTo": "div-pos",
+      "description": "產業熱度圖格子：藍正、琥珀（或紅）負、灰中性，空格只畫髮絲線，警示日加圓點。",
+      "html": "<div class=\"ds-heat\"><button class=\"ds-cell\" style=\"background:color-mix(in oklab,var(--div-neg,#d9822b) 100%,var(--div-mid,#383835))\" aria-label=\"很強負面\"></button><button class=\"ds-cell\" style=\"background:color-mix(in oklab,var(--div-neg,#d9822b) 50%,var(--div-mid,#383835))\" aria-label=\"中等負面，有警示\"><span class=\"ds-dot\"></span></button><button class=\"ds-cell\" style=\"background:var(--div-mid,#383835)\" aria-label=\"中性\"></button><button class=\"ds-cell ds-cell-empty\" aria-label=\"沒有新聞\"></button><button class=\"ds-cell\" style=\"background:color-mix(in oklab,var(--div-pos,#3987e5) 50%,var(--div-mid,#383835))\" aria-label=\"中等正面\"></button><button class=\"ds-cell\" style=\"background:color-mix(in oklab,var(--div-pos,#3987e5) 100%,var(--div-mid,#383835))\" aria-label=\"很強正面\"></button></div>",
+      "css": ".ds-heat{display:grid;grid-template-columns:repeat(6,28px);gap:2px}.ds-cell{display:flex;align-items:center;justify-content:center;height:20px;border:0;border-radius:3px;cursor:pointer;padding:0}.ds-cell-empty{background:transparent;box-shadow:inset 0 0 0 1px var(--hairline,rgba(255,255,255,.06))}.ds-cell:hover{filter:brightness(1.15)}.ds-cell:focus-visible{outline:2px solid var(--brand,#5aa9e6);outline-offset:1px}.ds-dot{width:6px;height:6px;border-radius:9999px;background:var(--ink,#e8eef6)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "行情板",
+    "overview": "這是一張夜盤時段的行情板：預設深色，夜盤藍底（`night-ground`）上浮著一層層髮絲線卡片，鋼藍是唯一的品牌色，數字一律用 IBM Plex Mono 等寬對齊。介面密度偏高但不擁擠，研究員在開盤前幾分鐘掃過去，就要知道哪幾檔需要查證、公司有沒有說明。淺色主題是同一張行情板換成白天的紙面：結構、角色與規則不變，只換色值。\n\n顏色帶語意，而且語意因市場而異。美股頁沿用美股慣例：綠色正面、紅色負面。台股頁避開綠色（免得和「跌」混淆），警示等級預設用琥珀（台灣讀者看到紅色會讀成「漲」），設定頁可改成紅色，選擇存在使用者的裝置。資料限制與系統提醒（還沒開盤、資料過期、公告漏收、評分額度用盡）一律用中性灰或鋼藍加圖示，不借用警示色。每處顏色都搭配文字或圖示，顏色不單獨承載語意。\n\n動態節制而一致：大量元素用 CSS keyframes 淡入上移，指示器膠囊用彈簧在選項間滑動，全部尊重「減少動態」設定。載入中的骨架與真實內容同高，資料到了版面不跳。",
+    "keyCharacteristics": [
+      "預設深色，夜盤藍底，頂部一抹鋼藍光暈給景深",
+      "髮絲線邊框＋內側高光＋柔和陰影的卡片，大圓角（18px）",
+      "單一品牌色鋼藍；語意色依市場切換慣例",
+      "數字一律等寬、表格數字（tabular-nums），文字用 Plex Sans，中文走系統字",
+      "手機底部 6 分頁列，桌機左側欄；每一頁頂列下方都有固定高度的狀態列",
+      "膠囊形分段控制，選中的底色用彈簧滑動"
+    ],
+    "rules": [
+      {
+        "name": "The Amber-Is-Alert Rule",
+        "body": "琥珀在台股頁只代表警示等級（高度異常、留意）與熱度圖的負值，不代表漲跌，也不拿來當提醒色。",
+        "section": "colors"
+      },
+      {
+        "name": "The Caveat-Is-Not-Alert Rule",
+        "body": "資料限制與系統提醒用中性灰（`surface-2` 底、`ink-2` 字）或鋼藍，並一定附圖示（CircleAlert、Clock、Info、TriangleAlert）；不用琥珀或紅色。",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Markets Rule",
+        "body": "美股頁綠正紅負；台股頁不出現綠色，正面在熱度圖用藍色。",
+        "section": "colors"
+      },
+      {
+        "name": "The Never-Color-Alone Rule",
+        "body": "每個語意色都有文字（「高度異常」「負面」）或圖示同行，色盲與灰階下也讀得懂。",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono-Numbers Rule",
+        "body": "會被比較的數字（分數、z 值、則數、日期、代號）一律 Plex Mono 加 tabular-nums；中文說明不用等寬。",
+        "section": "typography"
+      },
+      {
+        "name": "The Two-Weights Rule",
+        "body": "只有 400 與 600 兩個字重；層級靠字級與墨色深淺，不靠更多字重。",
+        "section": "typography"
+      },
+      {
+        "name": "The No-Jump Rule",
+        "body": "每個會非同步載入的區塊，骨架高度貼近真實內容；資料到了不把下方內容往下推。",
+        "section": "layout"
+      },
+      {
+        "name": "The Hairline-Card Rule",
+        "body": "卡片 = 18px 圓角 + 1px 髮絲線 + Card 陰影 + `surface` 底，集中在一個 `card` utility；不另外發明卡片樣式。",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do 讓台股警示等級只讀 `--alert-high`／`--alert-watch`，配色切換由 `data-alert-palette` 決定。",
+      "Do 用中性灰或鋼藍加圖示表達資料限制與系統提醒。",
+      "Do 美股頁用 `pos` 綠正面、`neg` 紅負面；台股頁的正面用 `div-pos` 藍。",
+      "Do 所有比較用數字用 Plex Mono 加 tabular-nums。",
+      "Do 卡片一律走 `card` utility（18px、髮絲線、Card 陰影）。",
+      "Do 骨架與真實內容同高；狀態列高度固定（手機 48px、`sm` 以上 32px）。",
+      "Do 警示卡依證據標題 → 重大訊息 → 數字 → 走勢的順序排列。",
+      "Do 觸控目標至少 44px，焦點用 2px 鋼藍外框。",
+      "Do 進場只動 transform 與 opacity，並遵守減少動態設定。"
+    ],
+    "donts": [
+      "Don't 在台股頁用綠色，也不要讓琥珀出現在警示等級與熱度圖負值以外的地方。",
+      "Don't 用琥珀或紅色表示「還沒開盤」「資料過期」「公告漏收」這類資料限制。",
+      "Don't 讓顏色單獨承載語意；徽章、標籤、提醒都要有文字或圖示。",
+      "Don't 把「沒有新聞」畫成中性灰；熱度圖的空格只留一圈髮絲線。",
+      "Don't 加入 400、600 以外的字重，或為中文介面加全大寫與字距。",
+      "Don't 在淺色主題改動結構或角色，只換色值。"
+    ]
+  }
+}
