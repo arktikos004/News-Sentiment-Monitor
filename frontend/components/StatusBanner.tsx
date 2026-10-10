@@ -16,12 +16,15 @@ export default function StatusBanner({
   mock,
   onRetry,
   width = "narrow",
+  inline = false,
 }: {
   error?: string | null;
   stale?: boolean;
   mock?: boolean;
   onRetry?: () => void;
   width?: PageWidth;
+  /** 放在頁面內的某個區塊裡（不自帶頁寬與左右邊距） */
+  inline?: boolean;
 }) {
   return (
     <AnimatePresence initial={false}>
@@ -31,7 +34,7 @@ export default function StatusBanner({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.22, ease: EASE_OUT }}
-          className={`mx-auto w-full space-y-2 px-4 pt-4 lg:px-8 ${PAGE_WIDTH[width]}`}
+          className={inline ? "mb-4 space-y-2" : `mx-auto w-full space-y-2 px-4 pt-4 lg:px-8 ${PAGE_WIDTH[width]}`}
         >
           {error && (
             <div role="alert" className="flex items-center gap-3 rounded-2xl border border-neg/30 bg-neg-soft py-2 pl-4 pr-2 text-body text-neg">
@@ -42,7 +45,7 @@ export default function StatusBanner({
                   type="button"
                   whileTap={press}
                   onClick={onRetry}
-                  className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-neg px-4 text-meta font-semibold text-white"
+                  className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-neg/40 bg-surface px-4 text-meta font-semibold text-neg"
                 >
                   <RotateCw size={14} /> 重試
                 </motion.button>

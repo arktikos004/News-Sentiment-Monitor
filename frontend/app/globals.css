@@ -24,10 +24,15 @@
   --pos-soft: rgba(63, 207, 142, 0.14);
   --neu: #8a9aae;
   --neu-soft: rgba(138, 154, 174, 0.14);
-  --neg: #f2555a;
-  --neg-soft: rgba(242, 85, 90, 0.14);
+  --neg: #f46268;
+  --neg-soft: rgba(244, 98, 104, 0.14);
   --warn: #e8a33d;
   --warn-soft: rgba(232, 163, 61, 0.14);
+  /* 台股警示等級的顏色：設定頁選「紅色」時沿用負面色與琥珀；預設是下方的琥珀關注度色階 */
+  --alert-high: var(--neg);
+  --alert-high-soft: var(--neg-soft);
+  --alert-watch: var(--warn);
+  --alert-watch-soft: var(--warn-soft);
 
   --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(2, 6, 12, 0.35);
   --shadow-float: 0 16px 40px rgba(2, 6, 12, 0.6);
@@ -49,7 +54,7 @@
   --hairline: rgba(14, 26, 38, 0.07);
   --ink: #0e1a26;
   --ink-2: #3f5266;
-  --ink-3: #5f7186;
+  --ink-3: #56677b;
 
   --brand: #1f6fb2;
   --brand-fg: #ffffff;
@@ -59,8 +64,8 @@
   --pos-soft: rgba(15, 138, 79, 0.1);
   --neu: #5e6e80;
   --neu-soft: rgba(94, 110, 128, 0.1);
-  --neg: #d0343a;
-  --neg-soft: rgba(208, 52, 58, 0.1);
+  --neg: #c0262d;
+  --neg-soft: rgba(192, 38, 45, 0.1);
   --warn: #9a6212;
   --warn-soft: rgba(154, 98, 18, 0.12);
 
@@ -71,6 +76,24 @@
   --div-neg: #e34948;
   --div-mid: #f0efec;
   color-scheme: light;
+}
+
+/* 台股警示配色（設定頁可切換，預設琥珀）：台灣讀者看到紅色會讀成「漲」，所以警示等級與產業熱度圖的負值改用
+   琥珀關注度色階；美股頁的綠正紅負不受影響。每個色值在自己的淡底與卡片底上都 ≥ 4.5:1 */
+:root[data-alert-palette="amber"] {
+  --alert-high: #f59e42;
+  --alert-high-soft: rgba(245, 158, 66, 0.14);
+  --alert-watch: #e3c25b;
+  --alert-watch-soft: rgba(227, 194, 91, 0.13);
+  --div-neg: #d9822b;
+}
+
+:root[data-theme="light"][data-alert-palette="amber"] {
+  --alert-high: #a84a05;
+  --alert-high-soft: rgba(168, 74, 5, 0.1);
+  --alert-watch: #7d5c00;
+  --alert-watch-soft: rgba(125, 92, 0, 0.1);
+  --div-neg: #c76a14;
 }
 
 /* shadcn/ui 別名：同一個元素上解析，主題切換時跟著變 */
@@ -115,6 +138,10 @@
   --color-neg-soft: var(--neg-soft);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
+  --color-alert-high: var(--alert-high);
+  --color-alert-high-soft: var(--alert-high-soft);
+  --color-alert-watch: var(--alert-watch);
+  --color-alert-watch-soft: var(--alert-watch-soft);
 
   --color-foreground: var(--foreground);
   --color-card: var(--card);

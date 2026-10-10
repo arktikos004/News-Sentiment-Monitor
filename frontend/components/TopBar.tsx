@@ -10,6 +10,7 @@ import { motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import SearchSheet from "@/components/SearchSheet";
+import StatusStrip from "@/components/StatusStrip";
 import { useAppState } from "@/lib/app-state";
 import { press } from "@/lib/motion";
 
@@ -37,6 +38,7 @@ export function TopBar({
         </div>
         {actions && <div className="-mr-2 flex items-center gap-1">{actions}</div>}
       </div>
+      <StatusStrip widthClass={PAGE_WIDTH[width]} />
     </header>
   );
 }

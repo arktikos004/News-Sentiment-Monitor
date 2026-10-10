@@ -256,7 +256,7 @@ async function staticCalendar(): Promise<AlertSessionsResponse> {
   const cal = await staticGet<ExportedCalendar>("/alerts/sessions.json");
   if (!cal.latest || cal.sessions.length === 0) {
     // 換用新評分器後，基準期（20 個交易日）還沒累積滿之前沒有可判斷的看板
-    throw new ApiError(503, "ALERT_DATA_UNAVAILABLE", "預警資料準備中：評分基準期尚未累積滿");
+    throw new ApiError(503, "ALERT_DATA_UNAVAILABLE", "警示資料準備中：評分基準期尚未累積滿");
   }
   return { sessions: cal.sessions, latest: cal.latest };
 }
@@ -275,7 +275,7 @@ const staticApi: typeof liveApi = {
       board = await staticGet<ExportedBoard>(`/alerts/${enc(day)}.json`);
     } catch (e) {
       if (e instanceof ApiError && e.status === 404) {
-        throw new ApiError(422, "INVALID_SESSION", `${day} 沒有可顯示的預警看板（非交易日或超出保留範圍）`);
+        throw new ApiError(422, "INVALID_SESSION", `${day} 沒有可顯示的警示看板（非交易日或超出保留範圍）`);
       }
       throw e;
     }

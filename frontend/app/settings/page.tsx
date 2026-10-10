@@ -2,9 +2,10 @@
 
 /** 設定：外觀、模型資訊、研究說明（含未複製的確認實驗與預警回測結論）、免責聲明。iOS 式分組卡片。 */
 
-import { BadgeCheck, CalendarDays, Cpu, FlaskConical, Newspaper, Palette, Scale, ShieldAlert, Target } from "lucide-react";
+import { BadgeCheck, CalendarDays, Cpu, FlaskConical, Newspaper, Palette, Scale, ShieldAlert, Siren, Target } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useEffect } from "react";
+import AlertPaletteToggle from "@/components/AlertPaletteToggle";
 import Skeleton from "@/components/Skeleton";
 import ThemeToggle from "@/components/ThemeToggle";
 import { PageTitle, TopBar } from "@/components/TopBar";
@@ -59,6 +60,12 @@ export default function SettingsPage() {
           <Row icon={Palette} tint="bg-brand-soft text-brand" label="主題">
             <ThemeToggle />
           </Row>
+          <Row icon={Siren} tint="bg-alert-high-soft text-alert-high" label="台股警示配色">
+            <AlertPaletteToggle />
+          </Row>
+          <p className="px-4 py-3 text-meta text-ink-3">
+            台股慣例紅色代表「漲」，所以警示等級與產業熱度圖的負值預設用琥珀；習慣用紅色表示警示的話可以改回。美股頁一律是綠色正面、紅色負面。
+          </p>
         </Group>
 
         <Group title="情緒模型">
@@ -105,7 +112,7 @@ export default function SettingsPage() {
             改用這個模型時量到的人工一致率提升（46.7% → 61.7%），在 2026-09-03 事先聲明的確認實驗中沒有重現（p = 0.804），所以不宣稱模型變得更準。
           </Note>
           <Note icon={ShieldAlert} tint="bg-neg-soft text-neg">
-            台股預警在歷史回測中，事前示警率與隨機響鈴無法區分（p = 0.983），只能當作開盤前的即時示警，不是提前預警。
+            台股警示在歷史回測中，事前示警率與隨機響鈴無法區分（p = 0.983），只能當作開盤前的即時示警，不是提前預警。
             {STATIC_DATA && "回測以本機 gemma3:27b 評分；公開站改用雲端託管模型評分，尚未重新回測。"}
           </Note>
           <p className="px-4 py-3 text-meta text-ink-3">完整紀錄在專案的 docs/ 資料夾（confirmation_2026-09-03.md、alert_backtest.md）。</p>

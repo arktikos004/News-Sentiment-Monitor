@@ -49,7 +49,7 @@ export default function WatchlistCompare({
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block font-mono text-body font-semibold text-ink">{ticker}</span>
-                  <span className="block text-meta text-ink-3">
+                  <span className={`block text-meta ${active ? "text-ink-2" : "text-ink-3"}`}>
                     {sentiment ? `${sentiment.article_count} 則新聞` : "這檔目前抓不到資料，稍後重新整理"}
                   </span>
                 </span>
