@@ -261,7 +261,7 @@ async function staticCalendar(): Promise<AlertSessionsResponse> {
   return { sessions: cal.sessions, latest: cal.latest };
 }
 
-const staticApi: typeof liveApi = {
+export const staticApi: typeof liveApi = {
   sentiment: (ticker) => staticGet(`/stocks/${enc(ticker)}/sentiment.json`),
   news: (ticker) => staticGet(`/stocks/${enc(ticker)}/news.json`),
   modelInfo: () => staticGet("/model.json"),

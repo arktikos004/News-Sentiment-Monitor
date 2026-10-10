@@ -170,7 +170,7 @@ def _write_report(pb: PhraseBank, agreement: str) -> None:
         "## 句長分佈（詞數）",
         "",
         f"- 中位數 {pct(50)}、P90 {pct(90)}、P99 {pct(99)}、最長 {lengths[-1]}",
-        f"- transformer 的 max_length 取 128 已涵蓋 P99（config.MAX_LENGTH）",
+        "- transformer 的 max_length 取 128 已涵蓋 P99（config.MAX_LENGTH）",
         "",
         "> 由 `python -m newssent.data.phrasebank` 自動產生。",
         "",

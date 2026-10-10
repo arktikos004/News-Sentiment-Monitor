@@ -338,7 +338,7 @@ def render_report(results: list[EventResult], scorer: str, params: AlertParams) 
         f"| 規則選出事件數 | {len(rule)} |",
         f"| 事前 5 個交易日內至少示警一次 | {len(pre_hits)} / {len(pre_eval)}（事前窗有資料者） |",
         f"| 事件日開盤前示警（即時，非提前） | {len(day_hits)} / {len(day_eval)} |",
-        f"| 背景警示率 p（事件前第 10～6 個交易日） | "
+        "| 背景警示率 p（事件前第 10～6 個交易日） | "
         + ("—" if p is None else f"{p:.1%}（{bg_hits} / {len(background)} 個股票日）")
         + " |",
         "| 隨機響鈴下事前至少一次的機率 1 − (1 − p)⁵ | " + ("—" if chance is None else f"{chance:.1%}") + " |",

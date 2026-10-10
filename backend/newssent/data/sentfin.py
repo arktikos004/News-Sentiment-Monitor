@@ -168,7 +168,7 @@ def _write_report(ds: SentFiN) -> None:
     lines = [
         "# SEntFiN 1.0 資料探索（實驗 #6：目標導向情緒）",
         "",
-        f"- 資料集：SEntFiN 1.0（Sinha et al., JASIST 2022；arXiv:2305.12257；MIT 授權）",
+        "- 資料集：SEntFiN 1.0（Sinha et al., JASIST 2022；arXiv:2305.12257；MIT 授權）",
         f"- {ds.n_headlines} 則新聞標題，展開成 **{total} 筆 (實體, 標題) 樣本**"
         f"（多實體標題貢獻 {multi} 筆額外樣本）",
         f"- 重複樣本 {ds.n_duplicates} 筆（切分前去重），去重後 {kept} 筆",
