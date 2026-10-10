@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 預警卡片的近 5 個交易日走勢（Recharts 面積圖）。縱軸固定 −1 ~ +1；虛線是前 20 日基準平均。
+ * 警示卡片的近 5 個交易日走勢（Recharts 面積圖）。縱軸固定 −1 ~ +1；虛線是前 20 日基準平均。
  * 當日無標題（score = null）的點不畫、線在那裡斷開，不以 0 補值。點或滑過可看當日分數與則數。
  */
 
@@ -31,7 +31,7 @@ export default function AlertTrend({
 }: {
   points: DailySentimentPoint[];
   baseline: number | null;
-  color: string; // CSS 色值（例如 var(--neg)），對應示警等級
+  color: string; // CSS 色值（例如 var(--neg)），對應警示等級
 }) {
   const gradientId = `trend-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const data: Row[] = points.map((p) => ({ day: p.session.slice(5), score: p.score, n: p.article_count }));

@@ -21,8 +21,9 @@ export default function NewsPage() {
         {news ? (
           <NewsList
             articles={news.articles}
+            ticker={news.ticker}
             withFilters
-            filterBarClassName="sticky top-[calc(env(safe-area-inset-top)+6rem)] z-10 -mx-4 bg-background/80 px-4 backdrop-blur-xl lg:-mx-8 lg:px-8"
+            filterBarClassName="sticky top-[calc(env(safe-area-inset-top)+7rem)] z-10 -mx-4 bg-background/80 px-4 backdrop-blur-xl sm:top-[calc(env(safe-area-inset-top)+6rem)] lg:-mx-8 lg:px-8"
           />
         ) : !error ? (
           <div className="space-y-3 pt-3">

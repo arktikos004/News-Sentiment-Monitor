@@ -82,7 +82,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <p className="mt-auto px-3 text-meta text-ink-3">情緒指數僅供學術研究參考，不構成投資建議。</p>
       </nav>
 
-      <div className="pb-nav flex min-h-dvh flex-col lg:pl-64">{children}</div>
+      <div className="pb-nav flex min-h-dvh flex-col lg:pl-64">
+        {children}
+        {/* 大螢幕的免責聲明在側欄底部；手機與平板沒有側欄，放在每一頁內容的最後（設定頁的「關於」已有同一段說明） */}
+        {!isActive(pathname, "/settings") && (
+          <p className="mt-auto px-4 pb-4 pt-10 text-center text-meta text-ink-3 lg:hidden">情緒指數僅供學術研究參考，不構成投資建議。</p>
+        )}
+      </div>
 
       <nav
         aria-label="主選單"
