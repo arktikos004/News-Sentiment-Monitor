@@ -19,7 +19,7 @@ GitHub Actions（daily.yml，每天台北 07:30、13:30、19:30、01:30）
 | 美股代號原本可任意輸入 | 只提供 `config.STATIC_TICKERS`（24 檔）；前端搜尋改為清單篩選，舊版存下的清單外代號退回 AAPL |
 | 本機 gemma3:27b 雲端跑不動 | `GeminiReviewer`（`inference/llm_review.py`），同一份提示詞；版本字串 `llm-gemini:<模型>` 與本機分數分開 |
 | 新評分器沒有 20 日基準 | `backfill.yml` 手動回補分數；看板全是「資料不足」的交易日不匯出 |
-| 把假資料發布出去 | 匯出關卡：模型 mock、覆蓋率 < 70%、預警日期倒退 → exit 1，不部署，線上維持上一版 |
+| 把假資料發布出去 | 匯出關卡：模型 mock、覆蓋率 < 70%、警示看板日期倒退 → exit 1，不部署，線上維持上一版 |
 | 資料庫要跨次保存 | 孤立分支 `state`，每次覆寫成單一 commit（SQLite 整檔改寫，留歷史會無限長大）；另存 30 天 artifact |
 | 新聞資料不得再散布 | 兩個資料庫只以 AES-256-GCM 加密封包 `private.tar.gz.enc` 存在公開的 state 分支（`scripts/state_crypt.py`，金鑰在 Secret `STATE_KEY`）；`commit_state.sh` 遇到明文 `.db` 直接失敗；backfill 的 artifact 只留彙總報告 |
 | 模型 439 MB 不能進 git | GitHub Release `models-v1` ＋ `backend/models.lock`（sha256）＋ actions/cache |
@@ -59,6 +59,11 @@ STATE_KEY=... python scripts/state_crypt.py unpack --bundle /tmp/private.tar.gz.
 cd backend && python -m newssent.export_static --out ../frontend/public/data
 cd ../frontend && NEXT_PUBLIC_STATIC_DATA=1 NEXT_PUBLIC_TICKERS=$(jq -r '.tickers|join(",")' public/data/tickers.json) npm run build
 npx wrangler pages dev out
+
+# 只改前端時：用 state 分支上一版的網站資料預覽（與 deploy.yml 相同，不跑 Python、不需要 STATE_KEY）
+git fetch github state && mkdir -p frontend/public/data
+git archive github/state site-data | tar -x -C frontend/public/data --strip-components=1
+cd frontend && NEXT_PUBLIC_STATIC_DATA=1 NEXT_PUBLIC_TICKERS=$(jq -r '.tickers|join(",")' public/data/tickers.json) npm run build && npx serve out
 
 # 換模型：上傳新的 Release（新 tag）→ 更新 backend/models.lock 的 tag 與 sha256
 ```

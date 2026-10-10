@@ -6,7 +6,7 @@
 
 | 工具 | 提供者 | 用在哪個階段 | 用途 |
 | --- | --- | --- | --- |
-| Claude Code（Claude 系列模型） | Anthropic（美國） | 開發 | 撰寫與重構程式碼、測試與技術文件；依開發者指定的方向實作實驗腳本；程式碼審查 |
+| Claude Code（Claude 系列模型） | Anthropic（美國） | 開發 | 撰寫與重構程式碼、測試與技術文件；依開發者指定的方向實作實驗腳本；程式碼審查；網站介面設計與文案潤飾（依公開的 skill 指引：frontend-design、impeccable、humanizer、Humanizer-zh；設計方向與取捨由開發者決定） |
 | Gemma 3（`gemma3:27b`），本機 Ollama | Google（美國） | 系統內、實驗 | 台股預警的標題評分（2026-09-26 以前）、預警回測、實驗 #6 的 LLM 覆核比較組；中文小模型蒸餾實驗的參考評分者（只用來對照，不當訓練標籤） |
 | Gemma 4（`gemma-4-26b-a4b-it`），經 Gemini API | Google（美國） | 系統內、實驗 | 台股預警的標題評分（2026-09-27 起）。送出的只有公司名稱與新聞標題。這些評分也是中文小模型蒸餾實驗的訓練標籤（離線、未上線） |
 | Gemini 3.5 Flash-Lite、Gemma 4 31B，經 Gemini API | Google（美國） | 實測 | 2026-09-27 評估雲端評分器的候選，實測後未採用（`tools/gemini_probe.py`） |
