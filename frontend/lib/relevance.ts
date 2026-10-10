@@ -30,6 +30,11 @@ const NAMES: Record<string, string[]> = {
 
 const ETF = new Set(["QQQ", "SPY"]);
 
+/** 這一檔的代號與公司常用名稱（取標題重點字時排除，因為代號標籤已經表示了） */
+export function tickerNames(ticker: string): string[] {
+  return [ticker, ...(NAMES[ticker] ?? []).flatMap((n) => n.split(/\s+/))];
+}
+
 export function mentionsTicker(ticker: string, title: string): boolean | null {
   if (ETF.has(ticker)) return null;
   const t = title.toLowerCase();

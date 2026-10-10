@@ -1,7 +1,8 @@
 "use client";
 
 /**
- * 台股警示的單檔卡片，依查證的順序排列：先看證據標題（當日評分為負的標題，最多 3 則，同一則報導只列一次），
+ * 台股警示的單檔卡片，依查證的順序排列：先看證據標題（當日評分為負的標題，最多 3 則，同一則報導只列一次；
+ * 每則標題下方附關鍵字標籤），
  * 再看公司近 3 個交易日有沒有發布重大訊息（證交所開放資料，只收主旨），最後才是分數與走勢。
  * 警示等級用台股警示配色（設定頁可選琥珀或紅色），不代表漲跌方向。
  * 台股代號過不了 /api/stocks 的代號驗證，所以不連到美股的總覽與新聞頁。
@@ -26,6 +27,29 @@ import { announcementStatus, uniqueEvidence } from "@/lib/announcements";
 import type { AlertLevel, AnnouncementCheck, StockAlert } from "@/lib/api";
 import { relativeTime, signed } from "@/lib/format";
 import { delay } from "@/lib/motion";
+import { twTitleTopics, zhKeyWords } from "@/lib/topics";
+
+/**
+ * 證據標題下方的關鍵字：中文詞表比對出的主題（最多 3 個，依查證時的重要性排序）；
+ * 一個都沒比對到時，從標題斷詞取 2 個重點字（排除這檔自己的名稱與代號）。只比對標題文字，不影響分數。
+ */
+function EvidenceTags({ title, exclude }: { title: string; exclude: string[] }) {
+  const topics = twTitleTopics(title)
+    .slice(0, 3)
+    .map((t) => t.label);
+  const tags = topics.length ? topics : zhKeyWords(title, exclude, 2);
+  if (tags.length === 0) return null;
+  return (
+    <div className="mt-1.5 flex flex-wrap gap-1.5 text-meta">
+      <span className="sr-only">關鍵字：</span>
+      {tags.map((t) => (
+        <span key={t} className="rounded-full bg-surface-2 px-2 py-0.5 text-ink-2">
+          {t}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 // 公開資訊觀測站沒有穩定的單則公告連結，只能連到首頁、請使用者以代號查詢
 export const MOPS_URL = "https://mops.twse.com.tw/";
@@ -186,6 +210,7 @@ export default function AlertCard({
                           ) : (
                             <p className="text-body text-ink">{e.title}</p>
                           )}
+                          <EvidenceTags title={e.title} exclude={[alert.name, code]} />
                           <p className="mt-0.5 flex flex-wrap gap-x-3 text-meta text-ink-3">
                             <span>{e.source}</span>
                             <span>{relativeTime(e.published_at)}</span>
