@@ -125,10 +125,10 @@ export default function SettingsPage() {
           <Note icon={Target} tint="bg-brand-soft text-brand">
             模型判斷的是「這則標題對這支股票是好消息還是壞消息」，不是句子本身的語氣。
           </Note>
-          <Note icon={FlaskConical} tint="bg-warn-soft text-warn">
+          <Note icon={FlaskConical} tint="bg-surface-3 text-ink-2">
             改用這個模型時量到的人工一致率提升（46.7% → 61.7%），在 2026-09-03 事先聲明的確認實驗中沒有重現（p = 0.804），所以不宣稱模型變得更準。
           </Note>
-          <Note icon={ShieldAlert} tint="bg-neg-soft text-neg">
+          <Note icon={ShieldAlert} tint="bg-surface-3 text-ink-2">
             台股警示在歷史回測中，事前示警率與隨機響鈴無法區分（p = 0.983），只能當作開盤前的即時警示，不是提前預警。
             {STATIC_DATA && "回測以本機 gemma3:27b 評分；公開站改用雲端託管模型評分，尚未重新回測。"}
           </Note>

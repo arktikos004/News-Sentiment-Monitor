@@ -171,7 +171,7 @@ function Heatmap({ panel }: { panel: AlertPanelResponse }) {
       {picked && (
         <div className="mt-3 rounded-xl bg-surface-2 px-3 py-2.5 text-meta text-ink-2">
           <p>
-            <span className="font-semibold text-ink">{picked.label}</span> · {picked.day}：分數{" "}
+            <span className="font-semibold text-ink">{picked.label}</span> {picked.day}：分數{" "}
             <span className="font-mono tabular-nums text-ink">{signed(picked.cell.score)}</span>，{picked.cell.n} 則標題
             {picked.members != null
               ? `，${picked.members} 檔中 ${picked.cell.alerts} 檔觸發警示`
@@ -192,10 +192,10 @@ function Heatmap({ panel }: { panel: AlertPanelResponse }) {
         <table className="mt-2 w-full text-meta">
           <thead className="text-ink-3">
             <tr>
-              <th className="py-1 text-left font-medium">產業</th>
-              <th className="py-1 text-right font-medium">分數</th>
-              <th className="py-1 text-right font-medium">標題</th>
-              <th className="py-1 text-right font-medium">警示</th>
+              <th className="py-1 text-left font-normal">產業</th>
+              <th className="py-1 text-right font-normal">分數</th>
+              <th className="py-1 text-right font-normal">標題</th>
+              <th className="py-1 text-right font-normal">警示</th>
             </tr>
           </thead>
           <tbody className="font-mono tabular-nums text-ink-2">
@@ -384,7 +384,7 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
 
           <p className="mt-3 text-meta text-ink-3">
             線上預設（基準 {data.default.baseline} 日、至少 {data.default.min_articles} 則、z &lt; {signed(data.default.z)}）：平均每天{" "}
-            {defaultAvg.toFixed(1)} 檔。期間 {days[0].s}～{days[days.length - 1].s}（{days.length} 個可判斷的交易日）· 評分器 {data.scorer}
+            {defaultAvg.toFixed(1)} 檔。期間 {days[0].s}～{days[days.length - 1].s}（{days.length} 個可判斷的交易日），評分器 {data.scorer}
           </p>
         </>
       )}
