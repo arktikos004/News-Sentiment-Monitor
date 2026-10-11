@@ -143,7 +143,7 @@ function TodayAlerts() {
   );
 }
 
-/** 正面、中性、負面各幾則（取代原本的環圈圖：同一批新聞不再畫第三次） */
+/** 正面、中性、負面各幾則：只給數字，同一批新聞已經畫在刻度與清單上 */
 function Counts({ articles }: { articles: NewsItem[] }) {
   const n = (s: NewsItem["sentiment"]) => articles.filter((a) => a.sentiment === s).length;
   return (

@@ -1,9 +1,9 @@
 """評估：Accuracy、Macro F1（主指標）、混淆矩陣、CPU/GPU 推論速度 benchmark。
 
 neutral 過半，Accuracy 會被「全猜 neutral」灌水——多數類基線一併回報，
-模型必須明顯超越它才有部署價值（PLAN.md Phase 2）。
+模型必須明顯超越它才有部署價值。
 GPU 欄位僅對支援 to_device() 的模型（transformer）量測；速度比較分 GPU/CPU
-兩欄呈現（部署場景不同結論不同，PLAN.md Phase 3）。
+兩欄呈現（部署場景不同，結論也不同）。
 """
 
 from __future__ import annotations

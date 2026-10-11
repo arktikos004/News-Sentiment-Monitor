@@ -33,7 +33,7 @@ def get_news(
 
     analyzer: Analyzer | None = getattr(request.app.state, "analyzer", None)
     if analyzer is None:
-        # 尚未訓練出 artifact：逐則情緒以 mock 佔位，前端以 is_mock 判斷顯示提示
+        # 模型未載入：逐則情緒以 mock 佔位，前端依 is_mock 顯示提示
         items = [
             NewsItem(
                 title=a.title,
@@ -69,7 +69,7 @@ def get_sentiment(
 ) -> SentimentResponse:
     analyzer: Analyzer | None = getattr(request.app.state, "analyzer", None)
     if analyzer is None:
-        # 尚未訓練出 artifact 時的 mock 回應，維持 Phase 0 凍結的欄位結構
+        # 模型未載入：回 mock 回應，維持 Phase 0 凍結的欄位結構
         return SentimentResponse(
             ticker=ticker,
             score=0.0,

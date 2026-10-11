@@ -1,4 +1,4 @@
-"""Financial PhraseBank 下載、解析、清洗、去重、分層切分（Phase 1 / 進度 A）。
+"""Financial PhraseBank 下載、解析、清洗、去重、分層切分。
 
 CLI：python -m newssent.data.phrasebank
   下載資料集 zip（僅數 MB）→ 解析 sentences_50agree → clean_text 清洗 →

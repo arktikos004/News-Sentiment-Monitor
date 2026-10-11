@@ -1,7 +1,7 @@
 """關鍵字雲：對近期標題做 TF-IDF 計分，取全庫加總最高的詞。
 
-停用詞與 ticker 本身必須剔除——否則每檔股票的關鍵字雲都被自己的名字佔滿
-（PLAN.md Phase 5）。純函式，輸入為 clean_text() 後的標題清單。
+停用詞與 ticker 本身必須剔除——否則每檔股票的關鍵字雲都被自己的名字佔滿。
+純函式，輸入為 clean_text() 後的標題清單。
 """
 
 from __future__ import annotations

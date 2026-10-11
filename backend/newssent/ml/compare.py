@@ -1,7 +1,6 @@
 """彙整 artifacts/*/metadata.json 產出模型比較表：python -m newssent.ml.compare
 
-輸出 Markdown 到 docs/model_comparison.md。Phase 3 的 transformer 模型
-訓練完存入 artifacts/ 後，重跑本指令即自動併入同一張表。
+輸出 Markdown 到 docs/model_comparison.md。新訓練的模型存入 artifacts/ 後，重跑本指令即併入同一張表。
 """
 
 from __future__ import annotations

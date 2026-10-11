@@ -2,7 +2,7 @@
 
 ticker 會被用來組快取 key 與外部 API query，未驗證直接使用等於開放注入。
 快取以「ticker + 時間桶」為 key：同一 ticker 在同一時間桶內只需打一次外部 API，
-用來對付 NewsAPI 免費層每日 100 requests 的限制。
+用來對付外部新聞源的額度（yfinance 會限流、NewsAPI 免費層每日 100 次）。
 """
 
 import json

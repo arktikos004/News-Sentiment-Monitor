@@ -29,7 +29,7 @@ from newssent.ml.registry import ArtifactContractError
 
 logger = logging.getLogger("newssent")
 
-# 每 IP 限流：保護 NewsAPI 每日 100 requests 額度不被單一使用者吃光（PLAN.md 安全性章節）
+# 每 IP 限流：外部新聞源有額度（yfinance 會限流、NewsAPI 免費層每日 100 次），不讓單一使用者吃光（PLAN.md 安全性章節）
 limiter = Limiter(key_func=get_remote_address, default_limits=["30/minute"])
 
 
@@ -58,7 +58,7 @@ async def lifespan(app: FastAPI):
         app.state.analyzer = Analyzer.from_registry(PRODUCTION_MODEL)
         logger.info("已載入模型 %s", app.state.analyzer.version)
     except FileNotFoundError:
-        # 尚未訓練（開發初期）：以 mock 模式提供 API，前端照常對接
+        # 找不到 artifact（例如還沒下載模型）：以 mock 模式提供 API，回應的 is_mock 為 true
         app.state.analyzer = None
         logger.warning("找不到模型 artifact（%s），/sentiment 以 mock 模式運作", PRODUCTION_MODEL)
     except ArtifactContractError:

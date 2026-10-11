@@ -1,4 +1,4 @@
-"""Transformer fine-tuning（Phase 3 / 進度 C）：DistilBERT、BERT、RoBERTa。
+"""Transformer fine-tuning：DistilBERT、BERT、RoBERTa。
 
 - HF Trainer + CUDA + fp16 + early stopping（驗證集 Macro F1）+ class weight
   （neutral 過半，WeightedTrainer 覆寫 compute_loss 用 balanced 權重）

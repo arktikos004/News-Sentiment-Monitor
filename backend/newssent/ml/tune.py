@@ -1,6 +1,6 @@
 """Transformer 超參數搜尋：python -m newssent.ml.tune --model bert
 
-小型 grid search（PLAN.md Phase 4）：learning rate × max_length，
+小型 grid search：learning rate × max_length，
 以驗證集 Macro F1 選優，最佳模型連同超參數經 registry.save 存回
 artifacts/<model>/（覆蓋 train.py 的預設超參數版本）。
 基線模型（tfidf_lr/svm）不在此調參範圍。

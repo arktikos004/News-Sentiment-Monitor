@@ -2,7 +2,7 @@
 
 不要在 text/、ml/、api/、frontend 各自維護副本——一律從這裡讀取。
 標籤順序尤其關鍵：negative/neutral/positive 的索引順序一旦與訓練時錯位，
-模型會不報錯地輸出相反情緒；registry 啟動檢查會以此處的順序為準（Phase 4）。
+模型會不報錯地輸出相反情緒；registry 載入 artifact 時以此處的順序為準。
 """
 
 import os
@@ -53,22 +53,17 @@ LABEL_TO_ID: dict[str, int] = {name: i for i, name in enumerate(LABEL_NAMES)}
 # 情緒指數的極性符號：neutral 不貢獻極性
 SENTIMENT_SIGN: dict[str, int] = {"negative": -1, "neutral": 0, "positive": 1}
 
-# --- 資料集（Phase 1）---
+# --- 資料集 ---
 PHRASEBANK_AGREEMENT = "50agree"        # 約 4,846 筆；可改 66/75agree 比較品質
 SPLIT_SEED = 42
 SPLIT_RATIOS: tuple[float, float, float] = (0.70, 0.15, 0.15)  # train/val/test
-MAX_LENGTH = 128                        # Phase 1 依句長分佈最終確認
+MAX_LENGTH = 128                        # 涵蓋 PhraseBank 句長的 P99（docs/data_exploration.md）
 
-# --- 模型（Phase 4 選型；2026-08-14 實驗 #6 換任務定義）---
-# 2026-07-11 五模型比較（驗證集 Macro F1 選型，避免用測試集挑模型的樂觀偏差）：
-#   bert(調參後 lr=2e-5, max_length=64) 0.8542 > distilbert 0.8395 > roberta 0.8451
-#   > tfidf_lr 0.7121 > svm 0.7079；測試集確認 bert 0.8458 仍居首
-# 2026-08-14 實驗 #6：人工複核暴露的錯誤（抓不到負面、過度給方向）根因是**任務定義**——
-#   PhraseBank 量的是語氣，線上要答的是「這則標題對這支股票是好是壞」。改用
-#   PhraseBank＋SEntFiN 合併語料訓練的**目標導向**模型（輸入為 (公司名, 標題) 配對），
-#   在 60 則人工標注上一致率 46.7%→61.7%（McNemar p=0.035，未過多重比較修正）。
-#   完整比較與誠實邊界見 docs/experiment_target_sentiment.md。
-PRODUCTION_MODEL = "bert-combined"      # artifacts/<名稱>/，由 compare.py 結果決定
+# --- 模型 ---
+# 正式模型：PhraseBank＋SEntFiN 合併語料訓練的目標導向模型，輸入是 (公司名, 標題) 配對，
+# 答的是「這則標題對這支股票是好是壞」，而不是標題的語氣。
+# 五模型比較見 docs/model_selection.md；改成目標導向的理由與人工標注比較見 docs/experiment_target_sentiment.md。
+PRODUCTION_MODEL = "bert-combined"      # artifacts/<名稱>/
 
 # --- 目標導向推論（實驗 #6）---
 # 目標導向模型的輸入是 (目標實體, 標題)，但線上只拿得到 ticker，而新聞標題裡寫的是
@@ -102,8 +97,9 @@ TICKER_COMPANY_NAMES: dict[str, str] = {
 }
 
 # --- 靜態站（news.sekinv.com）每日預先計算的標的 ---
-# 公開站沒有常駐後端，只能提供事先算好的清單；前端搜尋改為從此清單挑選。
-# TSM/UMC/ASX/CHT/QQQ 是 stock-trend-assistant 情緒卡的 ADR 對照與大盤代理（其 lib/newsApi.ts），不可移除。
+# 公開站沒有常駐後端，只能提供事先算好的清單；前端搜尋只能從此清單挑選。
+# TSM/UMC/ASX/CHT/QQQ 是 stock-trend-assistant 情緒卡的 ADR 對照與大盤代理
+# （該 repo 的 frontend/lib/newsApi.ts），不可移除。
 STATIC_TICKERS: tuple[str, ...] = (
     "AAPL", "MSFT", "NVDA", "GOOG", "AMZN", "META", "TSLA", "AVGO", "AMD", "INTC", "MU", "NFLX",
     "QCOM", "ORCL", "ADBE", "CRM", "ASML", "ARM", "TSM", "UMC", "ASX", "CHT", "QQQ", "SPY",
@@ -114,7 +110,7 @@ def company_name(ticker: str) -> str:
     return TICKER_COMPANY_NAMES.get((ticker or "").upper(), ticker)
 
 
-# --- 情緒指數（Phase 5 aggregate.py）---
+# --- 情緒指數（inference/aggregate.py）---
 # score = Σ(sign × confidence) / n，映射 [−1, +1]；|score| 超過門檻才判為正/負，否則中性
 SENTIMENT_LABEL_THRESHOLD = 0.15
 
@@ -160,10 +156,10 @@ FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 # 本機 Ollama 模型：回測（tools/alert_backtest.py）與 2026-09-26 以前的線上分數都出自它
 ALERT_LLM_MODEL = "gemma3:27b"
 ALERT_SCORER_LEGACY = f"llm-{ALERT_LLM_MODEL}"
-# 2026-09 起雲端排程沒有 GPU，改用 Google AI Studio 託管的模型（GeminiReviewer；會把標題送到 Google）。
-# 與本機版屬於不同評分器：分數另存、不混算；換用後的一致性見 docs/scorer_switch_gemini.md
-# 2026-09-27 實測（tools/gemini_probe.py）：gemma-3-27b-it 已下架；gemma-4-31b-it 每則約 39 秒，
-# 每次排程只評得了約 70 則、趕不上每日新增量；故採 gemma-4-26b-a4b-it＋最低思考（每則約 1.4 秒）。
+# 雲端排程沒有 GPU，改用 Google AI Studio 託管的模型（GeminiReviewer；會把標題送到 Google）。
+# 與本機版屬於不同評分器：分數另存、不混算；一致性用 tools/scorer_agreement.py 檢驗，門檻見 docs/scorer_switch_prereg.md。
+# 選這個模型的理由（2026-09-27 以 tools/gemini_probe.py 實測）：gemma-3-27b-it 已下架；gemma-4-31b-it 每則約 39 秒，
+# 每次排程只評得了約 70 則、趕不上每日新增量；gemma-4-26b-a4b-it＋最低思考每則約 1.4 秒。
 # 決策與實測數字見 docs/scorer_switch_prereg.md「修訂」一節。
 GEMINI_MODEL = "gemma-4-26b-a4b-it"
 GEMINI_SYSTEM_INSTRUCTION = True   # 模型不接受 systemInstruction 時改 False（系統提示併入 user turn）
@@ -206,7 +202,7 @@ ALERT_INDUSTRY: dict[str, str] = {
     "6669.TW": "電腦及週邊設備業",
 }
 
-# --- 新聞來源與快取（Phase 5）---
+# --- 新聞來源與快取 ---
 # yfinance：免金鑰、近即時（目前主源）；newsapi：原始規劃指定源，取得 NEWSAPI_KEY 後切回
 NEWS_PROVIDER = "yfinance"
 NEWSAPI_KEY = os.environ.get("NEWSAPI_KEY", "")

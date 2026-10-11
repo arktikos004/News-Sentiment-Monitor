@@ -1,11 +1,10 @@
-"""TF-IDF 基線（Phase 2 / 進度 B）。
+"""TF-IDF 基線。
 
 - tfidf_lr：TF-IDF（uni+bigram）+ LogisticRegression（class_weight='balanced'）
 - svm：TF-IDF + LinearSVC，以 CalibratedClassifierCV 校準——LinearSVC 原生無機率，
   但 API 契約要求信心分數，校準後才能輸出 predict_proba。
 
-transformer 模型（Phase 3，需 GPU 與 GB 級下載）之後以同一 SentimentModel
-介面加入，訓練/比較流程不變。
+transformer 模型（ml/models/transformer.py）實作同一個 SentimentModel 介面，訓練與比較流程共用。
 """
 
 from __future__ import annotations

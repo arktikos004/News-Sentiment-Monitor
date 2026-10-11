@@ -1,7 +1,7 @@
 """Pydantic 回應模型 — Phase 0 凍結的 API 契約。
 
-前端從第一週就對這份契約開發（先吃 mock 回應），後續 Phase 不應隨意變更
-欄位名稱或型別；若需變更，視為破壞性變更並同步通知前端。
+前端（含讀靜態 JSON 的公開站，以及 stock-trend-assistant 的情緒卡）依這份契約讀資料：欄位名稱與型別不要改；
+真的要改就是破壞性變更，frontend/lib/api.ts 與 export_static.py 要一起改。
 """
 
 from datetime import date
@@ -27,7 +27,7 @@ class SentimentResponse(BaseModel):
     model_version: str
     as_of: str = Field(description="資料時間戳（ISO8601）")
     stale: bool = Field(default=False, description="外部新聞源失敗、回傳舊快取時為 True")
-    is_mock: bool = Field(default=False, description="Phase 5 模型整合前為 True")
+    is_mock: bool = Field(default=False, description="模型未載入、回應是 mock 時為 True")
 
 
 class NewsItem(BaseModel):
@@ -50,7 +50,7 @@ class ModelInfoResponse(BaseModel):
     model_version: str
     trained_at: str | None = None
     test_macro_f1: float | None = None
-    is_mock: bool = Field(default=False, description="Phase 4 前尚未整合真實模型時為 True")
+    is_mock: bool = Field(default=False, description="模型未載入時為 True")
 
 
 class HealthResponse(BaseModel):
