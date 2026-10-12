@@ -30,16 +30,16 @@ const NAMES: Record<string, string[]> = {
 
 const ETF = new Set(["QQQ", "SPY"]);
 
-/** 這一檔的代號與公司常用名稱（取標題重點字時排除，因為代號標籤已經表示了） */
-export function tickerNames(ticker: string): string[] {
-  return [ticker, ...(NAMES[ticker] ?? []).flatMap((n) => n.split(/\s+/))];
+/** 公司名稱整詞比對（不分大小寫，容許所有格與複數）：intel 不會比對到 Intelligence */
+function nameRe(name: string): RegExp {
+  return new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:'s|s)?\\b`, "i");
 }
 
 export function mentionsTicker(ticker: string, title: string): boolean | null {
   if (ETF.has(ticker)) return null;
   const t = title.toLowerCase();
   if (new RegExp(`(^|[^a-z])${ticker.toLowerCase()}([^a-z]|$)`).test(t)) return true;
-  return (NAMES[ticker] ?? []).some((n) => t.includes(n));
+  return (NAMES[ticker] ?? []).some((n) => nameRe(n).test(title));
 }
 
 /**
@@ -47,9 +47,8 @@ export function mentionsTicker(ticker: string, title: string): boolean | null {
  * 公司名稱不分大小寫。ETF 只認代號。
  */
 export function mentionedTickers(title: string): string[] {
-  const lower = title.toLowerCase();
   const found = Object.entries(NAMES)
-    .filter(([ticker, names]) => new RegExp(`\\b${ticker}\\b`).test(title) || names.some((n) => lower.includes(n)))
+    .filter(([ticker, names]) => new RegExp(`\\b${ticker}\\b`).test(title) || names.some((n) => nameRe(n).test(title)))
     .map(([ticker]) => ticker);
   for (const etf of ETF) if (new RegExp(`\\b${etf}\\b`).test(title)) found.push(etf);
   return found;

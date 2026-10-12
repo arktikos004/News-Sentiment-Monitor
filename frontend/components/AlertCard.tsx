@@ -2,7 +2,7 @@
 
 /**
  * 台股警示的單檔卡片，依查證的順序排列：先看證據標題（當日評分為負的標題，最多 3 則，同一則報導只列一次；
- * 每則標題下方附關鍵字標籤），
+ * 每則標題下方附詞表比對出的主題標籤，比對不到就不加），
  * 再看公司近 3 個交易日有沒有發布重大訊息（證交所開放資料，只收主旨），最後才是分數與走勢。
  * 警示等級用台股警示配色（設定頁可選琥珀或紅色），不代表漲跌方向。
  * 台股代號過不了 /api/stocks 的代號驗證，所以不連到美股的總覽與新聞頁。
@@ -27,17 +27,21 @@ import { announcementStatus, uniqueEvidence } from "@/lib/announcements";
 import type { AlertLevel, AnnouncementCheck, StockAlert } from "@/lib/api";
 import { relativeTime, signed } from "@/lib/format";
 import { delay } from "@/lib/motion";
-import { twTitleTopics, zhKeyWords } from "@/lib/topics";
+import { twTitleTopics } from "@/lib/topics";
+
+/** 一則標題的評分（評分器只給標籤：−1 負面、0 中性、+1 正面） */
+function scoreText(score: number): string {
+  return score < 0 ? "負面" : score > 0 ? "正面" : "中性";
+}
 
 /**
- * 證據標題下方的關鍵字：中文詞表比對出的主題（最多 3 個，依查證時的重要性排序）；
- * 一個都沒比對到時，從標題斷詞取 2 個重點字（排除這檔自己的名稱與代號）。只比對標題文字，不影響分數。
+ * 證據標題下方的主題標籤：中文詞表比對出的主題（最多 3 個，依查證時的重要性排序）。
+ * 比對不到就不加，不從標題另外取字。只比對標題文字，不影響分數。
  */
-function EvidenceTags({ title, exclude }: { title: string; exclude: string[] }) {
-  const topics = twTitleTopics(title)
+function EvidenceTags({ title }: { title: string }) {
+  const tags = twTitleTopics(title)
     .slice(0, 3)
     .map((t) => t.label);
-  const tags = topics.length ? topics : zhKeyWords(title, exclude, 2);
   if (tags.length === 0) return null;
   return (
     <div className="mt-1.5 flex flex-wrap gap-1.5 text-meta">
@@ -113,7 +117,7 @@ function Announcements({ check, code, hasEvidence }: { check: AnnouncementCheck;
                 )}
                 {a.subject}
               </p>
-              <p className="mt-0.5 flex flex-wrap gap-x-3 text-meta text-ink-3">
+              <p className="mt-0.5 flex flex-wrap gap-x-3 text-note text-ink-2">
                 <span className="font-mono tabular-nums">
                   {a.day} {a.time.slice(0, 5)}
                 </span>
@@ -123,8 +127,8 @@ function Announcements({ check, code, hasEvidence }: { check: AnnouncementCheck;
           ))}
         </ul>
       ) : null}
-      <p className="mt-2 flex items-start gap-1.5 text-meta text-ink-3">
-        <FileQuestion size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
+      <p className="mt-2 flex items-start gap-1.5 text-note text-ink-2">
+        <FileQuestion size={14} className="mt-[3px] shrink-0" aria-hidden="true" />
         <span>
           {hasEvidence && check.count === 0 && status.tone === "neutral" && status.text !== "沒有公告資料可對照" && "新聞內容尚未經公司公告證實。"}
           全文請到{mops}以代號 {code} 查詢。{note}
@@ -182,8 +186,8 @@ export default function AlertCard({
         </div>
 
         {alert.level === "insufficient" ? (
-          <p className="mt-4 flex items-start gap-2 rounded-xl bg-surface-2 px-3 py-2.5 text-meta text-ink-2">
-            <Info size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
+          <p className="mt-4 flex items-start gap-2 rounded-xl bg-surface-2 px-3 py-2.5 text-note text-ink-2">
+            <Info size={14} className="mt-[3px] shrink-0" aria-hidden="true" />
             {alert.reason ?? "資料不足，無法判斷。"}
           </p>
         ) : (
@@ -210,20 +214,18 @@ export default function AlertCard({
                           ) : (
                             <p className="text-body text-ink">{e.title}</p>
                           )}
-                          <EvidenceTags title={e.title} exclude={[alert.name, code]} />
-                          <p className="mt-0.5 flex flex-wrap gap-x-3 text-meta text-ink-3">
+                          <EvidenceTags title={e.title} />
+                          <p className="mt-0.5 flex flex-wrap gap-x-3 text-note text-ink-2">
                             <span>{e.source}</span>
                             <span>{relativeTime(e.published_at)}</span>
-                            <span>
-                              分數 <span className="font-mono tabular-nums text-ink-2">{signed(e.score)}</span>
-                            </span>
+                            <span>評分：{scoreText(e.score)}</span>
                           </p>
                         </div>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="mt-2 rounded-xl bg-surface-2 px-3 py-2.5 text-meta text-ink-2">
+                  <p className="mt-2 rounded-xl bg-surface-2 px-3 py-2.5 text-note text-ink-2">
                     當日 {alert.article_count} 則標題都沒有負面評分，所以沒有可查證的負面標題；這次警示來自情緒比平常低（當日 {signed(alert.score_today)}，20 日基準{" "}
                     {signed(alert.baseline_mean)}）。
                   </p>
@@ -235,10 +237,10 @@ export default function AlertCard({
               <Announcements check={alert.announcements} code={code} hasEvidence={evidence.length > 0} />
             )}
 
-            <p className="mt-4 text-meta text-ink-3">
-              當日分數 <span className="font-mono tabular-nums text-ink-2">{signed(alert.score_today)}</span>
-              ，20 日基準 <span className="font-mono tabular-nums text-ink-2">{signed(alert.baseline_mean)}</span>
-              ，當日標題 <span className="font-mono tabular-nums text-ink-2">{alert.article_count}</span> 則
+            <p className="mt-4 text-note text-ink-2">
+              當日分數 <span className="font-mono tabular-nums text-ink">{signed(alert.score_today)}</span>
+              ，20 日基準 <span className="font-mono tabular-nums text-ink">{signed(alert.baseline_mean)}</span>
+              ，當日標題 <span className="font-mono tabular-nums text-ink">{alert.article_count}</span> 則
             </p>
 
             <Collapsible defaultOpen={as === "div"} className="mt-3 border-t border-hairline">
