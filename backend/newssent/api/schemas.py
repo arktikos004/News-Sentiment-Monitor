@@ -2,6 +2,11 @@
 
 前端（含讀靜態 JSON 的公開站，以及 stock-trend-assistant 的情緒卡）依這份契約讀資料：欄位名稱與型別不要改；
 真的要改就是破壞性變更，frontend/lib/api.ts 與 export_static.py 要一起改。
+
+2026-10 起只新增欄位（direct、in_index、mentioned_tickers、related_tickers、target_name、target_aliases、
+index_count、index_counts、insufficient、index_method、KeywordScore.count），舊欄位的型別不變。
+article_count、sentiment、confidence 的意思不變；score、label、keywords 改成只用計入指數的新聞
+（config.SENTIMENT_SCOPE、SENTIMENT_WEIGHTING，見 inference/aggregate.py）。
 """
 
 from datetime import date
@@ -16,18 +21,31 @@ AlertLevelName = Literal["high", "watch", "normal", "insufficient"]
 class KeywordScore(BaseModel):
     word: str
     score: float
+    count: int = Field(default=0, description="含這個字的計入標題數")
+
+
+class IndexMethod(BaseModel):
+    scope: Literal["direct", "all"] = Field(description="direct＝只計入標題直接提到公司的新聞；all＝全部收錄的新聞")
+    weighting: Literal["equal", "confidence"] = Field(description="equal＝每則同權重；confidence＝以類別機率加權")
+    min_articles: int = Field(description="計入少於這個則數時不給整體判斷")
+    min_polar: int = Field(description="判為正面或負面至少要有幾則同向")
+    threshold: float = Field(description="|score| 超過才判為正面或負面")
 
 
 class SentimentResponse(BaseModel):
     ticker: str
-    score: float = Field(ge=-1, le=1, description="情緒指數，[−1, +1]")
-    label: SentimentLabel
-    article_count: int
-    keywords: list[KeywordScore]
+    score: float = Field(ge=-1, le=1, description="情緒指數，[−1, +1]：只用計入指數的新聞（見 index_method）")
+    label: SentimentLabel = Field(description="整體判讀；insufficient 時一律為 neutral")
+    article_count: int = Field(description="收錄的新聞則數（含沒有計入指數的）")
+    keywords: list[KeywordScore] = Field(description="計入指數的標題的關鍵字，不含公司本身的名稱")
     model_version: str
     as_of: str = Field(description="資料時間戳（ISO8601）")
     stale: bool = Field(default=False, description="外部新聞源失敗、回傳舊快取時為 True")
     is_mock: bool = Field(default=False, description="模型未載入、回應是 mock 時為 True")
+    index_count: int | None = Field(default=None, description="計入指數的則數")
+    index_counts: dict[str, int] | None = Field(default=None, description="計入的新聞裡 positive／neutral／negative 各幾則")
+    insufficient: bool = Field(default=False, description="計入的則數太少，或同向的則數不夠：不給方向判斷")
+    index_method: IndexMethod | None = None
 
 
 class NewsItem(BaseModel):
@@ -36,7 +54,11 @@ class NewsItem(BaseModel):
     source: str = Field(default="", description="媒體名稱（資料源提供；沒有時為空字串，前端改顯示網域）")
     published_at: str
     sentiment: SentimentLabel
-    confidence: float = Field(ge=0, le=1)
+    confidence: float = Field(ge=0, le=1, description="模型輸出的類別機率，沒有校準：不是分類準確率，也不是股價上漲的機率")
+    direct: bool = Field(default=True, description="標題提到這家公司（名稱、別名或代號）；ETF 一律為 true")
+    in_index: bool = Field(default=True, description="是否計入情緒指數")
+    mentioned_tickers: list[str] = Field(default_factory=list, description="標題提到的其他追蹤標的")
+    related_tickers: list[str] = Field(default_factory=list, description="資料源（Yahoo 財經）把這則新聞關聯到的代號；舊快取為空")
 
 
 class NewsResponse(BaseModel):
@@ -44,6 +66,8 @@ class NewsResponse(BaseModel):
     articles: list[NewsItem]
     stale: bool = False
     is_mock: bool = False
+    target_name: str = Field(default="", description="模型輸入用的公司名稱")
+    target_aliases: list[str] = Field(default_factory=list, description="判斷「標題有沒有提到這家公司」用的字詞")
 
 
 class ModelInfoResponse(BaseModel):

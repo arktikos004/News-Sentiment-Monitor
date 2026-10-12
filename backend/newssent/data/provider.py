@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import abc
 import logging
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 
 from newssent.data.cache import NewsCache, time_bucket, validate_ticker
@@ -33,6 +33,9 @@ class Article:
       線上情緒指數的可用時點由它決定，不是由 published_at 決定。
 
     兩者的實測落差見 docs/timestamp_semantics.md（由 tools/timestamp_lag.py 產生）。
+
+    related_tickers：資料源（Yahoo 財經）把這則新聞關聯到哪些代號。這是收錄這則新聞的原因，
+    不代表標題真的在講這家公司（見 inference/relevance.py）。
     """
 
     title: str
@@ -40,13 +43,14 @@ class Article:
     published_at: str  # ISO8601 字串；資料源宣稱的發布時間
     source: str
     fetched_at: str | None = None  # ISO8601 字串；本系統實際取得的時間
+    related_tickers: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict) -> "Article":
-        # fetched_at 用 .get()：2026-08 之前寫入的快取沒有這個欄位，
+        # fetched_at、related_tickers 用 .get()：較早寫入的快取沒有這兩個欄位，
         # 舊快取必須照樣讀得起來（降級退回舊快取是既有的可用性設計）
         return cls(
             title=d["title"],
@@ -54,6 +58,7 @@ class Article:
             published_at=d["published_at"],
             source=d["source"],
             fetched_at=d.get("fetched_at"),
+            related_tickers=list(d.get("related_tickers") or []),
         )
 
 
@@ -199,11 +204,13 @@ def _to_article(item: dict) -> Article | None:
             content.get("clickThroughUrl") or {}
         ).get("url") or ""
         provider = (content.get("provider") or {}).get("displayName") or ""
+        stock_tickers = (content.get("finance") or {}).get("stockTickers") or []
         return Article(
             title=title,
             url=url,
             published_at=content.get("pubDate") or "",
             source=provider,
+            related_tickers=_symbols(stock_tickers),
         )
 
     # 舊版格式
@@ -221,4 +228,15 @@ def _to_article(item: dict) -> Article | None:
         url=item.get("link") or "",
         published_at=published,
         source=item.get("publisher") or "",
+        related_tickers=_symbols(item.get("relatedTickers") or []),
     )
+
+
+def _symbols(items: list) -> list[str]:
+    """關聯代號：舊版格式是字串清單，新版是 {"symbol": ...} 清單；去重、保留順序。"""
+    out: list[str] = []
+    for item in items:
+        symbol = item.get("symbol") if isinstance(item, dict) else item
+        if isinstance(symbol, str) and symbol and symbol not in out:
+            out.append(symbol)
+    return out

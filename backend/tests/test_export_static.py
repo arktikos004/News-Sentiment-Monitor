@@ -79,7 +79,10 @@ def test_meta_records_news_freshness(client_with_model, alert_store, tmp_path, s
     client = _use_store(client_with_model, alert_store)
     meta = _export(client, tmp_path / "fresh")
     assert meta["news_stale_tickers"] == []
-    assert meta["news_latest_published_at"] == "2026-07-01T10:00:00Z"
+    assert meta["news_latest_published_at"] == "2026-07-01T12:00:00Z"
+    assert meta["index_insufficient_tickers"] == []  # 3 則標題直接提到 Apple：夠判方向
+    tickers = json.loads((tmp_path / "fresh/tickers.json").read_text(encoding="utf-8"))
+    assert tickers["aliases"]["AAPL"] == ["Apple", "iPhone", "AAPL"]
 
     app.state.news_provider = FakeProvider(sample_articles, stale=True)
     messages: list[str] = []

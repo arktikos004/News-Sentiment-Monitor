@@ -2,7 +2,7 @@ import pytest
 
 from newssent.data.provider import Article, NewsProvider, NewsResult
 from newssent.inference.aggregate import sentiment_index
-from newssent.inference.analyzer import AnalysisResult, ArticleSentiment
+from newssent.inference.analyzer import AnalysisResult, ArticleSentiment, counted
 
 
 class FakeProvider(NewsProvider):
@@ -17,7 +17,7 @@ class FakeProvider(NewsProvider):
 
 
 class FakeAnalyzer:
-    """測試用假 Analyzer：固定判 positive/0.9，不需要真實 artifact。"""
+    """測試用假 Analyzer：固定判 positive/0.9，不需要真實 artifact；計入指數的規則與真的 Analyzer 相同。"""
 
     version = "fake-1.0"
     metadata = {
@@ -37,18 +37,30 @@ class FakeAnalyzer:
 
     def analyze(self, ticker: str, articles: list[Article]) -> AnalysisResult:
         classified = self.classify(articles, target=ticker)
+        rel, in_index = counted(ticker, articles)
+        kept = [c for c, keep in zip(classified, in_index) if keep]
         return AnalysisResult(
-            index=sentiment_index([(c.label, c.confidence) for c in classified]),
+            index=sentiment_index([(c.label, c.confidence) for c in kept]),
             articles=classified,
-            keywords=[("earnings", 1.0)],
+            keywords=[("earnings", 1.0, 2)],
+            relevance=rel,
+            in_index=in_index,
         )
 
 
 @pytest.fixture
 def sample_articles() -> list[Article]:
     return [
-        Article(title="Company beats earnings", url="https://example.com/1", published_at="2026-07-01T09:00:00Z", source="Example"),
-        Article(title="Analysts upgrade rating", url="https://example.com/2", published_at="2026-07-01T10:00:00Z", source="Example"),
+        Article(title="Apple beats earnings", url="https://example.com/1", published_at="2026-07-01T09:00:00Z", source="Example"),
+        Article(title="Analysts upgrade Apple's rating", url="https://example.com/2", published_at="2026-07-01T10:00:00Z", source="Example"),
+        Article(title="AAPL holds near record as iPhone orders climb", url="https://example.com/3", published_at="2026-07-01T11:00:00Z", source="Example"),
+        Article(
+            title="Stocks rally as Fed holds rates",
+            url="https://example.com/4",
+            published_at="2026-07-01T12:00:00Z",
+            source="Example",
+            related_tickers=["AAPL", "MSFT"],
+        ),
     ]
 
 

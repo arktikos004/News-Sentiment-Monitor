@@ -110,8 +110,52 @@ def company_name(ticker: str) -> str:
     return TICKER_COMPANY_NAMES.get((ticker or "").upper(), ticker)
 
 
+# --- 新聞與標的的相關性（inference/relevance.py）---
+# 標題有提到公司名稱、別名或代號，才算「直接相關」。名稱整詞比對、不分大小寫（容許所有格與複數）；
+# TICKER_ALIASES_CASED 是同時也是一般英文字的別名，只在大小寫完全相同時才算（Meta、Arm）。
+# 代號本身要是獨立、全大寫的字。ETF（QQQ、SPY）是市場綜合，一律算直接相關。
+# TICKER_COMPANY_NAMES 是模型的輸入（訓練語料的實體寫法），不能動；這裡是另外一張比對用的表。
+TICKER_ALIASES: dict[str, tuple[str, ...]] = {
+    "AAPL": ("Apple", "iPhone"),
+    "MSFT": ("Microsoft",),
+    "NVDA": ("Nvidia",),
+    "GOOG": ("Google", "Alphabet"),
+    "AMZN": ("Amazon",),
+    "META": ("Meta Platforms", "Facebook", "Instagram"),
+    "TSLA": ("Tesla",),
+    "AVGO": ("Broadcom",),
+    "AMD": ("Advanced Micro Devices",),
+    "INTC": ("Intel",),
+    "MU": ("Micron",),
+    "NFLX": ("Netflix",),
+    "QCOM": ("Qualcomm",),
+    "ORCL": ("Oracle",),
+    "ADBE": ("Adobe",),
+    "CRM": ("Salesforce",),
+    "ARM": ("Arm Holdings",),
+    "TSM": ("TSMC", "Taiwan Semiconductor", "Taiwan Semi"),
+    "UMC": ("United Microelectronics",),
+    "ASX": ("ASE Technology",),
+    "CHT": ("Chunghwa",),
+    "ASML": (),
+}
+TICKER_ALIASES_CASED: dict[str, tuple[str, ...]] = {
+    "GOOG": ("GOOGL",),
+    "META": ("Meta",),
+    "ARM": ("Arm",),
+    "ASX": ("ASE",),
+}
+ETF_TICKERS: frozenset[str] = frozenset({"QQQ", "SPY"})
+
 # --- 情緒指數（inference/aggregate.py）---
-# score = Σ(sign × confidence) / n，映射 [−1, +1]；|score| 超過門檻才判為正/負，否則中性
+# 計入哪些新聞（D1）："direct"＝只算標題直接提到公司的；"all"＝全部收錄的新聞（2026-10 之前的算法）
+SENTIMENT_SCOPE = "direct"
+# 怎麼加權（D2）："equal"＝每則同權重，(正面則數 − 負面則數) ÷ 計入則數；
+# "confidence"＝以模型的類別機率加權（2026-10 之前的算法；類別機率沒有校準，不適合當權重）
+SENTIMENT_WEIGHTING = "equal"
+SENTIMENT_MIN_ARTICLES = 3  # 計入的標題少於 3 則：不給整體判斷（insufficient）
+SENTIMENT_MIN_POLAR = 2  # 判為正面或負面，至少要有 2 則同向；不到就標 insufficient、判讀維持中性
+# |score| 超過門檻才判為正/負，否則中性
 SENTIMENT_LABEL_THRESHOLD = 0.15
 
 # --- 情緒異常預警（inference/alerts.py）---

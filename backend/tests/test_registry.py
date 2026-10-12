@@ -57,6 +57,6 @@ def test_keywords_exclude_ticker_and_stopwords():
         "AAPL raises guidance on strong iphone demand",
         "the and of to in",  # 全停用詞
     ]
-    keywords = [w for w, _ in extract_keywords(titles, "AAPL")]
+    keywords = [w for w, _, _ in extract_keywords(titles, "AAPL")]
     assert "aapl" not in [w.lower() for w in keywords]
     assert "earnings" in keywords or "iphone" in keywords

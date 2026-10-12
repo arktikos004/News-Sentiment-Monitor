@@ -89,12 +89,15 @@ def run_export(
     ok = 0
     stale_tickers: list[str] = []
     latest_published = ""
+    insufficient: list[str] = []
     for t in tickers:
         for endpoint in ("sentiment", "news"):
             body = get(f"/api/stocks/{t}/{endpoint}")
             if body is not None:
                 write(f"stocks/{t}/{endpoint}.json", body)
                 ok += 1
+                if endpoint == "sentiment" and body.get("insufficient"):
+                    insufficient.append(t)
                 if endpoint == "news":
                     if body.get("stale"):
                         stale_tickers.append(t)
@@ -106,7 +109,12 @@ def run_export(
     log(f"個股 {len(tickers)} 檔：覆蓋率 {coverage:.0%}（{time.monotonic() - t0:.0f}s）")
     if coverage < MIN_TICKER_COVERAGE:
         raise ExportError(f"個股檔案覆蓋率 {coverage:.0%} < {MIN_TICKER_COVERAGE:.0%}：\n  " + "\n  ".join(failures[:20]))
-    write("tickers.json", {"tickers": tickers, "names": {t: company_name(t) for t in tickers}})
+    from newssent.inference.relevance import aliases
+
+    write(
+        "tickers.json",
+        {"tickers": tickers, "names": {t: company_name(t) for t in tickers}, "aliases": {t: aliases(t) for t in tickers}},
+    )
 
     # 分數庫沒有任何交易日時 API 回 503：此時沒有預警可發布，但新聞與情緒照常部署
     calendar = get("/api/alerts/sessions")
@@ -150,6 +158,8 @@ def run_export(
         # 新聞新鮮度：新聞源失敗時不會讓排程失敗，靠這兩個欄位才看得出網站停在舊資料
         "news_stale_tickers": stale_tickers,
         "news_latest_published_at": latest_published or None,
+        # 計入指數的新聞太少、不給方向判斷的標的（監看用）
+        "index_insufficient_tickers": insufficient,
         "failures": failures,
         "commit": os.environ.get("GITHUB_SHA"),
         "run_url": _run_url(),
