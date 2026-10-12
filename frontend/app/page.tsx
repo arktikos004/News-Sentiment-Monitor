@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { LEVEL } from "@/components/AlertCard";
 import BoardCutoff from "@/components/BoardCutoff";
+import HelpLink from "@/components/HelpLink";
 import IndexSummary from "@/components/IndexSummary";
 import KeywordList from "@/components/KeywordList";
 import NewsList from "@/components/NewsList";
@@ -28,7 +29,6 @@ import { useAppState } from "@/lib/app-state";
 import { boardTitle, coverage } from "@/lib/board-phase";
 import { signed } from "@/lib/format";
 import { latestBoard } from "@/lib/latest-board";
-import { METHOD_PATH } from "@/lib/method";
 import { press } from "@/lib/motion";
 
 const PREVIEW = 5;
@@ -152,10 +152,8 @@ function TodayAlerts() {
         </ul>
       )}
       <p className="border-t border-hairline px-5 py-3 text-note text-ink-2">
-        這份清單用來決定開盤前先查證哪幾檔，不是股價預測。
-        <Link href={METHOD_PATH} className="ml-1 text-brand underline-offset-2 hover:underline">
-          方法與限制
-        </Link>
+        開盤前先查證哪幾檔用，不是股價預測。
+        <HelpLink to="tw-checklist" className="ml-1" />
       </p>
     </section>
   );

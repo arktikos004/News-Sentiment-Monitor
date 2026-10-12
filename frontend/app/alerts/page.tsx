@@ -10,13 +10,13 @@
  * - 標題依看板的時間狀態切換（下一交易日、今日、歷史），並列出新聞與公告各自的資料截止時間
  */
 
-import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, Clock, ExternalLink, Info, RotateCcw } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, Clock, Info, RotateCcw } from "lucide-react";
 import { motion } from "motion/react";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import AlertCard, { LEVEL } from "@/components/AlertCard";
 import BoardCutoff from "@/components/BoardCutoff";
 import CaveatNote from "@/components/CaveatNote";
+import HelpLink from "@/components/HelpLink";
 import Skeleton from "@/components/Skeleton";
 import StatusBanner from "@/components/StatusBanner";
 import { IconButton, PageTitle, TopBar } from "@/components/TopBar";
@@ -24,7 +24,7 @@ import { announcementStatus, uniqueEvidence } from "@/lib/announcements";
 import { api, ApiError, siteMeta, STATIC_DATA, type AlertLevel, type AlertsResponse, type StockAlert } from "@/lib/api";
 import { boardTitle } from "@/lib/board-phase";
 import { signed } from "@/lib/format";
-import { backtested, DOC_URL, METHOD_PATH, scorerLabel, TW_BACKTEST } from "@/lib/method";
+import { backtested, scorerLabel } from "@/lib/method";
 import { press, snappy } from "@/lib/motion";
 
 const WEEKDAY = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
@@ -365,21 +365,11 @@ export default function AlertsPage() {
         )}
 
         <CaveatNote icon={Info} tone="neutral">
-          {p && (
-            <p>
-              門檻：z 值低於 {signed(p.watch_z, 1)} 為留意、低於 {signed(p.high_z, 1)} 為高度異常。z 值是當日情緒分數相對前 {p.baseline_sessions} 個交易日的標準化差距，越負代表比平常越負面；當日至少 {p.min_articles} 則標題才判斷，不到的列為資料不足。
-            </p>
-          )}
           <p>
-            這是開盤前的查證清單：列出證據標題，用來決定先查證哪幾檔，不是提前預警。歷史回測中，事前示警率與隨機響鈴無法區分（p = {TW_BACKTEST.p}）。
-            {data && !backtested(data.scorer) && `回測用本機的 Gemma 3 27B 評分；本頁改用 ${scorerLabel(data.scorer)}，尚未重新回測。`}
-            <a href={DOC_URL.alertBacktest} target="_blank" rel="noopener noreferrer" className="ml-1 inline-flex items-center gap-0.5 text-brand underline-offset-2 hover:underline">
-              回測紀錄
-              <ExternalLink size={12} aria-hidden="true" />
-            </a>
-            <Link href={METHOD_PATH} className="ml-3 text-brand underline-offset-2 hover:underline">
-              方法與限制
-            </Link>
+            {p ? `z 值低於 ${signed(p.watch_z, 1)} 為留意、低於 ${signed(p.high_z, 1)} 為高度異常。` : ""}
+            這是開盤前的查證清單，不是提前預警（回測與隨機響鈴無法區分）
+            {data && !backtested(data.scorer) && `；現行的 ${scorerLabel(data.scorer)} 尚未重新回測`}。
+            <HelpLink to="tw-checklist" className="ml-1" />
           </p>
         </CaveatNote>
 

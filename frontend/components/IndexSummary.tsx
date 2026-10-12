@@ -8,11 +8,10 @@
  */
 
 import { CircleHelp, Minus, TrendingDown, TrendingUp } from "lucide-react";
-import Link from "next/link";
 import CaveatNote from "@/components/CaveatNote";
+import HelpLink from "@/components/HelpLink";
 import type { NewsResponse, SentimentLabel, SentimentResponse } from "@/lib/api";
 import { relativeTime, signed } from "@/lib/format";
-import { METHOD_PATH } from "@/lib/method";
 import { displayName, inIndex, isEtf } from "@/lib/news-relevance";
 
 const TONE = {
@@ -87,8 +86,9 @@ export default function IndexSummary({ sentiment, news }: { sentiment: Sentiment
             ＝（偏正面 {counts.positive} − 偏負面 {counts.negative}）÷ {n}
           </>
         ) : (
-          !revised && "（以模型的類別機率加權的舊算法，下一次更新後改成每則同權重）"
+          !revised && "（舊算法：以類別機率加權，下一次更新後改成每則同權重）"
         )}
+        <HelpLink to="index" className="ml-2" />
       </p>
 
       {insufficient && (
@@ -98,10 +98,8 @@ export default function IndexSummary({ sentiment, news }: { sentiment: Sentiment
       )}
 
       <p className="mt-4 border-t border-hairline pt-3 text-note text-ink-2">
-        每則由模型只讀標題判讀，線上盲標的一致率約六成{revised && "；指數每則同權重，不用沒有校準過的類別機率加權"}。配色依美股慣例：綠色正面、紅色負面。
-        <Link href={METHOD_PATH} className="ml-1 text-brand underline-offset-2 hover:underline">
-          方法與限制
-        </Link>
+        模型只讀標題，線上盲標一致率約六成。
+        <HelpLink to="score" className="ml-1" />
       </p>
     </section>
   );

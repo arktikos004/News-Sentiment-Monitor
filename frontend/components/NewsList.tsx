@@ -14,9 +14,9 @@ import { ChevronDown, ExternalLink, Minus, TrendingDown, TrendingUp } from "luci
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
+import HelpLink from "@/components/HelpLink";
 import type { NewsItem, SentimentLabel } from "@/lib/api";
 import { hostname, LABEL_TOKEN, percent, relativeTime } from "@/lib/format";
-import { METHOD_PATH, ONLINE_AGREEMENT, US_MODEL } from "@/lib/method";
 import { delay, EASE_OUT, snappy, stagger } from "@/lib/motion";
 import { displayName, hasRelevance, inIndex, isEtf, mentionedTickers, mentionsTicker, mentionText, pendingReason } from "@/lib/news-relevance";
 import { tagLabel, titleTopics } from "@/lib/topics";
@@ -53,19 +53,11 @@ function tagsOf(a: NewsItem, ticker?: string) {
 
 function ScoreNote({ a, id }: { a: NewsItem; id: string }) {
   return (
-    <div id={id} className="mt-1.5 space-y-1 rounded-xl bg-surface-2 px-3 py-2.5 text-note text-ink-2">
-      <p>算法：BERT 讀「公司名稱＋標題」兩段文字，輸出偏正面、中性、偏負面三類的機率，取最高的一類。只看標題，不讀內文。</p>
-      <p>
-        這則判為「{ARTICLE_LABEL[a.sentiment]}」的類別機率是 <span className="font-mono tabular-nums text-ink">{percent(a.confidence)}</span>
-        ：這是模型的原始輸出，沒有做過機率校準。它不是分類準確率，也不是股價上漲的機率，也不拿來當指數的權重。
-      </p>
-      <p>
-        線上盲標 {US_MODEL.online.n} 則的一致率是 {percent(ONLINE_AGREEMENT)}，大約每 5 則有 2 則和人工判讀不同。
-        <Link href={METHOD_PATH} className="ml-1 text-brand underline-offset-2 hover:underline">
-          方法與限制
-        </Link>
-      </p>
-    </div>
+    <p id={id} className="mt-1.5 rounded-xl bg-surface-2 px-3 py-2.5 text-note text-ink-2">
+      判為「{ARTICLE_LABEL[a.sentiment]}」的類別機率 <span className="font-mono tabular-nums text-ink">{percent(a.confidence)}</span>
+      ：模型的原始輸出，沒有校準，不是準確率，也不是上漲機率。
+      <HelpLink to="score" className="ml-1" />
+    </p>
   );
 }
 
@@ -109,8 +101,11 @@ function NewsRow({ a, ticker, name, relation }: { a: NewsItem; ticker?: string; 
       </div>
       {relation === "direct" && (
         <p className="mt-1.5 text-note text-ink-2">
-          判讀依據：只根據標題分類
-          {basis.length > 0 ? `；標題提到${/^[A-Za-z0-9$]/.test(basis[0] as string) ? " " : ""}${basis.join("、")}` : ticker && isEtf(ticker) ? "；ETF 的新聞全部計入" : ""}。
+          {basis.length > 0
+            ? `依據：標題提到${/^[A-Za-z0-9$]/.test(basis[0] as string) ? " " : ""}${basis.join("、")}`
+            : ticker && isEtf(ticker)
+              ? "依據：ETF 的新聞全部計入"
+              : "依據：標題"}
         </p>
       )}
       {relation === "pending" && ticker && <p className="mt-1.5 text-note text-ink-2">{pendingReason(a, ticker, name)}</p>}
@@ -210,10 +205,10 @@ export default function NewsList({
         </div>
       )}
 
-      {withFilters && (
+      {withFilters && grouped && (
         <p className="mb-3 px-1 text-note text-ink-2">
-          {grouped && `這裡列的是標題直接提到 ${name} 的 ${direct.length} 則，也是計入情緒指數的新聞。`}
-          主題標籤依固定詞表比對標題文字，比對不到就不加；標籤不影響情緒分數。
+          標題直接提到 {name} 的 {direct.length} 則，計入情緒指數。
+          <HelpLink to="relevance" className="ml-1" />
         </p>
       )}
 
@@ -276,7 +271,8 @@ export default function NewsList({
           {showPending && (
             <div id={pendingId} className="mt-2">
               <p className="mb-2 px-1 text-note text-ink-2">
-                這些新聞是新聞源關聯到 {ticker} 的，但標題沒有提到 {name}：可能是大盤綜述、同業的報導，或只是順帶提到。每則都附上收錄的理由；要不要當成相關，請看原文判斷。
+                新聞源關聯到 {ticker}、但標題沒提到 {name} 的新聞，要不要當成相關請看原文判斷。
+                <HelpLink to="relevance" className="ml-1" />
               </p>
               <ul className="card divide-y divide-hairline overflow-hidden">
                 {pending.map((a) => (
