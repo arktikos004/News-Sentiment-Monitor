@@ -15,7 +15,7 @@
   --hairline: rgba(255, 255, 255, 0.06);
   --ink: #e8eef6;
   --ink-2: #a6b5c8;
-  --ink-3: #7a8ca3;
+  --ink-3: #8a9cb2;
 
   --brand: #5aa9e6;
   --brand-fg: #06101a;
@@ -62,24 +62,24 @@
   --ink-2: #3f5266;
   --ink-3: #56677b;
 
-  --brand: #1f6fb2;
+  --brand: #1b65a3;
   --brand-fg: #ffffff;
-  --brand-soft: rgba(31, 111, 178, 0.1);
+  --brand-soft: rgba(27, 101, 163, 0.1);
 
-  --pos: #0f8a4f;
-  --pos-soft: rgba(15, 138, 79, 0.1);
+  --pos: #0a7442;
+  --pos-soft: rgba(10, 116, 66, 0.1);
   --neu: #5e6e80;
   --neu-soft: rgba(94, 110, 128, 0.1);
   --neg: #c0262d;
   --neg-soft: rgba(192, 38, 45, 0.1);
-  --warn: #9a6212;
-  --warn-soft: rgba(154, 98, 18, 0.12);
+  --warn: #8a570f;
+  --warn-soft: rgba(138, 87, 15, 0.12);
   --swatch-amber-high: #a84a05;
   --swatch-amber-watch: #7d5c00;
 
   --shadow-card: 0 1px 2px rgba(14, 26, 38, 0.05), 0 8px 24px rgba(14, 26, 38, 0.06);
   --shadow-float: 0 16px 40px rgba(14, 26, 38, 0.18);
-  --glow: rgba(31, 111, 178, 0.08);
+  --glow: rgba(27, 101, 163, 0.08);
   --div-pos: #2a78d6;
   --div-neg: #e34948;
   --div-mid: #f0efec;
@@ -179,6 +179,11 @@
 
   --text-meta: 0.75rem;
   --text-meta--line-height: 1.4;
+  /* 有內容的次要文字（來源、時間、限制說明）最小 14px；新聞標題 17px */
+  --text-note: 0.875rem;
+  --text-note--line-height: 1.5;
+  --text-headline: 1.0625rem;
+  --text-headline--line-height: 1.5;
   --text-body: 0.9375rem;
   --text-body--line-height: 1.55;
   --text-title: 1.25rem;
