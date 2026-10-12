@@ -1,4 +1,4 @@
-# 基於自然語言處理之新聞情緒分析與即時監控系統
+# 基於自然語言處理之新聞情緒分析與監控系統
 
 [![tests](https://github.com/arktikos004/News-Sentiment-Monitor/actions/workflows/leakage.yml/badge.svg)](https://github.com/arktikos004/News-Sentiment-Monitor/actions/workflows/leakage.yml)
 [![lint](https://github.com/arktikos004/News-Sentiment-Monitor/actions/workflows/lint.yml/badge.svg)](https://github.com/arktikos004/News-Sentiment-Monitor/actions/workflows/lint.yml)

@@ -1,7 +1,7 @@
 [project]
 name = "newssent"
 version = "0.1.0"
-description = "財經新聞情緒分析與即時監控系統"
+description = "財經新聞情緒分析與監控系統"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",
