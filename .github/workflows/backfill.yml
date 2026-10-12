@@ -34,15 +34,15 @@ jobs:
     runs-on: ubuntu-24.04 # 固定版本：ubuntu-latest 自 2026-10-19 起改為 Ubuntu 26
     timeout-minutes: 330 # 單一 job 上限 6 小時：25 RPM × 5 小時 ≈ 7,500 次
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: 取出狀態分支
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: state
           path: _state
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12.10"
           cache: pip
@@ -95,7 +95,7 @@ jobs:
 
       - name: 上傳報告
         if: always() && steps.integrity.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: scorer-agreement-${{ github.run_id }}
           # 只留彙總報告：disagreements.csv 含新聞標題（FinMind 條款不含再散布），不上傳
