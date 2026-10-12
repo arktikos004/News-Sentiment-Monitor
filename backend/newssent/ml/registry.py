@@ -1,4 +1,4 @@
-"""模型 artifact 存取與版本契約（PLAN.md 架構原則 3）。
+"""模型 artifact 存取與版本契約。
 
 存檔時一併寫 metadata.json（**標籤順序**、agreement 等級、切分 seed 與比例、
 訓練日期、測試指標）；載入時逐項比對當前 config，不一致就拒絕載入——

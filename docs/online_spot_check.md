@@ -13,7 +13,7 @@
 > 原則為「僅憑標題無法確認對該 ticker 的方向就標 neutral」（故 30 則中 16 則 neutral）。
 > 對照：同一批**先前 AI 初標一致率 66.7%**，人工盲標複核降為 **46.7%**——差距本身說明
 > **AI 自標會高估一致率**，獨立人工數字才可信。07-17 批（已複核）亦為 46.7%，兩批一致。
-> 盲標原表 `docs/spot_check_review_2026-08-05_blank.csv`、已標注併回 `docs/spot_check_sample.csv`。
+> 先在盲標表上標注，再併回樣本檔；兩個檔案都不公開。
 
 ## 一致率：46.7%（14/30）
 
@@ -32,4 +32,4 @@
 - 抽測一致率通常低於測試集 Macro F1，這不是模型退化，而是**領域外（out-of-domain）泛化**的真實成本；誠實呈現此數字並分析錯誤型態，比只報測試集分數更有說服力。
 - 人工標注本身也有主觀性（同一標題不同人可能標 neutral/positive），一致率的分母包含這類邊界案例。
 
-> 由 `python tools/spot_check.py report` 產生，樣本與標注見 `docs/spot_check_sample.csv`。
+> 由 `python tools/spot_check.py report` 產生；樣本與標注檔不公開。

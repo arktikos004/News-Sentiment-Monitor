@@ -165,7 +165,7 @@ def _write_report(pb: PhraseBank, agreement: str) -> None:
         "",
         f"整體分佈：{dist}。",
         "neutral 過半——Accuracy 會被「全猜 neutral」灌水，主指標採 **Macro F1**，",
-        "訓練以 class weight 抵銷不平衡（PLAN.md Phase 1）。",
+        "訓練以 class weight 抵銷不平衡。",
         "",
         "## 句長分佈（詞數）",
         "",

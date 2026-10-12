@@ -166,7 +166,7 @@ def cmd_report() -> int:
         "- 人工標注本身也有主觀性（同一標題不同人可能標 neutral/positive），"
         "一致率的分母包含這類邊界案例。",
         "",
-        "> 由 `python tools/spot_check.py report` 產生，樣本與標注見 `docs/spot_check_sample.csv`。",
+        "> 由 `python tools/spot_check.py report` 產生；樣本與標注檔不公開。",
     ]
     REPORT_MD.write_text("\n".join(lines), encoding="utf-8")
     print(f"一致率 {agreement:.1%}（{n_agree}/{len(labeled)}），報告已寫入 {REPORT_MD}")

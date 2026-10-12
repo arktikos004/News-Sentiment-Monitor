@@ -22,4 +22,4 @@ npm run lint
 動畫分工：大量元素的進場用 `globals.css` 的 CSS keyframes（`animate-rise`／`grow-x`／`grow-y`，只動 transform／opacity）；
 Motion 只用在彈簧與版面動畫（分頁指示器、刻度標記、新聞篩選重排）。新增元件時沿用這個分工，避免主執行緒卡頓。
 用 `npx shadcn@latest add <元件>` 加 shadcn 元件；不要跑 `shadcn init`，它會覆寫 `globals.css` 的 token。
-這個 Next 版本有破壞性變更，改程式前先讀 `node_modules/next/dist/docs/`（見 [AGENTS.md](AGENTS.md)）。
+這個 Next 版本有破壞性變更，改程式前先讀 `node_modules/next/dist/docs/`。

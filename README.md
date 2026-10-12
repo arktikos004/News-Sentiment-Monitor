@@ -151,13 +151,11 @@ docs/                研究報告、預先聲明、實驗設計、部署說明
   [選型依據](docs/model_selection.md)、[實驗設計](docs/experiment_design.md)
 - **線上抽測**：[人工複核](docs/online_spot_check.md)、[07-17 批](docs/online_spot_check_2026-07-17.md)
 - **系統**：[架構](docs/architecture.md)、[資料探索](docs/data_exploration.md)、[SEntFiN 語料](docs/data_exploration_sentfin.md)、[部署與排程](docs/deploy.md)
-- **規劃與設計**：[開發計畫](PLAN.md)、[產品](PRODUCT.md)、[視覺設計](DESIGN.md)
 
 ## 問題回報與維護者
 
 - 問題與建議：請開 [GitHub issue](https://github.com/arktikos004/News-Sentiment-Monitor/issues)。
-- 維護者：[@arktikos004](https://github.com/arktikos004)。個人專案：問題設定、資料管線、模型訓練與評估、前後端、
-  線上抽測的人工標注都由開發者本人完成；開發過程與系統內使用的生成式 AI 見 [AI_USE.md](AI_USE.md)。
+- 維護者：[@arktikos004](https://github.com/arktikos004)。
 
 ## 授權
 

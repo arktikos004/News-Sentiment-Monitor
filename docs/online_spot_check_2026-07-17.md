@@ -36,4 +36,4 @@
 - 改進方向：以少量新聞標題做增量 fine-tuning（domain adaptation）、或將高信心
   neutral 之外的極性樣本加權，可望縮小落差。
 
-> 由 `python tools/spot_check.py report` 產生，樣本與標注見 `docs/spot_check_sample.csv`。
+> 由 `python tools/spot_check.py report` 產生；樣本與標注檔不公開。

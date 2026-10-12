@@ -29,7 +29,7 @@ from newssent.ml.registry import ArtifactContractError
 
 logger = logging.getLogger("newssent")
 
-# 每 IP 限流：外部新聞源有額度（yfinance 會限流、NewsAPI 免費層每日 100 次），不讓單一使用者吃光（PLAN.md 安全性章節）
+# 每 IP 限流：外部新聞源有額度（yfinance 會限流、NewsAPI 免費層每日 100 次），不讓單一使用者吃光
 limiter = Limiter(key_func=get_remote_address, default_limits=["30/minute"])
 
 

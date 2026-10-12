@@ -14,7 +14,7 @@
 
 整體分佈：negative 604（12.5%）、neutral 2879（59.4%）、positive 1363（28.1%）。
 neutral 過半——Accuracy 會被「全猜 neutral」灌水，主指標採 **Macro F1**，
-訓練以 class weight 抵銷不平衡（PLAN.md Phase 1）。
+訓練以 class weight 抵銷不平衡。
 
 ## 句長分佈（詞數）
 

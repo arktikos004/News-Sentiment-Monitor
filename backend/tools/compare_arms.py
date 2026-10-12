@@ -15,7 +15,7 @@
 評分基準＝**人工標注**（60 則：07-17 批 30 則 + 08-05 批 30 則，兩批皆已複核）。
 這 60 則從未參與任何訓練或選型，是唯一誠實的領域外驗收；模型選型仍只用各語料的驗證集。
 
-LLM 判讀落地 docs/spot_check_llm_review.csv（逐則可稽核，重跑時直接沿用快取）。
+LLM 判讀存在 docs/spot_check_llm_review.csv（本機快取，不放進 repo；重跑時直接沿用）。
 """
 
 from __future__ import annotations
@@ -426,7 +426,7 @@ def main() -> int:
             llm_notes.append(
                 f"- LLM 覆核用本機 Ollama `{llm_model}`（不外送資料），本次解析失敗 {n_failed} 則；"
                 f"每則約 {latency}，比 BERT 的 0.2 ms 慢約 4 個數量級——"
-                "逐則判讀存 `docs/spot_check_llm_review.csv` 可稽核。"
+                "逐則判讀存在本機快取，不公開。"
             )
 
     for name, res in results.items():
