@@ -77,11 +77,3 @@ export const LABEL_TOKEN: Record<SentimentLabel, "pos" | "neu" | "neg"> = {
   neutral: "neu",
   negative: "neg",
 };
-
-/** 單則新聞在刻度上的位置：與後端 aggregate.py 同一公式（正 +conf、負 −conf、中性 0） */
-export function articlePosition(label: SentimentLabel, confidence: number): number {
-  return label === "positive" ? confidence : label === "negative" ? -confidence : 0;
-}
-
-/** 與後端 config.SENTIMENT_LABEL_THRESHOLD 一致：|score| 超過才判正／負 */
-export const LABEL_THRESHOLD = 0.15;

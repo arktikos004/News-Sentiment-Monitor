@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { mentionedTickers, mentionsTicker } from "@/lib/relevance";
 import { titleTopics, twTitleTopics } from "@/lib/topics";
 
 const labels = (title: string) => titleTopics(title).map((t) => t.label);
@@ -31,6 +30,12 @@ describe("美股標題的主題標籤", () => {
     expect(labels("Chasing Returns? Read This First")).toEqual([]);
   });
 
+  it("漲跌動詞要和 stock、shares 這類字一起出現才是股價異動", () => {
+    expect(labels("Global smartphone shipments drop 20% in third quarter")).not.toContain("股價異動");
+    expect(labels("Apple stock drops after earnings")).toContain("股價異動");
+    expect(labels("Why the AI rally has room to run in this bull market")).toContain("股價異動");
+  });
+
   it("單獨的 cancellation 意思不明，不算庫藏股", () => {
     expect(labels("Netflix subscription cancellations ease")).toEqual([]);
   });
@@ -49,18 +54,5 @@ describe("台股證據標題的主題標籤", () => {
 
   it("比對不到詞表就不加標籤", () => {
     expect(twLabels("董監改選前夕的觀察")).toEqual([]);
-  });
-});
-
-describe("標題提到哪些追蹤標的", () => {
-  it("公司名稱整詞比對：Intelligence 不是 Intel", () => {
-    expect(mentionedTickers("Artificial Intelligence spending keeps rising")).toEqual([]);
-    expect(mentionsTicker("INTC", "Artificial Intelligence spending keeps rising")).toBe(false);
-    expect(mentionedTickers("Intel's foundry wins a new customer")).toEqual(["INTC"]);
-  });
-
-  it("代號要是全大寫的獨立字", () => {
-    expect(mentionedTickers("Arm yourself with these picks")).toEqual([]);
-    expect(mentionedTickers("ARM rallies after earnings")).toEqual(["ARM"]);
   });
 });

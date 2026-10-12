@@ -14,16 +14,16 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { LEVEL } from "@/components/AlertCard";
 import BoardCutoff from "@/components/BoardCutoff";
+import IndexSummary from "@/components/IndexSummary";
 import KeywordList from "@/components/KeywordList";
 import NewsList from "@/components/NewsList";
 import Panel from "@/components/Panel";
 import SearchSheet from "@/components/SearchSheet";
-import SentimentScale from "@/components/SentimentScale";
 import Skeleton from "@/components/Skeleton";
 import StatusBanner from "@/components/StatusBanner";
 import { IconButton, PageTitle, TopBar } from "@/components/TopBar";
 import { announcementStatus, uniqueEvidence } from "@/lib/announcements";
-import { siteMeta, STATIC_DATA, type AlertsResponse, type NewsItem } from "@/lib/api";
+import { siteMeta, STATIC_DATA, type AlertsResponse } from "@/lib/api";
 import { useAppState } from "@/lib/app-state";
 import { boardTitle, coverage } from "@/lib/board-phase";
 import { signed } from "@/lib/format";
@@ -161,20 +161,6 @@ function TodayAlerts() {
   );
 }
 
-/** 正面、中性、負面各幾則：只給數字，同一批新聞已經畫在刻度與清單上 */
-function Counts({ articles }: { articles: NewsItem[] }) {
-  const n = (s: NewsItem["sentiment"]) => articles.filter((a) => a.sentiment === s).length;
-  return (
-    <p className="mt-3 px-1 text-note text-ink-2">
-      共 {articles.length} 則：<span className="text-pos">偏正面 {n("positive")}</span>、中性 {n("neutral")}、
-      <span className="text-neg">偏負面 {n("negative")}</span>。每則由模型只讀標題判讀，線上盲標的一致率約六成。
-      <Link href={METHOD_PATH} className="ml-1 text-brand underline-offset-2 hover:underline">
-        方法與限制
-      </Link>
-    </p>
-  );
-}
-
 export default function OverviewPage() {
   const { ticker, view, refresh } = useAppState();
   const { sentiment, news, error } = view;
@@ -226,16 +212,7 @@ export default function OverviewPage() {
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-6">
             <div className="space-y-4 lg:space-y-6">
               {ready ? (
-                <div>
-                  <SentimentScale
-                    score={sentiment.score}
-                    label={sentiment.label}
-                    articles={news.articles}
-                    articleCount={sentiment.article_count}
-                    asOf={sentiment.as_of}
-                  />
-                  <Counts articles={news.articles} />
-                </div>
+                <IndexSummary sentiment={sentiment} news={news} />
               ) : firstLoad ? (
                 <HeroSkeleton />
               ) : (
@@ -250,7 +227,7 @@ export default function OverviewPage() {
               {(ready || firstLoad) && (
                 <Panel title="熱門關鍵字" icon={Hash}>
                   {ready ? (
-                    <KeywordList keywords={sentiment.keywords} ticker={ticker ?? undefined} />
+                    <KeywordList keywords={sentiment.keywords} ticker={ticker ?? undefined} aliases={news.target_aliases} />
                   ) : (
                     <div className="space-y-3">
                       {Array.from({ length: 6 }, (_, i) => (
@@ -276,7 +253,7 @@ export default function OverviewPage() {
                   )}
                 </div>
                 {ready ? (
-                  <NewsList articles={news.articles} limit={PREVIEW} ticker={ticker ?? undefined} />
+                  <NewsList articles={news.articles} limit={PREVIEW} ticker={news.ticker} aliases={news.target_aliases} />
                 ) : (
                   <div className="card divide-y divide-hairline">
                     {Array.from({ length: PREVIEW }, (_, i) => (

@@ -9,6 +9,7 @@ const DOCS = "https://github.com/arktikos004/News-Sentiment-Monitor/blob/master/
 export const DOC_URL = {
   confirmation: `${DOCS}/confirmation_2026-09-03.md`,
   targetSentiment: `${DOCS}/experiment_target_sentiment.md`,
+  indexRevision: `${DOCS}/sentiment_index_revision.md`,
   alertBacktest: `${DOCS}/alert_backtest.md`,
   scorerSwitch: `${DOCS}/scorer_switch_prereg.md`,
 } as const;

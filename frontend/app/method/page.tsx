@@ -76,6 +76,10 @@ export default function MethodPage() {
               </>,
             ],
             [
+              "情緒指數",
+              "只計入標題直接提到公司（名稱、別名或代號）的新聞，每則同權重：（偏正面則數 − 偏負面則數）÷ 計入則數。計入不到 3 則，或判為某個方向的那一方不到 2 則，就標「資料不足」、不給方向。新聞源關聯到這一檔、但標題沒提到公司的新聞列為「關聯待確認」，附上收錄理由，不計入。",
+            ],
+            [
               "同來源測試集",
               <>
                 Financial PhraseBank 與 SEntFiN 1.0 合併後，依固定亂數種子切出的測試集 {US_MODEL.testN.toLocaleString()} 則：Macro F1 {US_MODEL.testMacroF1}
@@ -98,6 +102,7 @@ export default function MethodPage() {
               <span key="docs" className="flex flex-wrap gap-x-4 gap-y-1">
                 <Doc href={DOC_URL.confirmation}>線上確認實驗</Doc>
                 <Doc href={DOC_URL.targetSentiment}>任務定義的比較實驗</Doc>
+                <Doc href={DOC_URL.indexRevision}>情緒指數的修訂與前後比較</Doc>
               </span>,
             ],
           ]}

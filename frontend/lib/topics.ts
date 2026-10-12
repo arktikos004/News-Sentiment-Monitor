@@ -10,8 +10,10 @@
  * phrase：多字片語，先比對，比對到的文字遮掉後才比對各主題的 word（單字）。
  * 所以「Treasury share cancellation」是庫藏股與股本，不會因為 Treasury 又被標成債券與利率；
  * 單獨的 treasury、yield、cancellation 意思不明（財政部、股利殖利率、取消訂閱），只在片語裡才算。
+ * needs：word 比對到之後，標題還要同時符合這個條件才算——drop、jump、surge 這類字也用來講出貨量、營收，
+ * 要和 stock、shares 這類字一起出現才是股價異動。
  */
-export type Topic = { key: string; label: string; phrase?: RegExp; word?: RegExp };
+export type Topic = { key: string; label: string; phrase?: RegExp; word?: RegExp; needs?: RegExp };
 
 export const TOPICS: Topic[] = [
   { key: "earnings", label: "財報", word: /\b(earnings|quarterly|revenues?|eps|profits?)\b/i },
@@ -25,8 +27,9 @@ export const TOPICS: Topic[] = [
   {
     key: "move",
     label: "股價異動",
-    phrase: /\b(trading (lower|higher)|sell-?offs?)\b/gi,
-    word: /\b(jump(s|ed)?|surge(s|d)?|soar(s|ed)?|plunge(s|d)?|tumble(s|d)?|slump(s|ed)?|sinks?|sank|slides?|slid|rall(y|ies|ied)|dip(s|ped)?|movers?|falls?|fell|drop(s|ped)?|decline(s|d)?|rises?|rose|climb(s|ed)?)\b/i,
+    phrase: /\b(trading (lower|higher)|sell-?offs?|(stock|market) movers?)\b/gi,
+    word: /\b(jump(s|ed)?|surge(s|d)?|soar(s|ed)?|plunge(s|d)?|tumble(s|d)?|slump(s|ed)?|sinks?|sank|slides?|slid|rall(y|ies|ied)|dip(s|ped)?|falls?|fell|drop(s|ped)?|decline(s|d)?|rises?|rose|climb(s|ed)?)\b/i,
+    needs: /\b(stocks?|shares?|share price|market|premarket|after-hours)\b/i,
   },
   { key: "ai", label: "AI", phrase: /\bartificial intelligence\b/gi, word: /\b(ai|openai|chatgpt|genai|llms?)\b/i },
   { key: "chips", label: "晶片", word: /\b(chips?|chipmakers?|semiconductors?|gpus?|foundr(y|ies)|wafers?)\b/i },
@@ -128,7 +131,7 @@ export function titleTopics(title: string): Topic[] {
       text = rest;
     }
   }
-  for (const t of TOPICS) if (t.word?.test(text)) hit.add(t.key);
+  for (const t of TOPICS) if (t.word?.test(text) && (!t.needs || t.needs.test(title))) hit.add(t.key);
   return TOPICS.filter((t) => hit.has(t.key));
 }
 

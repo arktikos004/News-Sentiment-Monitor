@@ -22,18 +22,33 @@ export type SentimentLabel = "negative" | "neutral" | "positive";
 export interface KeywordScore {
   word: string;
   score: number;
+  count?: number; // 含這個字的計入標題數（舊版靜態檔沒有）
+}
+
+/** 指數的算法（後端 config）：計入哪些新聞、怎麼加權、什麼時候不給方向 */
+export interface IndexMethod {
+  scope: "direct" | "all"; // direct＝只計入標題直接提到公司的新聞
+  weighting: "equal" | "confidence"; // equal＝每則同權重
+  min_articles: number;
+  min_polar: number;
+  threshold: number;
 }
 
 export interface SentimentResponse {
   ticker: string;
-  score: number; // [-1, +1]
-  label: SentimentLabel;
-  article_count: number;
+  score: number; // [-1, +1]：只用計入指數的新聞
+  label: SentimentLabel; // insufficient 時一律是 neutral
+  article_count: number; // 收錄的新聞則數（含沒有計入指數的）
   keywords: KeywordScore[];
   model_version: string;
   as_of: string;
   stale: boolean;
   is_mock: boolean;
+  // 以下欄位舊版靜態檔沒有
+  index_count?: number | null; // 計入指數的則數
+  index_counts?: Record<SentimentLabel, number> | null;
+  insufficient?: boolean; // 計入的則數太少，或同向的則數不夠：不給方向判斷
+  index_method?: IndexMethod | null;
 }
 
 export interface NewsItem {
@@ -42,7 +57,12 @@ export interface NewsItem {
   source?: string; // 媒體名稱；沒有時顯示網域
   published_at: string;
   sentiment: SentimentLabel;
-  confidence: number;
+  confidence: number; // 模型輸出的類別機率，沒有校準
+  // 以下欄位舊版靜態檔沒有
+  direct?: boolean; // 標題提到這家公司（名稱、別名或代號）；ETF 一律為 true
+  in_index?: boolean; // 是否計入情緒指數
+  mentioned_tickers?: string[]; // 標題提到的其他追蹤標的
+  related_tickers?: string[]; // 新聞源（Yahoo 財經）關聯到的代號
 }
 
 export interface NewsResponse {
@@ -50,6 +70,8 @@ export interface NewsResponse {
   articles: NewsItem[];
   stale: boolean;
   is_mock: boolean;
+  target_name?: string; // 模型輸入用的公司名稱
+  target_aliases?: string[]; // 判斷「標題有沒有提到這家公司」用的字詞
 }
 
 export interface ModelInfoResponse {

@@ -22,6 +22,7 @@ export default function NewsPage() {
           <NewsList
             articles={news.articles}
             ticker={news.ticker}
+            aliases={news.target_aliases}
             withFilters
             filterBarClassName="sticky top-[calc(env(safe-area-inset-top)+7rem)] z-10 -mx-4 bg-background/80 px-4 backdrop-blur-xl sm:top-[calc(env(safe-area-inset-top)+6rem)] lg:-mx-8 lg:px-8"
           />

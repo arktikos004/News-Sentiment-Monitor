@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { articlePosition, hostname, relativeTime, shortTime, signed } from "@/lib/format";
+import { hostname, relativeTime, shortTime, signed } from "@/lib/format";
 
 describe("signed", () => {
   it("正數加 +，負數用真正的減號", () => {
@@ -42,13 +42,5 @@ describe("hostname", () => {
   it("去掉 www.，網址無效時回空字串", () => {
     expect(hostname("https://www.reuters.com/markets/x")).toBe("reuters.com");
     expect(hostname("not a url")).toBe("");
-  });
-});
-
-describe("articlePosition", () => {
-  it("與後端 aggregate.py 同一公式：正 +信心、負 −信心、中性 0", () => {
-    expect(articlePosition("positive", 0.8)).toBe(0.8);
-    expect(articlePosition("negative", 0.8)).toBe(-0.8);
-    expect(articlePosition("neutral", 0.8)).toBe(0);
   });
 });

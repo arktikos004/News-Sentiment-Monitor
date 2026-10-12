@@ -4,7 +4,7 @@
  * 進場與長條伸展都是 CSS keyframe；按下回饋用 CSS active 縮放。
  */
 
-import { ChevronRight, Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronRight, CircleHelp, Minus, TrendingDown, TrendingUp } from "lucide-react";
 import type { WatchRow } from "@/lib/app-state";
 import { LABEL_TEXT, LABEL_TOKEN, signed } from "@/lib/format";
 import { delay } from "@/lib/motion";
@@ -26,8 +26,9 @@ export default function WatchlistCompare({
     <ul className="card divide-y divide-hairline overflow-hidden">
       {rows.map(({ ticker, sentiment }, i) => {
         const active = ticker === selected;
-        const token = sentiment ? LABEL_TOKEN[sentiment.label] : "neu";
-        const Icon = sentiment ? ICON[sentiment.label] : Minus;
+        const insufficient = sentiment?.insufficient === true;
+        const token = sentiment && !insufficient ? LABEL_TOKEN[sentiment.label] : "neu";
+        const Icon = insufficient ? CircleHelp : sentiment ? ICON[sentiment.label] : Minus;
         const magnitude = sentiment ? Math.min(1, Math.abs(sentiment.score)) : 0;
         return (
           <li key={ticker} className="animate-rise" style={delay(i)}>
@@ -50,7 +51,11 @@ export default function WatchlistCompare({
                 <span className="min-w-0 flex-1">
                   <span className="block font-mono text-body font-semibold text-ink">{ticker}</span>
                   <span className={`block text-meta ${active ? "text-ink-2" : "text-ink-3"}`}>
-                    {sentiment ? `${sentiment.article_count} 則新聞` : "這檔目前抓不到資料，稍後重新整理"}
+                    {sentiment
+                      ? sentiment.index_count != null
+                        ? `標題直接提到 ${sentiment.index_count} 則（收錄 ${sentiment.article_count} 則）`
+                        : `${sentiment.article_count} 則新聞`
+                      : "這檔目前抓不到資料，稍後重新整理"}
                   </span>
                 </span>
                 {sentiment && (
@@ -60,7 +65,7 @@ export default function WatchlistCompare({
                     </span>
                     <span className={`inline-flex items-center gap-0.5 text-meta ${TEXT[token]}`}>
                       <Icon size={11} strokeWidth={2.6} />
-                      {LABEL_TEXT[sentiment.label]}
+                      {insufficient ? "資料不足" : LABEL_TEXT[sentiment.label]}
                     </span>
                   </span>
                 )}
