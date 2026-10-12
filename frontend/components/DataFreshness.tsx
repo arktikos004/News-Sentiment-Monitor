@@ -33,7 +33,7 @@ export default function DataFreshness() {
   }, []);
 
   if (meta === null) return null;
-  if (meta === "error") return <p className="px-4 py-3 text-meta text-ink-3">讀不到資料更新時間。</p>;
+  if (meta === "error") return <p className="px-4 py-3 text-note text-ink-2">讀不到資料更新時間。</p>;
 
   const { stale } = meta;
   return (

@@ -51,9 +51,9 @@ export default function WatchlistPage() {
             ))}
           </div>
         )}
-        <p className="mt-4 flex items-start gap-2 px-1 text-meta text-ink-3">
+        <p className="mt-4 flex items-start gap-2 px-1 text-note text-ink-2">
           <Info size={14} className="mt-0.5 shrink-0" />
-          長條以 0 為中心，向右是正面、向左是負面。點一檔會切換到它的總覽。
+          長條以 0 為中心，向右是正面、向左是負面；指數只計入標題直接提到公司的新聞，則數太少時標「資料不足」。點一檔會切換到它的總覽。
         </p>
       </main>
     </>

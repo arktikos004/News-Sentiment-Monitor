@@ -34,7 +34,7 @@ export function TopBar({
       <div className={`mx-auto flex h-16 w-full items-center gap-2 px-4 lg:px-8 ${PAGE_WIDTH[width]}`}>
         <div className="min-w-0 flex-1">
           {title}
-          {subtitle && <div className="text-meta text-ink-3">{subtitle}</div>}
+          {subtitle && <div className="text-note text-ink-2">{subtitle}</div>}
         </div>
         {actions && <div className="-mr-2 flex items-center gap-1">{actions}</div>}
       </div>

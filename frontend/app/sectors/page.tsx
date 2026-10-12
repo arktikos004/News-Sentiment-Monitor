@@ -115,7 +115,7 @@ function Heatmap({ panel }: { panel: AlertPanelResponse }) {
   return (
     <section className="card p-4">
       <h2 className="text-body font-semibold text-ink">產業 × 交易日的新聞情緒</h2>
-      <p className="mt-1 text-meta text-ink-3">
+      <p className="mt-1 text-note text-ink-2">
         每格是該產業當天標題的平均分數（依則數加權）；點產業名稱展開個股，點一格看數字。
       </p>
 
@@ -273,7 +273,7 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
   return (
     <section className="card p-4">
       <h2 className="text-body font-semibold text-ink">警示門檻模擬</h2>
-      <p className="mt-1 text-meta text-ink-3">
+      <p className="mt-1 text-note text-ink-2">
         調整參數，看每天會有幾檔觸發警示。只算工作量；換門檻後的事件命中率是新的成效數字，要先寫預先聲明才計算。
       </p>
 
@@ -303,7 +303,7 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
       </div>
 
       {days.length === 0 ? (
-        <p className="mt-4 rounded-xl border border-dashed border-border px-3 py-3 text-meta text-ink-3">
+        <p className="mt-4 rounded-xl border border-dashed border-border px-3 py-3 text-note text-ink-2">
           這組參數在期間內沒有可判斷的日子（基準期的資料還不夠長）。
         </p>
       ) : (
@@ -383,7 +383,7 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
             </p>
           </div>
 
-          <p className="mt-3 text-meta text-ink-3">
+          <p className="mt-3 text-note text-ink-2">
             線上預設（基準 {data.default.baseline} 日、至少 {data.default.min_articles} 則、z &lt; {signed(data.default.z)}）：平均每天{" "}
             {defaultAvg.toFixed(1)} 檔。期間 {days[0].s}～{days[days.length - 1].s}（{days.length} 個可判斷的交易日），評分器{" "}
             {scorerLabel(data.scorer)}
@@ -429,7 +429,7 @@ export default function SectorsPage() {
       <main className="mx-auto w-full max-w-3xl space-y-4 px-4 pt-4 lg:px-8 lg:pt-6">
         {panel ? <Heatmap panel={panel} /> : !error && <Skeleton className="h-96 w-full rounded-2xl" />}
         {whatIf ? <WhatIf data={whatIf} /> : !error && <Skeleton className="h-72 w-full rounded-2xl" />}
-        <p className="px-1 text-meta text-ink-3">
+        <p className="px-1 text-note text-ink-2">
           產業別取自證交所開放資料「上市公司每月營業收入彙總表」。分數是標題情緒的平均（−1 到 +1），只呈現衍生數值；證據標題（每檔最多 3 則）與原文連結在警示頁。
         </p>
       </main>

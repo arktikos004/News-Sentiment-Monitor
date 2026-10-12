@@ -85,7 +85,7 @@ export default function SettingsPage() {
           <Row icon={Siren} tint="bg-alert-high-soft text-alert-high" label="台股警示配色">
             <AlertPaletteToggle />
           </Row>
-          <p className="px-4 py-3 text-meta text-ink-3">
+          <p className="px-4 py-3 text-note text-ink-2">
             台股慣例紅色代表「漲」，所以警示等級與產業熱度圖的負值預設用琥珀；習慣用紅色表示警示的話可以改回。美股頁一律是綠色正面、紅色負面。
           </p>
         </Group>
