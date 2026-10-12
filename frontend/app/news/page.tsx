@@ -31,9 +31,9 @@ export default function NewsPage() {
             <div className="card divide-y divide-hairline">
               {Array.from({ length: 7 }, (_, i) => (
                 <div key={i} className="space-y-2.5 px-4 py-3.5">
-                  <Skeleton className="h-5 w-40" />
                   <Skeleton className="h-5 w-full" />
-                  <Skeleton className="h-1 w-full" />
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-4 w-32" />
                 </div>
               ))}
             </div>

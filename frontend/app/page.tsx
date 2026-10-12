@@ -1,7 +1,8 @@
 "use client";
 
 /**
- * 總覽：先看台股今日警示（需要查證的少數幾檔、第一則證據標題、公司公告狀態），再看目前美股標的的新聞情緒。
+ * 總覽：先看台股最新一份警示（需要查證的少數幾檔、第一則證據標題、公司公告狀態），再看目前美股標的的新聞情緒。
+ * 警示的標題依時間狀態切換：還沒開盤是「下一交易日警示」，開盤後是「今日警示」，過去的交易日是「歷史」。
  * 每個區塊在載入中都有同樣高度的骨架，資料到了不會把下方內容往下推（避免版面跳動）。
  * 錯誤處理對應 Phase 0 凍結契約（422/404/503），訊息對照在 app-state.describeError。
  */
@@ -12,6 +13,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { LEVEL } from "@/components/AlertCard";
+import BoardCutoff from "@/components/BoardCutoff";
 import KeywordList from "@/components/KeywordList";
 import NewsList from "@/components/NewsList";
 import Panel from "@/components/Panel";
@@ -21,15 +23,17 @@ import Skeleton from "@/components/Skeleton";
 import StatusBanner from "@/components/StatusBanner";
 import { IconButton, PageTitle, TopBar } from "@/components/TopBar";
 import { announcementStatus, uniqueEvidence } from "@/lib/announcements";
-import type { AlertsResponse, NewsItem } from "@/lib/api";
+import { siteMeta, STATIC_DATA, type AlertsResponse, type NewsItem } from "@/lib/api";
 import { useAppState } from "@/lib/app-state";
+import { boardTitle, coverage } from "@/lib/board-phase";
 import { signed } from "@/lib/format";
 import { latestBoard } from "@/lib/latest-board";
+import { METHOD_PATH } from "@/lib/method";
 import { press } from "@/lib/motion";
 
 const PREVIEW = 5;
 const WEEKDAY = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
-const STATUS_TEXT = { brand: "text-brand", neutral: "text-ink-3", caveat: "text-ink-2" } as const;
+const STATUS_TEXT = { brand: "text-brand", neutral: "text-ink-2", caveat: "text-ink-2" } as const;
 
 function HeroSkeleton() {
   return (
@@ -45,17 +49,23 @@ function HeroSkeleton() {
   );
 }
 
-/** 台股今日警示：最新交易日需要查證的幾檔，點一列到警示頁看完整證據（整頁載入，讓警示頁讀到網址的日期與代號） */
+/** 台股最新一份警示：需要查證的幾檔，點一列到警示頁看完整證據（整頁載入，讓警示頁讀到網址的日期與代號） */
 function TodayAlerts() {
   const [board, setBoard] = useState<AlertsResponse | null | "error">(null);
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
 
   useEffect(() => {
     latestBoard()
       .then(setBoard)
       .catch(() => setBoard("error"));
+    if (STATIC_DATA) {
+      siteMeta()
+        .then((m) => setGeneratedAt(m.generated_at))
+        .catch(() => setGeneratedAt(null));
+    }
   }, []);
 
-  const heading = <h2 className="text-title font-semibold text-ink">台股今日警示</h2>;
+  const heading = <h2 className="text-title font-semibold text-ink">{board && board !== "error" ? boardTitle(board) : "台股警示"}</h2>;
 
   if (board === "error") {
     return (
@@ -79,16 +89,18 @@ function TodayAlerts() {
     .filter((a) => a.level === "high" || a.level === "watch")
     .sort((a, b) => (a.z_score ?? 0) - (b.z_score ?? 0));
   const weekday = WEEKDAY[new Date(`${board.as_of}T00:00:00Z`).getUTCDay()];
+  const c = coverage(board);
 
   return (
     <section className="card overflow-hidden">
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1 px-5 pb-3 pt-5">
         <div>
           {heading}
-          <p className="mt-0.5 text-meta text-ink-3">
-            {board.as_of}（{weekday}），{board.universe_size} 檔中 {triggered.length} 檔需要查證
-            {!board.window_closed && "；還沒開盤，標題仍在累積"}
+          <p className="mt-1 text-note text-ink-2">
+            {board.as_of}（{weekday}）：{c.universe} 檔中 {c.triggered} 檔需要查證；可判讀 {c.judged} 檔，{c.insufficient} 檔資料不足
+            {!board.window_closed && "。還沒開盤，標題仍在累積，結果可能再變"}。
           </p>
+          <BoardCutoff board={board} generatedAt={generatedAt} />
         </div>
         <a href={`/alerts?date=${board.as_of}`} className="flex min-h-11 items-center gap-0.5 text-body text-brand">
           看完整警示
@@ -98,7 +110,7 @@ function TodayAlerts() {
       {triggered.length === 0 ? (
         <p className="border-t border-hairline px-5 py-4 text-body text-ink-2">
           這個交易日沒有股票達到警示門檻
-          {board.summary.insufficient > 0 && `；另有 ${board.summary.insufficient} 檔標題太少、無法判斷`}。
+          {board.summary.insufficient > 0 && `；另有 ${board.summary.insufficient} 檔標題太少、無法判斷，不算在「沒有警示」裡`}。
         </p>
       ) : (
         <ul className="divide-y divide-hairline border-t border-hairline">
@@ -120,11 +132,11 @@ function TodayAlerts() {
                     <span className="block text-body font-semibold text-ink">
                       {a.name} <span className="font-mono text-meta font-normal text-ink-3">{a.ticker.replace(/\.TW$/, "")}</span>
                     </span>
-                    <span className="mt-0.5 block truncate text-meta text-ink-2">
+                    <span className="mt-0.5 block truncate text-note text-ink-2">
                       {first ? first.title : `當日 ${a.article_count} 則標題都沒有負面評分`}
                     </span>
                     {/* keep-all：只在空格與標點後換行，「尚未」這類詞不會被拆成兩行 */}
-                    <span className={`flex items-center gap-1 text-meta [word-break:keep-all] ${STATUS_TEXT[status.tone]}`}>
+                    <span className={`flex items-center gap-1 text-note [word-break:keep-all] ${STATUS_TEXT[status.tone]}`}>
                       {status.tone === "caveat" && <CircleAlert size={12} className="shrink-0" aria-hidden="true" />}
                       {status.text}
                     </span>
@@ -139,6 +151,12 @@ function TodayAlerts() {
           })}
         </ul>
       )}
+      <p className="border-t border-hairline px-5 py-3 text-note text-ink-2">
+        這份清單用來決定開盤前先查證哪幾檔，不是股價預測。
+        <Link href={METHOD_PATH} className="ml-1 text-brand underline-offset-2 hover:underline">
+          方法與限制
+        </Link>
+      </p>
     </section>
   );
 }
@@ -147,9 +165,12 @@ function TodayAlerts() {
 function Counts({ articles }: { articles: NewsItem[] }) {
   const n = (s: NewsItem["sentiment"]) => articles.filter((a) => a.sentiment === s).length;
   return (
-    <p className="mt-3 px-1 text-meta text-ink-3">
-      共 {articles.length} 則：<span className="text-pos">正面 {n("positive")}</span>、中性 {n("neutral")}、
-      <span className="text-neg">負面 {n("negative")}</span>
+    <p className="mt-3 px-1 text-note text-ink-2">
+      共 {articles.length} 則：<span className="text-pos">偏正面 {n("positive")}</span>、中性 {n("neutral")}、
+      <span className="text-neg">偏負面 {n("negative")}</span>。每則由模型只讀標題判讀，線上盲標的一致率約六成。
+      <Link href={METHOD_PATH} className="ml-1 text-brand underline-offset-2 hover:underline">
+        方法與限制
+      </Link>
     </p>
   );
 }
@@ -169,7 +190,7 @@ export default function OverviewPage() {
 
   return (
     <>
-      <TopBar title={<PageTitle>總覽</PageTitle>} subtitle="台股今日警示與美股新聞情緒" width="wide" />
+      <TopBar title={<PageTitle>總覽</PageTitle>} subtitle="台股開盤前查證清單與美股新聞情緒" width="wide" />
 
       <main className="mx-auto w-full max-w-6xl space-y-8 px-4 pt-4 lg:px-8 lg:pt-6">
         <TodayAlerts />
@@ -260,9 +281,9 @@ export default function OverviewPage() {
                   <div className="card divide-y divide-hairline">
                     {Array.from({ length: PREVIEW }, (_, i) => (
                       <div key={i} className="space-y-2.5 px-4 py-3.5">
-                        <Skeleton className="h-5 w-40" />
                         <Skeleton className="h-5 w-full" />
-                        <Skeleton className="h-1 w-full" />
+                        <Skeleton className="h-5 w-40" />
+                        <Skeleton className="h-4 w-32" />
                       </div>
                     ))}
                   </div>

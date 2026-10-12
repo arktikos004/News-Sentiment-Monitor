@@ -20,7 +20,7 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "財經新聞情緒監控",
-  description: "基於自然語言處理之新聞情緒分析與即時監控系統（研究原型）",
+  description: "美股財經新聞情緒指數與台股開盤前查證清單：每天更新 4 次的研究原型",
   applicationName: "新聞情緒",
   appleWebApp: { capable: true, title: "新聞情緒", statusBarStyle: "black-translucent" },
   // Next 的 appleWebApp.capable 輸出的是 mobile-web-app-capable；舊版 iOS 只認帶 apple- 前綴的這個

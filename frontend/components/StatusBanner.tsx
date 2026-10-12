@@ -53,14 +53,14 @@ export default function StatusBanner({
             </div>
           )}
           {stale && (
-            <p className="flex items-center gap-2 rounded-2xl bg-warn-soft px-4 py-2.5 text-meta text-warn">
-              <DatabaseBackup size={15} className="shrink-0" />
+            <p className="flex items-center gap-2 rounded-2xl bg-brand-soft px-4 py-2.5 text-note text-ink">
+              <DatabaseBackup size={16} className="shrink-0 text-brand" aria-hidden="true" />
               新聞來源暫時失效，目前顯示的是快取的舊資料。
             </p>
           )}
           {mock && (
-            <p className="flex items-center gap-2 rounded-2xl bg-brand-soft px-4 py-2.5 text-meta text-brand">
-              <FlaskConical size={15} className="shrink-0" />
+            <p className="flex items-center gap-2 rounded-2xl bg-brand-soft px-4 py-2.5 text-note text-ink">
+              <FlaskConical size={16} className="shrink-0 text-brand" aria-hidden="true" />
               模型尚未載入，目前顯示的是示意資料。
             </p>
           )}

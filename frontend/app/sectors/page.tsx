@@ -16,6 +16,7 @@ import StatusBanner from "@/components/StatusBanner";
 import Skeleton from "@/components/Skeleton";
 import { PageTitle, TopBar } from "@/components/TopBar";
 import { api, ApiError, type AlertLevel, type AlertPanelResponse, type AlertWhatIfResponse } from "@/lib/api";
+import { backtested, scorerLabel } from "@/lib/method";
 
 const SHOW_SESSIONS = 20;
 const BINS = [0.05, 0.15, 0.3, 0.5]; // |分數| 的分界：中性、弱、中、強、很強
@@ -384,7 +385,9 @@ function WhatIf({ data }: { data: AlertWhatIfResponse }) {
 
           <p className="mt-3 text-meta text-ink-3">
             線上預設（基準 {data.default.baseline} 日、至少 {data.default.min_articles} 則、z &lt; {signed(data.default.z)}）：平均每天{" "}
-            {defaultAvg.toFixed(1)} 檔。期間 {days[0].s}～{days[days.length - 1].s}（{days.length} 個可判斷的交易日），評分器 {data.scorer}
+            {defaultAvg.toFixed(1)} 檔。期間 {days[0].s}～{days[days.length - 1].s}（{days.length} 個可判斷的交易日），評分器{" "}
+            {scorerLabel(data.scorer)}
+            {!backtested(data.scorer) && "（尚未重新回測）"}。
           </p>
         </>
       )}

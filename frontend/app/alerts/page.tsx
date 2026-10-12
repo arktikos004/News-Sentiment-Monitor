@@ -7,22 +7,27 @@
  * - 看過的日期存在模組層快取，切走分頁再回來不必重抓（後端限流所有端點共用）
  * - 大螢幕兩欄：左邊是可排序的清單，右邊是選中那檔的證據與公告；手機是一張張的卡片
  * - 依回測的預先聲明：固定揭露「事前示警率與隨機響鈴無法區分」，也不提供任何「精選命中日」捷徑
+ * - 標題依看板的時間狀態切換（下一交易日、今日、歷史），並列出新聞與公告各自的資料截止時間
  */
 
 import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, Clock, ExternalLink, Info, RotateCcw } from "lucide-react";
 import { motion } from "motion/react";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import AlertCard, { LEVEL } from "@/components/AlertCard";
+import BoardCutoff from "@/components/BoardCutoff";
+import CaveatNote from "@/components/CaveatNote";
 import Skeleton from "@/components/Skeleton";
 import StatusBanner from "@/components/StatusBanner";
 import { IconButton, PageTitle, TopBar } from "@/components/TopBar";
 import { announcementStatus, uniqueEvidence } from "@/lib/announcements";
-import { api, ApiError, STATIC_DATA, type AlertLevel, type AlertsResponse, type StockAlert } from "@/lib/api";
+import { api, ApiError, siteMeta, STATIC_DATA, type AlertLevel, type AlertsResponse, type StockAlert } from "@/lib/api";
+import { boardTitle } from "@/lib/board-phase";
 import { signed } from "@/lib/format";
+import { backtested, DOC_URL, METHOD_PATH, scorerLabel, TW_BACKTEST } from "@/lib/method";
 import { press, snappy } from "@/lib/motion";
 
 const WEEKDAY = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
-const BACKTEST_URL = "https://github.com/arktikos004/News-Sentiment-Monitor/blob/master/docs/alert_backtest.md";
 
 type Key = `${string}|${"triggered" | "all"}`;
 const keyOf = (asOf: string, includeAll: boolean): Key => `${asOf}|${includeAll ? "all" : "triggered"}`;
@@ -37,9 +42,6 @@ const cache: {
   selected: string | null;
   results: Partial<Record<Key, AlertsResponse>>;
 } = { sessions: null, latest: null, asOf: null, includeAll: false, selected: null, results: {} };
-
-// 歷史回測（docs/alert_backtest.md）所用的評分器；線上改用其他評分器時要揭露回測結論未必適用
-const LEGACY_SCORER = "llm-gemma3:27b";
 
 /** 寫入模組層快取（在元件外定義：React Compiler 不允許元件內直接改外部變數） */
 function remember(patch: Partial<typeof cache>) {
@@ -84,7 +86,7 @@ const SUMMARY: { level: AlertLevel; label: string }[] = [
 // 資料限制的提醒用中性色加圖示：琥珀與紅色只代表警示等級
 const STATUS_TEXT = {
   brand: "text-brand",
-  neutral: "text-ink-3",
+  neutral: "text-ink-2",
   caveat: "text-ink-2",
 } as const;
 
@@ -154,7 +156,7 @@ function AlertList({
                   <span className="block truncate text-body font-semibold text-ink">
                     {a.name} <span className="font-mono text-meta font-normal text-ink-3">{a.ticker.replace(/\.TW$/, "")}</span>
                   </span>
-                  <span className={`flex items-center gap-1 text-meta ${STATUS_TEXT[status.tone]}`}>
+                  <span className={`flex items-center gap-1 text-note ${STATUS_TEXT[status.tone]}`}>
                     {status.tone === "caveat" && <CircleAlert size={12} className="shrink-0" aria-hidden="true" />}
                     <span className="truncate">
                       {uniqueEvidence(a.evidence).length} 則證據，{status.text}
@@ -183,6 +185,7 @@ export default function AlertsPage() {
   const [results, setResults] = useState(cache.results);
   const [error, setError] = useState<string | null>(null);
   const [retryToken, setRetryToken] = useState(0);
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const dateInput = useRef<HTMLInputElement>(null);
   // 網址帶 t= 時，手機的單欄卡片清單要捲到那一檔（大螢幕右欄直接顯示它）
   const pendingScroll = useRef<string | null>(null);
@@ -217,6 +220,14 @@ export default function AlertsPage() {
       })
       .catch((e: unknown) => setError(describe(e)));
   }, [retryToken]);
+
+  // 還沒開盤的看板，新聞標題收錄到最近一次更新：靜態站的 meta.json 記著更新時間
+  useEffect(() => {
+    if (!STATIC_DATA) return;
+    siteMeta()
+      .then((m) => setGeneratedAt(m.generated_at))
+      .catch(() => setGeneratedAt(null));
+  }, []);
 
   const key = asOf ? keyOf(asOf, includeAll) : null;
   const data = key ? results[key] : undefined;
@@ -255,7 +266,7 @@ export default function AlertsPage() {
 
   return (
     <>
-      <TopBar title={<PageTitle>台股警示</PageTitle>} subtitle="49 檔台股的新聞情緒異常，開盤前查證用" width="wide" />
+      <TopBar title={<PageTitle>台股警示</PageTitle>} subtitle="49 檔台股的新聞情緒異常：開盤前的查證清單" width="wide" />
       <StatusBanner
         width="wide"
         error={error}
@@ -340,31 +351,37 @@ export default function AlertsPage() {
           </button>
         )}
 
-        {data && !data.window_closed && (
-          <p className="flex items-center gap-2 rounded-2xl bg-brand-soft px-4 py-2.5 text-meta text-ink">
-            <Clock size={15} className="shrink-0 text-brand" aria-hidden="true" />
-            這個交易日還沒開盤，標題仍在累積，結果可能再變。
-          </p>
+        {data && (
+          <div className="px-1">
+            <h2 className="text-title font-semibold text-ink">{boardTitle(data)}</h2>
+            <BoardCutoff board={data} generatedAt={generatedAt} className="mt-0.5" />
+          </div>
         )}
 
-        <div className="flex items-start gap-2.5 rounded-2xl border border-hairline bg-surface-2/60 px-4 py-3 text-meta text-ink-2">
-          <Info size={15} className="mt-0.5 shrink-0 text-brand" aria-hidden="true" />
-          <div className="space-y-1">
-            {p && (
-              <p>
-                門檻：z 值低於 {signed(p.watch_z, 1)} 為留意、低於 {signed(p.high_z, 1)} 為高度異常。z 值是當日情緒分數相對前 {p.baseline_sessions} 個交易日的標準化差距，越負代表比平常越負面；當日至少 {p.min_articles} 則標題才判斷。
-              </p>
-            )}
+        {data && !data.window_closed && (
+          <CaveatNote icon={Clock}>
+            <p>這個交易日還沒開盤，標題仍在累積，結果可能再變。</p>
+          </CaveatNote>
+        )}
+
+        <CaveatNote icon={Info} tone="neutral">
+          {p && (
             <p>
-              歷史回測中，事前示警率與隨機響鈴無法區分（p = 0.983）。本頁是開盤前的即時警示與證據標題，用來決定先查證哪幾檔，不是提前預警。
-              {data && data.scorer !== LEGACY_SCORER && "回測用本機的 Gemma 3 27B 評分；本頁改用 Google AI Studio 上的 Gemma 4 評分，尚未重新回測。"}
-              <a href={BACKTEST_URL} target="_blank" rel="noopener noreferrer" className="ml-1 inline-flex items-center gap-0.5 text-brand underline-offset-2 hover:underline">
-                回測紀錄
-                <ExternalLink size={12} aria-hidden="true" />
-              </a>
+              門檻：z 值低於 {signed(p.watch_z, 1)} 為留意、低於 {signed(p.high_z, 1)} 為高度異常。z 值是當日情緒分數相對前 {p.baseline_sessions} 個交易日的標準化差距，越負代表比平常越負面；當日至少 {p.min_articles} 則標題才判斷，不到的列為資料不足。
             </p>
-          </div>
-        </div>
+          )}
+          <p>
+            這是開盤前的查證清單：列出證據標題，用來決定先查證哪幾檔，不是提前預警。歷史回測中，事前示警率與隨機響鈴無法區分（p = {TW_BACKTEST.p}）。
+            {data && !backtested(data.scorer) && `回測用本機的 Gemma 3 27B 評分；本頁改用 ${scorerLabel(data.scorer)}，尚未重新回測。`}
+            <a href={DOC_URL.alertBacktest} target="_blank" rel="noopener noreferrer" className="ml-1 inline-flex items-center gap-0.5 text-brand underline-offset-2 hover:underline">
+              回測紀錄
+              <ExternalLink size={12} aria-hidden="true" />
+            </a>
+            <Link href={METHOD_PATH} className="ml-3 text-brand underline-offset-2 hover:underline">
+              方法與限制
+            </Link>
+          </p>
+        </CaveatNote>
 
         {data && (
           <div role="group" aria-label="列出哪些股票" className="grid grid-cols-2 gap-1 rounded-full border border-hairline bg-surface p-1 lg:max-w-md">
@@ -420,13 +437,13 @@ export default function AlertsPage() {
             </span>
             <p className="text-body text-ink">這個交易日沒有股票達到警示門檻。</p>
             {data.summary.insufficient > 0 && (
-              <p className="text-meta text-ink-3">其中 {data.summary.insufficient} 檔資料不足、無法判斷；切到「全部」可以看到各自缺什麼。</p>
+              <p className="text-note text-ink-2">另有 {data.summary.insufficient} 檔資料不足、無法判斷，不算在「沒有警示」裡；切到「全部」可以看到各自缺什麼。</p>
             )}
           </div>
         ) : null}
 
         {announcedSince && (
-          <p className="px-1 text-meta text-ink-3">
+          <p className="px-1 text-note text-ink-2">
             公司重大訊息的資料來源：臺灣證券交易所（政府資料開放平臺「上市公司每日重大訊息」資料集），依
             <a href="https://data.gov.tw/license" target="_blank" rel="noopener noreferrer" className="mx-1 text-brand underline-offset-2 hover:underline">
               政府資料開放授權條款

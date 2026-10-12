@@ -1,9 +1,13 @@
 "use client";
 
-/** 設定：外觀、模型資訊、研究說明（含未複製的確認實驗與警示回測結論）、免責聲明。iOS 式分組卡片。 */
+/**
+ * 設定：外觀、模型資訊、研究說明、免責聲明。iOS 式分組卡片。
+ * 測試集的分數和線上盲標的一致率並列，都不加「已驗證」之類的標記；細節在「方法與限制」頁。
+ */
 
-import { BadgeCheck, CalendarDays, Cpu, FlaskConical, Newspaper, Palette, Scale, ShieldAlert, Siren, Target } from "lucide-react";
+import { CalendarDays, ChevronRight, Cpu, FlaskConical, Newspaper, Palette, Scale, ShieldAlert, Siren, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 import { useEffect } from "react";
 import AlertPaletteToggle from "@/components/AlertPaletteToggle";
 import Skeleton from "@/components/Skeleton";
@@ -12,6 +16,7 @@ import { PageTitle, TopBar } from "@/components/TopBar";
 import DataFreshness from "@/components/DataFreshness";
 import { STATIC_DATA } from "@/lib/api";
 import { useAppState } from "@/lib/app-state";
+import { METHOD_PATH, ONLINE_AGREEMENT, TW_BACKTEST, US_MODEL } from "@/lib/method";
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -97,7 +102,7 @@ export default function SettingsPage() {
               {STATIC_DATA ? "讀不到模型資訊，請稍後再試。" : "讀不到模型資訊：後端沒有回應，確認 API 已在 :8001 啟動。"}
             </Note>
           ) : modelInfo.is_mock ? (
-            <Note icon={FlaskConical} tint="bg-warn-soft text-warn">
+            <Note icon={FlaskConical} tint="bg-surface-3 text-ink-2">
               模型尚未載入，各頁顯示的是示意資料。
             </Note>
           ) : (
@@ -105,8 +110,11 @@ export default function SettingsPage() {
               <Row icon={Cpu} tint="bg-brand-soft text-brand" label="模型版本" stack>
                 {value(modelInfo.model_version)}
               </Row>
-              <Row icon={BadgeCheck} tint="bg-pos-soft text-pos" label="測試集 Macro F1" stack>
-                {value(modelInfo.test_macro_f1?.toFixed(4) ?? "—")}
+              <Row icon={FlaskConical} tint="bg-surface-3 text-ink-2" label="同來源測試集 Macro F1" stack>
+                {value(modelInfo.test_macro_f1?.toFixed(3) ?? "—")}
+              </Row>
+              <Row icon={Users} tint="bg-surface-3 text-ink-2" label="線上盲標一致率" stack>
+                {value(`${Math.round(ONLINE_AGREEMENT * 100)}%（${US_MODEL.online.agreed}/${US_MODEL.online.n}）`)}
               </Row>
               <Row icon={CalendarDays} tint="bg-surface-3 text-ink-2" label="訓練日期" stack>
                 {value(modelInfo.trained_at?.slice(0, 10) ?? "—")}
@@ -122,17 +130,16 @@ export default function SettingsPage() {
         )}
 
         <Group title="研究說明">
-          <Note icon={Target} tint="bg-brand-soft text-brand">
-            模型判斷的是「這則標題對這支股票是好消息還是壞消息」，不是句子本身的語氣。
-          </Note>
-          <Note icon={FlaskConical} tint="bg-surface-3 text-ink-2">
-            改用這個模型時量到的人工一致率提升（46.7% → 61.7%），在 2026-09-03 事先聲明的確認實驗中沒有重現（p = 0.804），所以不宣稱模型變得更準。
-          </Note>
-          <Note icon={ShieldAlert} tint="bg-surface-3 text-ink-2">
-            台股警示在歷史回測中，事前示警率與隨機響鈴無法區分（p = 0.983），只能當作開盤前的即時警示，不是提前預警。
-            {STATIC_DATA && "回測以本機 gemma3:27b 評分；公開站改用雲端託管模型評分，尚未重新回測。"}
-          </Note>
-          <p className="px-4 py-3 text-meta text-ink-3">完整紀錄在專案的 docs/ 資料夾（confirmation_2026-09-03.md、alert_backtest.md）。</p>
+          <Link href={METHOD_PATH} className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-surface-2">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface-3 text-ink-2">
+              <ShieldAlert size={16} />
+            </span>
+            <span className="flex-1 text-body text-ink-2">
+              美股標題分類的線上盲標一致率約 {Math.round(ONLINE_AGREEMENT * 100)}%；台股查證清單的回測與隨機響鈴無法區分（p = {TW_BACKTEST.p}），現行評分器尚未重新回測。
+              <span className="mt-0.5 block font-semibold text-brand">看方法與限制</span>
+            </span>
+            <ChevronRight size={18} className="shrink-0 text-ink-3" aria-hidden="true" />
+          </Link>
         </Group>
 
         <Group title="關於">

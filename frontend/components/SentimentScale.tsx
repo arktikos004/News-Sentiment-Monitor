@@ -111,8 +111,8 @@ export default function SentimentScale({
         <span>正面 {signed(1, 0)}</span>
       </div>
 
-      <p className="relative mt-4 max-w-prose text-meta text-ink-3">
-        細線是單則新聞（方向乘以信心），粗線是它們的平均，也就是情緒指數。配色依美股慣例：綠色正面、紅色負面。
+      <p className="relative mt-4 max-w-prose text-note text-ink-2">
+        細線是單則新聞（方向乘以模型的類別機率，這個機率沒有校準過），粗線是它們的平均，也就是情緒指數。配色依美股慣例：綠色正面、紅色負面。
       </p>
     </section>
   );

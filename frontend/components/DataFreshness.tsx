@@ -37,13 +37,13 @@ export default function DataFreshness() {
 
   const { stale } = meta;
   return (
-    <div className="space-y-2 px-4 py-3 text-meta">
-      <p className={`flex items-center gap-2 ${stale ? "text-warn" : "text-ink-2"}`}>
-        {stale ? <TriangleAlert size={15} /> : <CalendarClock size={15} className="text-ink-3" />}
+    <div className="space-y-2 px-4 py-3 text-note">
+      <p className={`flex items-center gap-2 ${stale ? "font-semibold text-ink" : "text-ink-2"}`}>
+        {stale ? <TriangleAlert size={15} className="text-brand" aria-hidden="true" /> : <CalendarClock size={15} className="text-ink-3" aria-hidden="true" />}
         每日自動更新，上次更新 {taipeiTime(meta.generated_at)}（台北時間）
         {stale && "，資料可能已過期"}
       </p>
-      <p className="text-ink-3">
+      <p className="text-ink-2">
         台股警示最新交易日：{meta.alerts_latest ?? "準備中"}
         {meta.alerts_status === "quota" && "（今日評分額度用盡，部分標題尚未評分，明日補上）"}
         {meta.alerts_status === "failed" && "（今日台股新聞更新失敗，顯示的是前一次的結果）"}
