@@ -26,7 +26,7 @@ flowchart LR
 
         subgraph inference["推論層 inference/"]
             AN["analyzer.py 逐則情緒"]
-            AGG["aggregate.py\n信心加權情緒指數 [−1,+1]"]
+            AGG["aggregate.py\n同權重情緒指數 [−1,+1]"]
             KW["keywords.py TF-IDF 關鍵字"]
             REC["alert_recorder.py\n離線：抓新聞＋LLM 評分"]
             BOARD["alerts.py · alert_board.py\n當日分數對 20 日基準的 z 值"]
@@ -98,17 +98,20 @@ flowchart LR
 
 ## 情緒指數公式
 
-`score = Σ(sign(label) × confidence) / n`，映射 [−1, +1]；
+只計入標題直接提到公司（名稱、別名或代號；`inference/relevance.py`）的新聞，每則同權重：
+`score = (正面則數 − 負面則數) / 計入則數`，映射 [−1, +1]；
 `|score| > 0.15`（`SENTIMENT_LABEL_THRESHOLD`）才判定正/負，否則中性。
-neutral 的 sign 為 0——中性新聞稀釋指數但不貢獻極性。
+計入少於 3 則、或判為某個方向的那一方不到 2 則時標 `insufficient`，判讀維持中性。
+2026-10 之前是全部收錄的新聞、以類別機率加權（`Σ(sign × confidence) / n`）；修訂的原因與前後比較見
+[sentiment_index_revision.md](sentiment_index_revision.md)，兩項改動都可以在 `config.py` 分開回退。
 
 ## 資料流（一次 /sentiment 請求）
 
 1. `deps.py` 正規驗證 ticker（`^[A-Z]{1,5}(\.[A-Z])?$`，防注入與路徑穿越）
 2. Provider 取新聞（同 ticker 一小時內只打一次外部源；失敗退回快取並標 `stale: true`）
 3. 逐則標題 `clean_text()` → BERT 批次推論 → 逐則 (label, confidence)
-4. `aggregate.py` 算指數、`keywords.py` 算關鍵字（剔除停用詞與代號）
-5. 回傳 `{score, label, article_count, keywords, model_version, as_of, stale}`
+4. `relevance.py` 判斷每則標題有沒有提到公司；`aggregate.py` 只用計入的新聞算指數，`keywords.py` 算關鍵字（剔除停用詞、代號與公司名稱）
+5. 回傳 `{score, label, article_count, keywords, model_version, as_of, stale, index_count, index_counts, insufficient, index_method}`
 
 > 環境備註：專案路徑含中文時 libcurl 讀不到 venv 內 CA 憑證，
 > `config.py` 啟動時自動複製 cacert.pem 至 ASCII 路徑並設 `CURL_CA_BUNDLE`。
