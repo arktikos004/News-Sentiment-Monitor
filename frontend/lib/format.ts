@@ -28,6 +28,18 @@ export function shortTime(iso: string): string {
   return Number.isNaN(d.getTime()) ? iso.slice(0, 16).replace("T", " ") : TIME_FMT.format(d);
 }
 
+/** ISO 時間 → 台北時間「10/12 20:16」（資料更新與截止時間一律用台北時間） */
+export function taipeiTime(iso: string): string {
+  return new Date(iso).toLocaleString("zh-TW", {
+    timeZone: "Asia/Taipei",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
 const REL_FMT = new Intl.RelativeTimeFormat("zh-TW", { numeric: "auto" });
 
 /** 「3 小時前」「昨天」；超過一週改顯示日期時間 */

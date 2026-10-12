@@ -1,42 +1,48 @@
 "use client";
 
 /**
- * 頂列下方的狀態列（每一頁都看得到）：資料更新時間、台股警示的最新交易日與需要查證的檔數、台股標題的評分狀態。
+ * 頂列下方的狀態列（每一頁都看得到）：資料更新時間，以及台股警示的三件事各自的狀態——
+ * 評分服務（正常、額度用盡、更新失敗）、資料覆蓋（可判讀幾檔、幾檔資料不足）、警示結果（幾檔需要查證）。
+ * 「資料不足」單獨列出，不併進「正常」，也不用一個燈號概括全部。
  * 每日排程失敗時線上會停在上一版：超過 48 小時沒更新、評分額度用盡或更新失敗都排到最前面並加上圖示。
  * 提醒用鋼藍色加圖示，不用琥珀：台股頁的琥珀只代表警示等級。
- * 高度固定（手機兩行、桌機一行），載入中先佔好位置，頂列不會跳動；讀不到時直接說讀不到。
+ * 手機兩行、桌機一行；每一項的文字自己說得通（標籤只給螢幕閱讀器），手機上才放得下。
  * 本機開發（即時後端）沒有 meta.json，不顯示。
  */
 
 import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { siteMeta, STATIC_DATA, type AlertsResponse, type SiteMeta } from "@/lib/api";
+import { boardPhase, coverage, md } from "@/lib/board-phase";
+import { taipeiTime } from "@/lib/format";
 import { latestBoard } from "@/lib/latest-board";
 
 const STALE_HOURS = 48;
 
-function taipeiTime(iso: string): string {
-  return new Date(iso).toLocaleString("zh-TW", {
-    timeZone: "Asia/Taipei",
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-}
+/** 狀態列裡的檔數：等寬、半粗，沒有標籤也看得出重點 */
+const Num = ({ children }: { children: React.ReactNode }) => <span className="font-mono font-semibold tabular-nums text-ink">{children}</span>;
 
-const md = (iso: string) => `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`;
+type Entry = { key: string; label: string; value: React.ReactNode; warn: boolean; href?: string };
 
-type Entry = { key: string; label: string; value: React.ReactNode; warn: boolean };
-
-function Item({ label, value, warn }: Omit<Entry, "key">) {
+function Item({ label, value, warn, href }: Omit<Entry, "key">) {
+  const body = (
+    <>
+      {warn && <TriangleAlert size={12} aria-hidden="true" />}
+      {value}
+    </>
+  );
   return (
-    <div className="flex shrink-0 items-center gap-1.5">
-      <dt className="text-ink-3">{label}</dt>
-      <dd className={`flex items-center gap-1 font-semibold ${warn ? "text-brand" : "text-ink"}`}>
-        {warn && <TriangleAlert size={12} aria-hidden="true" />}
-        {value}
+    <div className="flex shrink-0 items-center">
+      <dt className="sr-only">{label}</dt>
+      <dd className={`flex items-center gap-1 ${warn ? "font-semibold text-brand" : "text-ink-2"}`}>
+        {href ? (
+          // 整頁載入：警示頁從網址讀日期（client-side 切換會沿用它快取的上次日期）
+          <a href={href} className="flex items-center gap-1 hover:underline">
+            {body}
+          </a>
+        ) : (
+          body
+        )}
       </dd>
     </div>
   );
@@ -59,34 +65,66 @@ export default function StatusStrip({ widthClass }: { widthClass: string }) {
 
   let entries: Entry[] = [];
   if (meta === "error") {
-    entries = [{ key: "error", label: "資料狀態", value: "讀不到，重新整理再試一次", warn: true }];
+    entries = [{ key: "error", label: "資料狀態", value: "資料狀態讀不到，重新整理再試一次", warn: true }];
   } else if (meta) {
-    const triggered = board ? board.summary.high + board.summary.watch : null;
     const scoringWarn = meta.alerts_status === "quota" || meta.alerts_status === "failed";
+    const c = board ? coverage(board) : null;
+    const day = board ? (boardPhase(board) === "upcoming" ? `${md(board.as_of)} 開盤前` : boardPhase(board) === "today" ? "今日" : md(board.as_of)) : null;
     entries = [
-      { key: "updated", label: "資料更新", value: `${taipeiTime(meta.generated_at)}${meta.stale ? "，可能已過期" : ""}`, warn: meta.stale },
-      ...(meta.alerts_latest
+      {
+        key: "updated",
+        label: "資料更新",
+        value: `${taipeiTime(meta.generated_at)} 更新${meta.stale ? "，可能已過期" : ""}`,
+        warn: meta.stale,
+      },
+      {
+        key: "scoring",
+        label: "評分服務",
+        value:
+          meta.alerts_status === "quota"
+            ? "評分額度用盡，部分標題未評分"
+            : meta.alerts_status === "failed"
+              ? "評分更新失敗，顯示前一次結果"
+              : meta.alerts_status === "ok"
+                ? "評分服務正常"
+                : "評分服務狀態不明",
+        warn: scoringWarn,
+      },
+      ...(c && board
         ? [
             {
-              key: "alerts",
-              label: "台股警示",
+              key: "judged",
+              label: "資料覆蓋",
               value: (
-                // 整頁載入：警示頁從網址讀日期（client-side 切換會沿用它快取的上次日期）
-                <a href={`/alerts?date=${meta.alerts_latest}`} className="hover:underline">
-                  {md(meta.alerts_latest)}
-                  {triggered != null && `，${triggered} 檔需要查證`}
-                </a>
+                <span>
+                  可判讀 <Num>{c.judged}</Num>/{c.universe} 檔
+                </span>
               ),
               warn: false,
             },
+            {
+              key: "insufficient",
+              label: "資料不足",
+              value: (
+                <span>
+                  <Num>{c.insufficient}</Num> 檔資料不足
+                </span>
+              ),
+              warn: false,
+            },
+            {
+              key: "triggered",
+              label: "警示結果",
+              value: (
+                <span>
+                  {day}：<Num>{c.triggered}</Num> 檔需要查證
+                </span>
+              ),
+              warn: false,
+              href: `/alerts?date=${board.as_of}`,
+            },
           ]
         : []),
-      {
-        key: "scoring",
-        label: "台股評分",
-        value: meta.alerts_status === "quota" ? "額度用盡，部分標題未評分" : meta.alerts_status === "failed" ? "更新失敗，顯示前一次結果" : "正常",
-        warn: scoringWarn,
-      },
     ];
     // 有問題的項目排最前面
     entries.sort((a, b) => Number(b.warn) - Number(a.warn));
@@ -97,7 +135,7 @@ export default function StatusStrip({ widthClass }: { widthClass: string }) {
       <dl
         aria-label="資料狀態"
         aria-busy={meta === null}
-        className={`mx-auto flex h-12 w-full flex-wrap content-center items-center gap-x-4 gap-y-0.5 px-4 text-meta sm:h-8 sm:flex-nowrap sm:overflow-x-auto sm:whitespace-nowrap lg:px-8 ${widthClass}`}
+        className={`mx-auto flex min-h-12 w-full flex-wrap content-center items-center gap-x-4 gap-y-0.5 px-4 py-1 text-meta sm:h-8 sm:min-h-0 sm:flex-nowrap sm:overflow-x-auto sm:whitespace-nowrap sm:py-0 lg:px-8 ${widthClass}`}
       >
         {meta === null ? (
           <>
