@@ -26,7 +26,7 @@ class HeadlineScorer(Protocol):
 
 
 class LlmScorer:
-    """LLM 目標導向判讀（本機 Ollama 或託管 Gemini），沿用實驗 #6 B2 組的同一份提示詞（llm_review._SYSTEM_PROMPT）。
+    """LLM 目標導向判讀（本機 Ollama 或託管 Gemini），沿用同一份目標導向提示詞（llm_review._SYSTEM_PROMPT）。
 
     LLM 只給標籤、不給機率，故輸出 one-hot；每日平均分數因此等於
     (正面則數 − 負面則數) / 總則數。

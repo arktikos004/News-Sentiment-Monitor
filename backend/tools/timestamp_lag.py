@@ -104,7 +104,7 @@ def _write_report(lags: list[float], total: int, unparsed: int) -> None:
     if not lags:
         lines += [
             "快取內沒有可解析的發布時間，無法計算落差。",
-            "先讓 API 或 `tools/spot_check.py` 跑過一輪累積快取，再重跑本工具。",
+            "先讓 API 跑過一輪累積快取，再重跑本工具。",
             "",
         ]
     else:

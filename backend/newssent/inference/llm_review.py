@@ -1,16 +1,15 @@
-"""LLM 目標導向情緒判讀：一份提示詞與解析規則、兩個推論端點，以及實驗 #6 的混合式覆核。
+"""LLM 目標導向情緒判讀：一份提示詞與解析規則、兩個推論端點，以及離線比較用的混合式覆核。
 
-- OllamaReviewer：本機 Ollama，不外送任何資料。實驗 #6、情緒預警的回測（tools/alert_backtest.py）
+- OllamaReviewer：本機 Ollama，不外送任何資料。情緒預警的回測（tools/alert_backtest.py）
   與 2026-09-26 以前的線上分數都出自它。
 - GeminiReviewer：Google AI Studio 託管的模型，**會把新聞標題送到 Google**（標題本身是公開新聞）。
   雲端排程沒有 GPU，情緒預警（alert_recorder）的每日評分走這一條。
-- hybrid_review：實驗 #6 的對照組 B（小模型先篩、LLM 重判），只用於離線比較，不在線上推論路徑上。
+- hybrid_review：小模型先篩、LLM 重判的混合式覆核，只用於離線比較，不在線上推論路徑上。
 
 混合式覆核的出處：2026 年對 991 則 NVDA/AMD 標題的實測發現 FinBERT 說「正面」時 83% 是錯的，
 提出的解法是 **hybrid**——讓 BERT 處理容易的 neutral、把非中性者交給 LLM 重判
-（該文回報覆核準確率 84.2%、淨修正 246 則）。本專案自己的錯誤型態不只「亂給方向」，還有「抓不到負面」
-（人工複核：4 則負面模型 0 則抓到，全軟化成 neutral/positive），所以覆核範圍做成可選 policy
-（should_review），報告中兩種都量，不直接照抄文獻設定。
+（該文回報覆核準確率 84.2%、淨修正 246 則）。錯誤型態不只「亂給方向」，還可能「抓不到負面」
+（把負面軟化成 neutral/positive），所以覆核範圍做成可選 policy（should_review），不直接照抄文獻設定。
 
 兩個端點共用 _SYSTEM_PROMPT / _user_prompt / _parse_label：換的只有推論端點，問法不能變。
 """
@@ -27,7 +26,7 @@ from typing import Iterable
 from newssent.config import LABEL_NAMES
 
 DEFAULT_OLLAMA_HOST = "http://localhost:11434"
-# 本機預設 gemma3:27b（實驗 #6 比較過的唯一 LLM 組；不使用中國廠牌的生成式模型）
+# 本機預設 gemma3:27b（不使用中國廠牌的生成式模型）
 DEFAULT_LLM_MODEL = "gemma3:27b"
 
 # 覆核範圍：
@@ -35,7 +34,7 @@ DEFAULT_LLM_MODEL = "gemma3:27b"
 #   all         全部重判（另可修「把負面軟化成 neutral」，成本較高）
 REVIEW_POLICIES = ("non_neutral", "all")
 
-# 提示詞刻意寫成與人工複核相同的原則：
+# 提示詞的判讀原則：
 # 「僅憑標題無法確認對該 ticker 的方向就標 neutral」——這才是本專案要答的任務。
 _SYSTEM_PROMPT = """You are a financial analyst labelling news headlines for a specific company's stock.
 

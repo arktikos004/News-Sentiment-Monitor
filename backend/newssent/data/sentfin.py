@@ -1,4 +1,4 @@
-"""SEntFiN 1.0 下載、解析、展開、群組切分（實驗 #6：目標導向情緒）。
+"""SEntFiN 1.0 下載、解析、展開、群組切分（目標導向情緒）。
 
 CLI：python -m newssent.data.sentfin
 
@@ -6,8 +6,8 @@ CLI：python -m newssent.data.sentfin
 短句，量的是「語氣（tone）」。但線上要答的是「這則**標題**對**這支股票**是不是好消息
 （price impact）」，兩者是不同任務。2026 年對 991 則 NVDA/AMD 標題的實測顯示，主流
 FinBERT 說「正面」時有 83% 是錯的，作者的診斷即「模型是為錯的任務訓練的」。
-人工複核我們自己的模型時給的標注原則——「僅憑標題無法確認對該 ticker 的方向就標
-neutral」——正是文獻裡的 **entity-aware / target-dependent sentiment**。
+本專案要的判讀原則——「僅憑標題無法確認對該 ticker 的方向就標 neutral」——
+正是文獻裡的 **entity-aware / target-dependent sentiment**。
 
 SEntFiN 1.0（Sinha et al., JASIST 2022；MIT 授權）就是為此建的資料集：
 10,753 則**新聞標題**、標注到**實體層級**，其中 2,847 則含多個實體且情緒互相衝突。
@@ -17,7 +17,7 @@ SEntFiN 1.0（Sinha et al., JASIST 2022；MIT 授權）就是為此建的資料�
 
 誠實限制：SEntFiN 取自印度財經媒體，實體多為印度上市公司；本專案線上跑的是美股。
 語體（標題、疑問句、多實體並列）相符，但**實體分佈不同**——這是已知的領域落差，
-不可宣稱已完全消除，最終仍以人工抽測（docs/online_spot_check.md）驗收。
+不可宣稱已完全消除。
 """
 
 from __future__ import annotations
@@ -166,7 +166,7 @@ def _write_report(ds: SentFiN) -> None:
     multi = total - ds.n_headlines
 
     lines = [
-        "# SEntFiN 1.0 資料探索（實驗 #6：目標導向情緒）",
+        "# SEntFiN 1.0 資料探索（目標導向情緒）",
         "",
         "- 資料集：SEntFiN 1.0（Sinha et al., JASIST 2022；arXiv:2305.12257；MIT 授權）",
         f"- {ds.n_headlines} 則新聞標題，展開成 **{total} 筆 (實體, 標題) 樣本**"

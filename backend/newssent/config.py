@@ -62,10 +62,10 @@ MAX_LENGTH = 128                        # 涵蓋 PhraseBank 句長的 P99（docs
 # --- 模型 ---
 # 正式模型：PhraseBank＋SEntFiN 合併語料訓練的目標導向模型，輸入是 (公司名, 標題) 配對，
 # 答的是「這則標題對這支股票是好是壞」，而不是標題的語氣。
-# 五模型比較見 docs/model_selection.md；改成目標導向的理由與人工標注比較見 docs/experiment_target_sentiment.md。
+# 五模型比較見 docs/model_selection.md；改成目標導向的理由見 docs/data_exploration_sentfin.md。
 PRODUCTION_MODEL = "bert-combined"      # artifacts/<名稱>/
 
-# --- 目標導向推論（實驗 #6）---
+# --- 目標導向推論 ---
 # 目標導向模型的輸入是 (目標實體, 標題)，但線上只拿得到 ticker，而新聞標題裡寫的是
 # 公司名。這份對照表把 ticker 還原成訓練語料中會出現的實體字串；查無對照時退回
 # ticker 本身（模型仍可運作，只是少了名稱線索）。
@@ -196,7 +196,7 @@ ALERT_ANNOUNCEMENT_SESSIONS = 3
 # 台股中文新聞源：FinMind TaiwanStockNews（免費；註冊 token 讓每小時額度 300→600）
 FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 # 評分器：production 的 bert-combined 以英文語料訓練，**讀不懂中文標題**，不能直接用在台股新聞。
-# 用 LLM 判讀（實驗 #6 的 B2 組、同一份目標導向提示詞）。換評分器＝換版本字串，分數庫依版本分開存。
+# 用 LLM 判讀（同一份目標導向提示詞）。換評分器＝換版本字串，分數庫依版本分開存。
 # 本機 Ollama 模型：回測（tools/alert_backtest.py）與 2026-09-26 以前的線上分數都出自它
 ALERT_LLM_MODEL = "gemma3:27b"
 ALERT_SCORER_LEGACY = f"llm-{ALERT_LLM_MODEL}"

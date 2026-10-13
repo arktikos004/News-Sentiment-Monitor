@@ -213,7 +213,7 @@ def agreement_metrics(y_true: list[int], y_pred: list[int]) -> dict:
 def verdict(kappa: float, neg_recall: float) -> str:
     """預先聲明的判定，依序套用；NaN 一律視為未達門檻。"""
     if kappa >= KAPPA_MIN and neg_recall >= NEG_RECALL_MIN:
-        return "初步可行：下一步以人工標注驗收"
+        return "初步可行：值得在實戰期繼續投入"
     if kappa >= KAPPA_MIN:
         return "部分可行：可做初篩，負面仍交給語言模型"
     return "不可行"
@@ -461,7 +461,7 @@ def render(res: dict) -> str:
         "",
         f"**判定：{res['verdict']}**（κ {st['kappa']:.3f}，門檻 {KAPPA_MIN:.2f}；負面召回率 {_pct(st['neg_recall'])}，門檻 {NEG_RECALL_MIN:.0%}）",
         "",
-        "以下「一致率」都是與語言模型評分的一致，不是準確率：台股中文標題沒有人工標注可對照。",
+        "以下「一致率」都是與語言模型評分的一致，不是準確率：台股中文標題沒有可對照的正確答案。",
         "",
         "## 切分",
         "",

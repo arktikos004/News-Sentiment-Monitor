@@ -27,17 +27,17 @@ def _old_kappa_scorer_agreement(pairs: list[tuple[str, str]]) -> float:
     return (po - pe) / (1 - pe) if pe < 1 else math.nan
 
 
-def _old_kappa_judge_qualify(human: list[str], pred: list[str]) -> float:
-    n = len(human)
-    po = sum(h == p for h, p in zip(human, pred)) / n
-    ch, cp = Counter(human), Counter(pred)
+def _old_kappa_pairwise(ref: list[str], pred: list[str]) -> float:
+    n = len(ref)
+    po = sum(h == p for h, p in zip(ref, pred)) / n
+    ch, cp = Counter(ref), Counter(pred)
     pe = sum(ch[k] * cp[k] for k in set(ch) | set(cp)) / (n * n)
     return 1.0 if pe == 1 else (po - pe) / (1 - pe)
 
 
-def _old_mcnemar(human: list[str], a: list[str], b: list[str]) -> tuple[int, int, float]:
-    a_only = sum(1 for h, x, y in zip(human, a, b) if x == h and y != h)
-    b_only = sum(1 for h, x, y in zip(human, a, b) if y == h and x != h)
+def _old_mcnemar(ref: list[str], a: list[str], b: list[str]) -> tuple[int, int, float]:
+    a_only = sum(1 for h, x, y in zip(ref, a, b) if x == h and y != h)
+    b_only = sum(1 for h, x, y in zip(ref, a, b) if y == h and x != h)
     n = a_only + b_only
     if n == 0:
         return a_only, b_only, 1.0
@@ -54,15 +54,15 @@ def test_kappa_matches_both_old_implementations(seed):
     rng = random.Random(seed)
     n = rng.randint(5, 300)
     a = _random_labels(rng, n, LABEL_NAMES)
-    # 判讀方偶爾沒給出合法標籤（judge_qualify 的 MISSING）：只出現在一邊，不影響期望一致率
+    # 判讀方偶爾沒給出合法標籤（MISSING）：只出現在一邊，不影響期望一致率
     b = _random_labels(rng, n, [*LABEL_NAMES, "missing"])
     assert cohen_kappa(a, b, LABEL_NAMES) == _old_kappa_scorer_agreement(list(zip(a, b)))
-    assert cohen_kappa(a, b) == _old_kappa_judge_qualify(a, b)
+    assert cohen_kappa(a, b) == _old_kappa_pairwise(a, b)
 
 
 def test_kappa_is_undefined_without_samples_or_variety():
     assert math.isnan(cohen_kappa([], []))
-    # 兩邊都只用同一個標籤：期望一致率為 1，κ 沒有定義（舊 judge_qualify 會回 1.0）
+    # 兩邊都只用同一個標籤：期望一致率為 1，κ 沒有定義（舊的實作會回 1.0）
     assert math.isnan(cohen_kappa(["neutral"] * 5, ["neutral"] * 5))
 
 

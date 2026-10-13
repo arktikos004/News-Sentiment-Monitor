@@ -5,7 +5,7 @@
 訓練後評估 val/test 並以 registry.save() 存 artifact + metadata。
 transformer 模型延遲 import torch/transformers：無重相依的環境仍可訓練基線。
 
---corpus 的意義（實驗 #6）：
+--corpus 的意義（目標導向情緒）：
   phrasebank  句子層級語氣分類（現行 production 的訓練方式）
   sentfin     目標導向：輸入為 (實體, 標題) 配對，答「這則標題對這個實體是好是壞」
   combined    兩者合併；PhraseBank 樣本無實體，以純標題形式併入（模型需同時吃兩種輸入）
