@@ -98,7 +98,7 @@ export default function IndexSummary({ sentiment, news }: { sentiment: Sentiment
       )}
 
       <p className="mt-4 border-t border-hairline pt-3 text-note text-ink-2">
-        模型只讀標題，線上盲標一致率約六成。
+        模型只讀標題，不讀內文；逐則判讀可能出錯。
         <HelpLink to="score" className="ml-1" />
       </p>
     </section>

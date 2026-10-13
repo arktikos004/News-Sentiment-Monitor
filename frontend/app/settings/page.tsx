@@ -2,10 +2,10 @@
 
 /**
  * 設定：外觀、模型資訊、研究說明、免責聲明。iOS 式分組卡片。
- * 測試集的分數和線上盲標的一致率並列，都不加「已驗證」之類的標記；細節在「方法與限制」頁。
+ * 測試集的分數不加「已驗證」之類的標記；細節在「方法與限制」頁。
  */
 
-import { CalendarDays, ChevronRight, Cpu, FlaskConical, Newspaper, Palette, Scale, ShieldAlert, Siren, Users } from "lucide-react";
+import { CalendarDays, ChevronRight, Cpu, FlaskConical, Newspaper, Palette, Scale, ShieldAlert, Siren } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -16,7 +16,7 @@ import { PageTitle, TopBar } from "@/components/TopBar";
 import DataFreshness from "@/components/DataFreshness";
 import { STATIC_DATA } from "@/lib/api";
 import { useAppState } from "@/lib/app-state";
-import { METHOD_PATH, ONLINE_AGREEMENT, TW_BACKTEST, US_MODEL } from "@/lib/method";
+import { METHOD_PATH, TW_BACKTEST } from "@/lib/method";
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -113,9 +113,6 @@ export default function SettingsPage() {
               <Row icon={FlaskConical} tint="bg-surface-3 text-ink-2" label="同來源測試集 Macro F1" stack>
                 {value(modelInfo.test_macro_f1?.toFixed(3) ?? "—")}
               </Row>
-              <Row icon={Users} tint="bg-surface-3 text-ink-2" label="線上盲標一致率" stack>
-                {value(`${Math.round(ONLINE_AGREEMENT * 100)}%（${US_MODEL.online.agreed}/${US_MODEL.online.n}）`)}
-              </Row>
               <Row icon={CalendarDays} tint="bg-surface-3 text-ink-2" label="訓練日期" stack>
                 {value(modelInfo.trained_at?.slice(0, 10) ?? "—")}
               </Row>
@@ -135,7 +132,7 @@ export default function SettingsPage() {
               <ShieldAlert size={16} />
             </span>
             <span className="flex-1 text-body text-ink-2">
-              美股標題分類的線上盲標一致率約 {Math.round(ONLINE_AGREEMENT * 100)}%；台股查證清單的回測與隨機響鈴無法區分（p = {TW_BACKTEST.p}），現行評分器尚未重新回測。
+              美股標題分類只讀標題，同來源測試集的分數會高估線上表現；台股查證清單的回測與隨機響鈴無法區分（p = {TW_BACKTEST.p}），現行評分器尚未重新回測。
               <span className="mt-0.5 block font-semibold text-brand">看方法與限制</span>
             </span>
             <ChevronRight size={18} className="shrink-0 text-ink-3" aria-hidden="true" />

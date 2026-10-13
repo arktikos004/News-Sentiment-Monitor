@@ -14,9 +14,8 @@ import type { AlertsResponse } from "@/lib/api";
 import { useAppState } from "@/lib/app-state";
 import { signed } from "@/lib/format";
 import { latestBoard } from "@/lib/latest-board";
-import { backtested, DOC_URL, ONLINE_AGREEMENT, scorerLabel, TW_BACKTEST, US_MODEL } from "@/lib/method";
+import { backtested, DOC_URL, scorerLabel, TW_BACKTEST, US_MODEL } from "@/lib/method";
 
-const pct = (v: number) => `${Math.round(v * 100)}%`;
 
 function Doc({ href, children }: { href: string; children: React.ReactNode }) {
   return (
@@ -69,7 +68,6 @@ export default function MethodPage() {
   const version = modelInfo && modelInfo !== "error" && !modelInfo.is_mock ? modelInfo.model_version : US_MODEL.name;
   const scorer = board?.scorer;
   const p = board?.params;
-  const o = US_MODEL.online;
 
   return (
     <>
@@ -102,21 +100,12 @@ export default function MethodPage() {
               </>,
             ],
             [
-              "線上盲標",
-              <>
-                {o.from} 至 {o.to.slice(5)} 本站收錄的 {o.n} 則美股標題，人工盲標（標注者為開發者本人，標注時看不到模型輸出）：一致率 {pct(ONLINE_AGREEMENT)}（
-                {o.agreed}/{o.n}）；人工判為負面的標題，模型也判負面的有 {pct(o.negativeRecall)}。和前一版模型比較，McNemar 檢定 p = {o.pVsPrevious}，兩者無法區分。
-              </>,
-            ],
-            [
               "沒有驗證的部分",
               "每則標題旁的百分比是模型輸出的類別機率，沒有做過機率校準：它不是分類準確率，也不是股價上漲的機率。情緒指數和之後股價的關係也沒有驗證。",
             ],
             [
               "報告",
               <span key="docs" className="flex flex-wrap gap-x-4 gap-y-1">
-                <Doc href={DOC_URL.confirmation}>線上確認實驗</Doc>
-                <Doc href={DOC_URL.targetSentiment}>任務定義的比較實驗</Doc>
                 <Doc href={DOC_URL.indexRevision}>情緒指數的修訂與前後比較</Doc>
               </span>,
             ],
@@ -151,8 +140,8 @@ export default function MethodPage() {
             [
               "沒有驗證的部分",
               scorer && backtested(scorer)
-                ? "台股中文標題沒有人工標注，無法估計逐則判讀的準確度。"
-                : "現行的評分器尚未重新回測，它和回測用的 Gemma 3 判讀一致性也還沒計算，所以上面的回測結論是否適用於現行版本，目前無法確認。台股中文標題也沒有人工標注，無法估計逐則判讀的準確度。",
+                ? "台股中文標題沒有可對照的正確答案，無法估計逐則判讀的準確度。"
+                : "現行的評分器尚未重新回測，它和回測用的 Gemma 3 判讀一致性也還沒計算，所以上面的回測結論是否適用於現行版本，目前無法確認。台股中文標題也沒有可對照的正確答案，無法估計逐則判讀的準確度。",
             ],
             [
               "報告",
@@ -189,7 +178,7 @@ export default function MethodPage() {
           <Topic id="score" title="偏正面／中性／偏負面與評分說明">
             <p>
               每則標題由模型讀「公司名稱＋標題」判讀，只看標題、不讀內文。「評分說明」裡的百分比是模型輸出的類別機率，<strong className="font-semibold text-ink">沒有校準</strong>：
-              它不是分類準確率，也不是股價上漲的機率。線上盲標的一致率約 {pct(ONLINE_AGREEMENT)}，大約每 5 則有 2 則和人工判讀不同。
+              它不是分類準確率，也不是股價上漲的機率。
             </p>
           </Topic>
           <Topic id="tags" title="主題標籤">
