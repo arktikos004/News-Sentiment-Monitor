@@ -5,9 +5,8 @@
 
 ⚠️ **2026-08-14 更新**：production 已改為 **`bert-combined`**（PhraseBank＋SEntFiN
 合併語料訓練的**目標導向**模型）。本頁下方的比較仍然有效，但它比的是
-「哪個架構最會做 PhraseBank 的語氣分類」；實驗 #6 發現**任務定義本身**才是線上表現的瓶頸，
-換任務比換架構有效得多。裁決與誠實邊界見
-[experiment_target_sentiment.md](experiment_target_sentiment.md)。
+「哪個架構最會做 PhraseBank 的語氣分類」；線上要答的是「這則標題對這支股票是好是壞」，
+所以後來改的是任務定義，而不是架構（見 [SEntFiN 語料](data_exploration_sentfin.md)）。
 
 ## 選型結果（架構層級）：**BERT（fine-tuned，lr=2e-5、max_length=64）**
 

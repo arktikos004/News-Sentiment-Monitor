@@ -42,5 +42,5 @@ CLAUDE.md
 /docs/agents/
 .impeccable/
 
-# 人工標注與抽測樣本只存在本機
+# 只存在本機的實驗樣本
 /docs/*.csv

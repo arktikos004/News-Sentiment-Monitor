@@ -29,7 +29,7 @@
 > 此開放資料依政府資料開放授權條款（Open Government Data License）進行公眾釋出，
 > 使用者於遵守本條款各項規定之前提下，得利用之。
 > 政府資料開放授權條款：<https://data.gov.tw/license>
-`docs/` 裡的抽測樣本（共約 150 則英文標題）與回測報告引用的標題，是實驗記錄的一部分，數量有限且註明出處。
+`docs/` 裡回測報告引用的標題是實驗記錄的一部分，數量有限且註明出處。
 
 ### 評分時送出的資料
 
@@ -44,7 +44,7 @@
 | SEntFiN 1.0（10,753 則標題，實體層級標注） | Sinha et al. (2022)；由作者的 GitHub `pyRis/SEntFiN` 下載 | MIT | `bert-sentfin`、`bert-combined` 的訓練 |
 | 台股中文標題與 Gemma 4 的評分（5,820 則，發布於 2026-08-13 至 09-21） | 標題取自 FinMind `TaiwanStockNews`；標籤是 Gemma 4 經 Gemini API 的評分 | 標題依 FinMind 條款不對外散布；標籤的使用見下方說明 | 中文小模型蒸餾的離線初步實驗（未上線，見 [docs/distill_pilot.md](docs/distill_pilot.md)） |
 
-前兩個資料集都是人工標注，沒有用模型產生訓練標籤。第三列的標籤全部由語言模型產生，資料與訓練出的權重都只留在本機。
+前兩個資料集的標籤來自原作者，沒有用模型產生。第三列的標籤全部由語言模型產生，資料與訓練出的權重都只留在本機。
 
 ### 蒸餾實驗的標籤與服務條款
 
@@ -63,25 +63,16 @@
 | `distilbert-base-uncased` | Hugging Face | Apache-2.0 | 五模型比較 |
 | `roberta-base` | Meta | MIT | 五模型比較 |
 | `google-bert/bert-base-chinese` | Google | Apache-2.0 | 中文小模型蒸餾實驗的起點（未上線） |
-| `gemma3:27b` | Google（Gemma Terms of Use），經本機 Ollama 執行 | Gemma Terms of Use | 實驗 #6 的 LLM 覆核組；2026-09-26 以前的預警評分與預警回測；蒸餾實驗的參考評分者（不當訓練標籤） |
+| `gemma3:27b` | Google（Gemma Terms of Use），經本機 Ollama 執行 | Gemma Terms of Use | 2026-09-26 以前的預警評分與預警回測；蒸餾實驗的參考評分者（不當訓練標籤） |
 | `gemma-4-26b-a4b-it` | Google，經 Gemini API | Apache-2.0（模型）；Gemini API 服務條款 | 2026-09-27 起的預警評分；蒸餾實驗的訓練標籤 |
 | Release `models-v1`（`bert-combined.joblib`） | 本專案訓練產物 | CC BY-NC-SA 3.0（承襲 Financial PhraseBank 的條件） | 正式情緒模型 |
 | 中文小模型（蒸餾實驗的權重） | 本專案訓練產物 | 不公開、不散布 | 離線實驗，只留在開發者本機（以 FinMind 標題與經 Gemini API 取得的標籤訓練） |
-
-## 人工標注
-
-線上抽測共 120 則英文標題，全部由開發者本人標注：
-
-- 2026-07-17 批 30 則：先由 AI 助手初標，開發者逐則複核（29 則維持、1 則修改）。這一批不是盲標，只當參考。
-- 2026-08-05 批 30 則、確認實驗批 60 則（2026-09-03 完成）：盲標，標注時看不到模型輸出。
-
-標注者只有一人且就是開發者，無法量測標注者之間的一致性，這是已知的限制。
 
 ## 若要商業化，需要更換或取得授權的項目
 
 | 項目 | 現況 | 需要做的事 |
 | --- | --- | --- |
 | 新聞標題來源 | Yahoo、FinMind，條款都不含對外再散布 | 向新聞媒體或有授權的資料商取得顯示授權 |
-| 情緒模型權重 | 訓練資料含非商業授權的 Financial PhraseBank | 改用可商用的語料（SEntFiN 為 MIT）加上自行標注的資料重新訓練，或向 PhraseBank 作者取得商業授權 |
+| 情緒模型權重 | 訓練資料含非商業授權的 Financial PhraseBank | 改用可商用的語料（SEntFiN 為 MIT）重新訓練，或向 PhraseBank 作者取得商業授權 |
 | LLM 評分 | Gemini API 免費方案 | 改用付費方案，或自行部署 Apache-2.0 授權的 Gemma 4 |
-| 中文小模型的訓練標籤 | 經 Gemini API 免費方案取得 | 改以自行部署的 Gemma 4 重新產生標籤，並以人工標注驗收 |
+| 中文小模型的訓練標籤 | 經 Gemini API 免費方案取得 | 改以自行部署的 Gemma 4 重新產生標籤 |

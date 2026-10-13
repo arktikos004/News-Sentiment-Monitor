@@ -37,14 +37,12 @@
 ## 專案狀態與主要結果
 
 每日排程持續運作中（台北時間 07:30、13:30、19:30、01:30），細節見 [docs/deploy.md](docs/deploy.md)。
-重要結論都先寫預先聲明再看結果；沒有複製出來的結果照實記錄。人工標注由開發者本人完成，標注時看不到模型輸出
-（07-17 那批是 AI 初標再人工複核，其餘為盲標）。
+重要結論都先寫預先聲明再看結果；沒有複製出來的結果照實記錄。
 
 | 項目 | 結果 |
 | --- | --- |
 | 美股模型選型（[選型依據](docs/model_selection.md)） | 五個模型比較後選 BERT：測試 Macro F1 0.8458（TF-IDF 基線 0.7286） |
-| 任務定義修正（[實驗 #6](docs/experiment_target_sentiment.md)） | 從「標題語氣」改成「對這支股票是好是壞」，正式模型換成 `bert-combined`；60 則人工標注一致率 46.7%→61.7%（候選結論） |
-| 確認實驗（[結果](docs/confirmation_2026-09-03.md)） | 新的 60 則標注上 60.0% vs 63.3%，p = 0.804，**沒有確認**。換模型的理由是任務定義，正式模型維持 `bert-combined`，但不再宣稱一致率提升 |
+| 任務定義修正（[SEntFiN 語料](docs/data_exploration_sentfin.md)） | 從「標題語氣」改成「對這支股票是好是壞」，正式模型換成加入實體層級標籤語料的 `bert-combined` |
 | 台股警示回測（[結果](docs/alert_backtest.md)） | 21 件大跌事件，事前 5 日示警率與隨機響鈴無法區分（p = 0.983）：**不宣稱提前預警**，網站只做開盤前的查證清單 |
 | 中文小模型蒸餾（[初步實驗](docs/distill_pilot.md)） | κ = 0.639、負面召回 66.4%，依預先聲明的門檻判定「部分可行」；離線實驗，沒有上線 |
 | 資料誠信 | 打亂標籤測試、[預訓練污染分析](docs/pretraining_contamination.md)、[時間戳語意](docs/timestamp_semantics.md)（發布到抓取的落差中位數 2.94 小時） |
@@ -115,7 +113,6 @@ npm test           # lib/ 的單元測試；靜態檢查用 npm run lint
 | `python -m newssent.data.phrasebank`、`python -m newssent.data.sentfin` | 下載並切分語料，產出 [資料探索](docs/data_exploration.md) 報告 |
 | `python -m newssent.ml.train --model bert --corpus combined` | 訓練（語料 `phrasebank`、`sentfin`、`combined`） |
 | `python -m newssent.ml.tune --model bert`、`python -m newssent.ml.compare` | 超參數搜尋、[模型比較表](docs/model_comparison.md) |
-| `python tools/compare_arms.py`、`python tools/spot_check.py sample` | 實驗 #6 的方案對照、線上抽測取樣 |
 | `python tools/alert_backtest.py run` | 台股警示回測（需要分數庫） |
 | `python tools/contamination_check.py`、`python tools/timestamp_lag.py` | 預訓練污染分析、時間戳落差 |
 
@@ -133,7 +130,7 @@ backend/newssent/
   inference/         情緒指數與關鍵字；台股預警（alerts、alert_board、alert_recorder、panel）；LLM 判讀（llm_review）
   api/               FastAPI 路由、回應契約、錯誤格式
   export_static.py   每日把 API 回應匯出成靜態站的 JSON
-backend/tools/       研究工具：抽測、方案對照、污染檢查、時間戳落差、警示回測、評分器一致性、蒸餾實驗
+backend/tools/       研究工具：污染檢查、時間戳落差、警示回測、評分器一致性、蒸餾實驗、指數修訂報告
 backend/tests/       pytest，不連網
 frontend/            Next.js 分頁式 App：app/ 六個分頁，lib/api.ts 讀即時 API 或靜態 JSON
 scripts/             state 分支的加密封包、模型下載、git hooks
@@ -144,14 +141,12 @@ docs/                研究報告、預先聲明、實驗設計、部署說明
 
 ## 文件
 
-- **方法論**：[預先聲明](docs/preregistration_2026-08-14.md)、[確認實驗結果](docs/confirmation_2026-09-03.md)、
-  [預訓練污染分析](docs/pretraining_contamination.md)、[時間戳語意](docs/timestamp_semantics.md)
+- **方法論**：[預訓練污染分析](docs/pretraining_contamination.md)、[時間戳語意](docs/timestamp_semantics.md)
 - **台股警示**：[回測預先聲明](docs/alert_backtest_prereg.md)、[回測結果](docs/alert_backtest.md)、
-  [換評分器的預先聲明](docs/scorer_switch_prereg.md)、[裁判資格考預先聲明](docs/judge_qualification_prereg.md)、
+  [換評分器的預先聲明](docs/scorer_switch_prereg.md)、
   [中文小模型蒸餾](docs/distill_pilot.md)（[預先聲明](docs/distill_pilot_prereg.md)）
-- **實驗與模型**：[實驗 #6 任務定義修正](docs/experiment_target_sentiment.md)、[模型比較](docs/model_comparison.md)、
+- **實驗與模型**：[模型比較](docs/model_comparison.md)、
   [選型依據](docs/model_selection.md)、[實驗設計](docs/experiment_design.md)
-- **線上抽測**：[人工複核](docs/online_spot_check.md)、[07-17 批](docs/online_spot_check_2026-07-17.md)
 - **系統**：[架構](docs/architecture.md)、[資料探索](docs/data_exploration.md)、[SEntFiN 語料](docs/data_exploration_sentfin.md)、[部署與排程](docs/deploy.md)
 
 ## 問題回報與維護者

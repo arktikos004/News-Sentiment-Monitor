@@ -47,10 +47,3 @@
 1. `models/base.py`：所有模型 predict_proba 輸出欄位對齊固定順序
 2. `registry.py`：artifact metadata 記錄順序，API 啟動比對，不一致拒絕啟動
 3. `test_registry.py`：故意寫入錯位順序的 metadata，驗證載入如期失敗
-
-## 線上抽測（領域外泛化）
-
-PhraseBank（分析師標注短句）與實際新聞標題存在分佈落差——以 30 則線上標題
-人工標注 vs 模型輸出量化此落差，結果與錯誤型態分析見
-[online_spot_check.md](online_spot_check.md)（一致率顯著低於測試集 F1，
-主因模型對「隱含情緒」的標題過度偏 neutral；誠實呈現此限制）。
