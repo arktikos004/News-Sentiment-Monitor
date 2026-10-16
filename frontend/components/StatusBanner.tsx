@@ -37,7 +37,7 @@ export default function StatusBanner({
           className={inline ? "mb-4 space-y-2" : `mx-auto w-full space-y-2 px-4 pt-4 lg:px-8 ${PAGE_WIDTH[width]}`}
         >
           {error && (
-            <div role="alert" className="flex items-center gap-3 rounded-2xl border border-neg/30 bg-neg-soft py-2 pl-4 pr-2 text-body text-neg">
+            <div role="alert" className="flex items-center gap-3 rounded-2xl border border-danger/30 bg-danger-soft py-2 pl-4 pr-2 text-body text-danger">
               <CircleAlert size={18} className="shrink-0" />
               <span className="flex-1 py-1">{error}</span>
               {onRetry && (
@@ -45,7 +45,7 @@ export default function StatusBanner({
                   type="button"
                   whileTap={press}
                   onClick={onRetry}
-                  className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-neg/40 bg-surface px-4 text-meta font-semibold text-neg"
+                  className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-danger/40 bg-surface px-4 text-meta font-semibold text-danger"
                 >
                   <RotateCw size={14} /> 重試
                 </motion.button>

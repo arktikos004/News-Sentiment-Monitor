@@ -5,7 +5,7 @@
  * 測試集的分數不加「已驗證」之類的標記；細節在「方法與限制」頁。
  */
 
-import { CalendarDays, ChevronRight, Cpu, FlaskConical, Newspaper, Palette, Scale, ShieldAlert, Siren } from "lucide-react";
+import { CalendarDays, ChevronRight, Cpu, FlaskConical, Newspaper, Palette, Scale, ShieldAlert, Siren, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -13,6 +13,7 @@ import AlertPaletteToggle from "@/components/AlertPaletteToggle";
 import Skeleton from "@/components/Skeleton";
 import ThemeToggle from "@/components/ThemeToggle";
 import { PageTitle, TopBar } from "@/components/TopBar";
+import UpDownToggle from "@/components/UpDownToggle";
 import DataFreshness from "@/components/DataFreshness";
 import { STATIC_DATA } from "@/lib/api";
 import { useAppState } from "@/lib/app-state";
@@ -27,7 +28,7 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-/** stack：值是較長的文字（例如模型版本）時，窄螢幕改成值在標籤下方，不在字中間斷行 */
+/** stack：值較寬（例如模型版本、選項文字較長的切換鈕）時，窄螢幕改成值在標籤下方，不在字中間斷行，也不被裁掉 */
 function Row({
   icon: Icon,
   tint,
@@ -82,11 +83,14 @@ export default function SettingsPage() {
           <Row icon={Palette} tint="bg-brand-soft text-brand" label="主題">
             <ThemeToggle />
           </Row>
-          <Row icon={Siren} tint="bg-alert-high-soft text-alert-high" label="台股警示配色">
+          <Row icon={TrendingUp} tint="bg-pos-soft text-pos" label="正負顏色" stack>
+            <UpDownToggle />
+          </Row>
+          <Row icon={Siren} tint="bg-alert-high-soft text-alert-high" label="台股警示配色" stack>
             <AlertPaletteToggle />
           </Row>
           <p className="px-4 py-3 text-note text-ink-2">
-            台股慣例紅色代表「漲」，所以警示等級與產業熱度圖的負值預設用琥珀；習慣用紅色表示警示的話可以改回。美股頁一律是綠色正面、紅色負面。
+            台股慣例紅色代表「漲」，所以警示等級與產業熱度圖的負值預設用琥珀；習慣用紅色表示警示的話可以改回。美股頁的正負顏色另由上面的「正負顏色」設定。
           </p>
         </Group>
 
@@ -98,7 +102,7 @@ export default function SettingsPage() {
               <Skeleton className="h-8 w-full" />
             </div>
           ) : modelInfo === "error" ? (
-            <Note icon={ShieldAlert} tint="bg-neg-soft text-neg">
+            <Note icon={ShieldAlert} tint="bg-danger-soft text-danger">
               {STATIC_DATA ? "讀不到模型資訊，請稍後再試。" : "讀不到模型資訊：後端沒有回應，確認 API 已在 :8001 啟動。"}
             </Note>
           ) : modelInfo.is_mock ? (

@@ -57,7 +57,7 @@ function SearchBody({
       <form onSubmit={submit} className="px-4 pb-3">
         <div
           className={`flex items-center gap-3 rounded-2xl border bg-surface-2 px-4 transition-colors focus-within:border-brand ${
-            invalid ? "border-neg" : "border-transparent"
+            invalid ? "border-danger" : "border-transparent"
           }`}
         >
           <Search size={18} className="shrink-0 text-ink-3" />
@@ -83,7 +83,7 @@ function SearchBody({
           />
         </div>
         {invalid && (
-          <p role="alert" className="mt-2 px-1 text-meta text-neg">
+          <p role="alert" className="mt-2 px-1 text-meta text-danger">
             {curated
               ? `本站每日預先計算 ${CURATED_TICKERS.length} 檔，請從下方清單選擇。`
               : "代號格式不對：1–5 個英文字母，可加一碼類別（例如 AAPL、BRK.B）。"}

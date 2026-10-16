@@ -2,7 +2,8 @@
 @import "tw-animate-css";
 
 /* ── 設計 token（行情板）───────────────────────────────────────────
-   預設深色：夜盤藍底、鋼藍品牌色（brand）。綠／紅／灰表示美股新聞情緒（美股慣例：正綠負紅）。
+   預設深色：夜盤藍底、鋼藍品牌色（brand）。綠／紅／灰表示美股新聞情緒（預設美股慣例正綠負紅，設定頁可改成
+   台股慣例正紅負綠）；錯誤提示固定用紅色。
    台股頁的琥珀只表示警示等級（設定頁可改成紅色）；還沒開盤、資料過期、公告漏收這類資料限制與系統提醒
    用中性灰或鋼藍加圖示，不借用警示色。每處顏色都搭配文字，不以顏色單獨承載語意。
    下半段是 shadcn/ui 元件用的別名（foreground、card、primary、muted…），全部指回上面的 token。 */
@@ -21,23 +22,31 @@
   --brand-fg: #06101a;
   --brand-soft: rgba(90, 169, 230, 0.14);
 
-  --pos: #3fcf8e;
-  --pos-soft: rgba(63, 207, 142, 0.14);
+  /* 綠、紅色票（各主題自己定義）：情緒色 --pos / --neg 依設定頁的正負顏色指向其中一個（見下方 data-updown），
+     錯誤提示 --danger 固定指向紅色 */
+  --green: #3fcf8e;
+  --green-soft: rgba(63, 207, 142, 0.14);
+  --red: #f46268;
+  --red-soft: rgba(244, 98, 104, 0.14);
+  --pos: var(--green);
+  --pos-soft: var(--green-soft);
   --neu: #8a9aae;
   --neu-soft: rgba(138, 154, 174, 0.14);
-  --neg: #f46268;
-  --neg-soft: rgba(244, 98, 104, 0.14);
+  --neg: var(--red);
+  --neg-soft: var(--red-soft);
+  --danger: var(--red);
+  --danger-soft: var(--red-soft);
   --warn: #e8a33d;
   --warn-soft: rgba(232, 163, 61, 0.14);
-  /* 台股警示等級的顏色：設定頁選「紅色」時沿用負面色與琥珀；預設是下方的琥珀關注度色階 */
-  --alert-high: var(--neg);
-  --alert-high-soft: var(--neg-soft);
+  /* 台股警示等級的顏色：設定頁選「紅色」時用紅色票與琥珀（不隨正負顏色對調）；預設是下方的琥珀關注度色階 */
+  --alert-high: var(--red);
+  --alert-high-soft: var(--red-soft);
   --alert-watch: var(--warn);
   --alert-watch-soft: var(--warn-soft);
   /* 設定頁配色選項的色票：兩種配色在目前主題下的實際色值，與下方琥珀色階同步 */
   --swatch-amber-high: #f59e42;
   --swatch-amber-watch: #e3c25b;
-  --swatch-red-high: var(--neg);
+  --swatch-red-high: var(--red);
   --swatch-red-watch: var(--warn);
 
   --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(2, 6, 12, 0.35);
@@ -66,12 +75,12 @@
   --brand-fg: #ffffff;
   --brand-soft: rgba(27, 101, 163, 0.1);
 
-  --pos: #0a7442;
-  --pos-soft: rgba(10, 116, 66, 0.1);
+  --green: #0a7442;
+  --green-soft: rgba(10, 116, 66, 0.1);
   --neu: #5e6e80;
   --neu-soft: rgba(94, 110, 128, 0.1);
-  --neg: #c0262d;
-  --neg-soft: rgba(192, 38, 45, 0.1);
+  --red: #c0262d;
+  --red-soft: rgba(192, 38, 45, 0.1);
   --warn: #8a570f;
   --warn-soft: rgba(138, 87, 15, 0.12);
   --swatch-amber-high: #a84a05;
@@ -87,7 +96,7 @@
 }
 
 /* 台股警示配色（設定頁可切換，預設琥珀）：台灣讀者看到紅色會讀成「漲」，所以警示等級與產業熱度圖的負值改用
-   琥珀關注度色階；美股頁的綠正紅負不受影響。每個色值在自己的淡底與卡片底上都 ≥ 4.5:1 */
+   琥珀關注度色階；美股頁的正負顏色不受影響。每個色值在自己的淡底與卡片底上都 ≥ 4.5:1 */
 :root[data-alert-palette="amber"] {
   --alert-high: #f59e42;
   --alert-high-soft: rgba(245, 158, 66, 0.14);
@@ -102,6 +111,15 @@
   --alert-watch: #7d5c00;
   --alert-watch-soft: rgba(125, 92, 0, 0.1);
   --div-neg: #c76a14;
+}
+
+/* 正負顏色（設定頁可切換，預設美股慣例正綠負紅）：選台股慣例時只對調情緒色。綠、紅色票由各主題定義，
+   這一段在深色與淺色下都取到該主題的色值；錯誤提示、台股警示配色與產業熱度圖不受影響 */
+:root[data-updown="red-up"] {
+  --pos: var(--red);
+  --pos-soft: var(--red-soft);
+  --neg: var(--green);
+  --neg-soft: var(--green-soft);
 }
 
 /* shadcn/ui 別名：同一個元素上解析，主題切換時跟著變 */
@@ -119,7 +137,7 @@
   --muted-foreground: var(--ink-3);
   --accent: var(--surface-2);
   --accent-foreground: var(--ink);
-  --destructive: var(--neg);
+  --destructive: var(--danger);
   --input: var(--border);
   --ring: var(--brand);
   --radius: 0.875rem;
@@ -144,6 +162,8 @@
   --color-neu-soft: var(--neu-soft);
   --color-neg: var(--neg);
   --color-neg-soft: var(--neg-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
   --color-alert-high: var(--alert-high);

@@ -31,7 +31,7 @@ export default function AlertTrend({
 }: {
   points: DailySentimentPoint[];
   baseline: number | null;
-  color: string; // CSS 色值（例如 var(--neg)），對應警示等級
+  color: string; // CSS 色值（例如 var(--alert-high)），對應警示等級
 }) {
   const gradientId = `trend-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const data: Row[] = points.map((p) => ({ day: p.session.slice(5), score: p.score, n: p.article_count }));
