@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 產業情緒儀表板：49 檔依證交所產業別彙總成「產業 × 交易日」熱度圖。點產業名稱展開個股，
+ * 產業情緒儀表板：股票池依證交所產業別彙總成「產業 × 交易日」熱度圖。點產業名稱展開個股，
  * 點一格看當天的數字並連到那天的警示看板（佐證標題最多 3 則在那裡）。
  * 下半部是警示門檻模擬：調整基準天數、最少則數與 z 門檻，看每天會有幾檔觸發警示，
  * 並反推「每天最多 N 檔」需要的門檻。只算工作量，不重算命中率（那是新的成效數字，要先預先聲明）。
@@ -418,7 +418,7 @@ export default function SectorsPage() {
 
   return (
     <>
-      <TopBar title={<PageTitle>產業儀表板</PageTitle>} subtitle="49 檔台股依產業彙總的新聞情緒" />
+      <TopBar title={<PageTitle>產業儀表板</PageTitle>} subtitle="台灣 50 成分股依產業彙總的新聞情緒" />
       <StatusBanner
         error={error}
         onRetry={() => {

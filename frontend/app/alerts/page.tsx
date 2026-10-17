@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 台股警示：某個交易日全池 49 檔的新聞情緒異常（預設只列 high / watch）。
+ * 台股警示：某個交易日全池（台灣 50 成分股）的新聞情緒異常（預設只列 high / watch）。
  *
  * - 交易日來自 /api/alerts/sessions；選到非交易日自動對到前一個交易日，不送出會收到 422 的日期
  * - 看過的日期存在模組層快取，切走分頁再回來不必重抓（後端限流所有端點共用）
@@ -266,7 +266,7 @@ export default function AlertsPage() {
 
   return (
     <>
-      <TopBar title={<PageTitle>台股警示</PageTitle>} subtitle="49 檔台股的新聞情緒異常：開盤前的查證清單" width="wide" />
+      <TopBar title={<PageTitle>台股警示</PageTitle>} subtitle="台灣 50 成分股的新聞情緒異常：開盤前的查證清單" width="wide" />
       <StatusBanner
         width="wide"
         error={error}

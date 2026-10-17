@@ -81,7 +81,7 @@ flowchart LR
 
 ## 資料流（預警分頁）
 
-1. `alert_recorder` 離線執行：FinMind 抓 49 檔的中文標題 → 濾掉盤勢報導標題 → LLM 逐則評分 → 寫入 `alert_scores.db`
+1. `alert_recorder` 離線執行：FinMind 抓股票池的中文標題 → 濾掉盤勢報導標題 → LLM 逐則評分 → 寫入 `alert_scores.db`
 2. `/api/alerts/sessions` 回可查詢的交易日（已確認交易日＋推估到下一個尚未開盤的交易日）；前端用它切換日期
 3. `/api/alerts?as_of=…` 只讀分數庫：開盤前可得標題的平均分數，對前 20 個交易日算 z 值（< −1.5 留意、< −2 高度異常）
 4. 請求路徑上不打外部 API、不跑 LLM；分數庫沒跑 recorder 的日子會回「資料不足」並附原因
