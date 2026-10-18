@@ -102,6 +102,13 @@ def _to_item(alert: TickerAlert, announcements: AnnouncementCheck | None = None)
     )
 
 
+def _now(request: Request) -> datetime:
+    """預警的「現在」：靜態匯出固定成抓新聞開始的時刻（app.state.alerts_now），其餘用當下時間。
+    哪些 UTC 日必須已抓完以此判斷——抓新聞在 UTC 換日前、匯出在換日後時，用當下時間會要求一個
+    還沒有人抓完的 UTC 日，整個看板就被判成資料不足。"""
+    return getattr(request.app.state, "alerts_now", None) or datetime.now(timezone.utc)
+
+
 def _calendar(store: ScoreStore, now: datetime) -> list[date]:
     """已確認交易日＋推估到下一個尚未開盤的交易日；分數庫沒有交易日就無從判斷（503）。"""
     confirmed = store.sessions()
@@ -112,7 +119,7 @@ def _calendar(store: ScoreStore, now: datetime) -> list[date]:
 
 @router.get("/alerts/sessions", response_model=AlertSessionsResponse)
 def get_alert_sessions(request: Request) -> AlertSessionsResponse:
-    sessions = _calendar(request.app.state.score_store, datetime.now(timezone.utc))
+    sessions = _calendar(request.app.state.score_store, _now(request))
     return AlertSessionsResponse(sessions=sessions, latest=sessions[-1])
 
 
@@ -138,7 +145,7 @@ def _panel_window(store: ScoreStore, now: datetime, as_of: date | None) -> tuple
 def get_alert_panel(request: Request, as_of: date | None = _PANEL_AS_OF) -> AlertPanelResponse:
     """全池逐日面板（產業情緒儀表板用）：每檔每天的分數、則數、z 值與等級，線上預設參數。"""
     store: ScoreStore = request.app.state.score_store
-    now = datetime.now(timezone.utc)
+    now = _now(request)
     sessions, eval_idx = _panel_window(store, now, as_of)
     panel = load_panel(store, ALERT_UNIVERSE, ALERT_SCORER, sessions)
     params = AlertParams()
@@ -176,7 +183,7 @@ def get_alert_panel(request: Request, as_of: date | None = _PANEL_AS_OF) -> Aler
 def get_alert_whatif(request: Request, as_of: date | None = _PANEL_AS_OF) -> AlertWhatIfResponse:
     """警示門檻 what-if：基準天數 × 最少則數 × z 門檻的格點上，逐日會有幾檔示警。"""
     store: ScoreStore = request.app.state.score_store
-    now = datetime.now(timezone.utc)
+    now = _now(request)
     sessions, eval_idx = _panel_window(store, now, as_of)
     panel = load_panel(store, ALERT_UNIVERSE, ALERT_SCORER, sessions)
     return AlertWhatIfResponse(scorer=ALERT_SCORER, **whatif(panel, sessions, eval_idx, now.date()))
@@ -191,7 +198,7 @@ def get_alerts(
     include_all: bool = Query(False, description="true 時連 normal / insufficient 也列出"),
 ) -> AlertsResponse:
     store: ScoreStore = request.app.state.score_store
-    now = datetime.now(timezone.utc)
+    now = _now(request)
     sessions = _calendar(store, now)
     if as_of is None:
         as_of = sessions[-1]

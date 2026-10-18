@@ -6,6 +6,7 @@ import pytest
 from newssent.config import ALERT_SCORER, ALERT_UNIVERSE
 from newssent.data import mops
 from newssent.data.score_store import ScoreStore
+from newssent.inference.alerts import session_open
 from tests.alert_helpers import CALM_DAYS, fill, weekdays
 
 SESSIONS = weekdays(date(2025, 3, 3), 24)
@@ -204,6 +205,15 @@ def test_sessions_cover_confirmed_days_and_default_as_of(alert_client):
     # 前端拿 latest 當預設日，必須和 /api/alerts 省略 as_of 時是同一天
     assert body["latest"] == body["sessions"][-1]
     assert alert_client.get("/api/alerts").json()["as_of"] == body["latest"]
+
+
+def test_pinned_clock_ends_the_calendar_at_that_moment(alert_client, monkeypatch):
+    # 靜態匯出固定預警的「現在」：日曆只推估到那一刻之後第一個尚未開盤的交易日，不推到今天
+    from newssent.api.main import app
+
+    monkeypatch.setattr(app.state, "alerts_now", session_open(SESSIONS[-1]) - timedelta(hours=1), raising=False)
+    assert alert_client.get("/api/alerts/sessions").json()["latest"] == AS_OF
+    assert alert_client.get("/api/alerts").json()["as_of"] == AS_OF
 
 
 def test_sessions_empty_store_returns_503(empty_alert_client):

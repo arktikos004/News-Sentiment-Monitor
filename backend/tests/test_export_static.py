@@ -1,7 +1,7 @@
 """靜態站匯出：檔案結構與「寧可不部署也不發布錯的資料」的關卡。"""
 
 import json
-from datetime import date
+from datetime import date, datetime, time, timedelta, timezone
 
 import pytest
 
@@ -111,6 +111,28 @@ def test_refuses_alert_calendar_going_backwards(client_with_model, alert_store, 
     with pytest.raises(ExportError, match="倒退"):
         _export(_use_store(client_with_model, alert_store), tmp_path / "data",
                 prev_meta={"alerts_latest": "2099-01-01"})
+
+
+def test_alert_clock_spans_the_utc_rollover(client_with_model, alert_store, tmp_path, monkeypatch):
+    """抓新聞在 UTC 換日（台北 08:00）前、匯出在換日後：看板以抓新聞的時刻判斷哪些 UTC 日必須已抓完。"""
+    from newssent.api.main import app
+
+    last = SESSIONS[-1]
+    fetched_at = datetime.combine(last - timedelta(days=1), time(23, 50), tzinfo=timezone.utc)
+    # 抓新聞的當下，那個 UTC 日還沒結束：記錄器不會把它標成抓完
+    fill(alert_store, "2330.TW", SESSIONS, ["negative"] * 3, ALERT_SCORER, unfetched={fetched_at.date(), last})
+    client = _use_store(client_with_model, alert_store)
+    prev = {"alerts_latest": last.isoformat()}
+
+    monkeypatch.setattr(app.state, "alerts_now", fetched_at, raising=False)
+    meta = _export(client, tmp_path / "pinned", prev_meta=prev)
+    assert meta["alerts_latest"] == last.isoformat()
+    assert meta["alerts_now"] == fetched_at.isoformat()
+
+    # 以換日後的當下判斷：最新兩個交易日整個資料不足而略過 → 日期倒退
+    monkeypatch.setattr(app.state, "alerts_now", fetched_at + timedelta(minutes=15), raising=False)
+    with pytest.raises(ExportError, match="倒退"):
+        _export(client, tmp_path / "after", prev_meta=prev)
 
 
 def test_refuses_low_ticker_coverage(client_with_model, tmp_path):

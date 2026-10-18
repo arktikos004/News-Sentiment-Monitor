@@ -7,6 +7,7 @@
 # 狀態（alert_scores.db、news_cache.db、上一版網站資料）存在孤立分支 state，每次覆寫成單一 commit；
 # 另存 30 天的 artifact 供回復。資料庫只要通過完整性檢查就保存；site-data 只在正式站部署成功後才更新。
 # 評分額度用盡（exit 3）或台股新聞抓取失敗時照常部署美股新聞與情緒，頁面會標示預警的更新狀態。
+# 匯出的預警以抓新聞開始的時刻為準（--now）：07:30 這次常在 UTC 換日（台北 08:00）前抓、換日後才匯出。
 name: daily
 
 on:
@@ -88,6 +89,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
         run: |
+          echo "started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
           set +e
           # 每次評分最多 1200 次、45 分鐘（先到先停），留足時間給匯出與部署；已評的都已存檔，下一次接續
           python -m newssent.inference.alert_recorder --max-requests 1200 --max-minutes 45
@@ -119,7 +121,7 @@ jobs:
 
       - name: 匯出靜態 JSON（含發布關卡）
         working-directory: backend
-        run: python -m newssent.export_static --out ../frontend/public/data --prev ../_state/site-data/meta.json --alerts-status ${{ steps.alerts.outputs.status }}
+        run: python -m newssent.export_static --out ../frontend/public/data --prev ../_state/site-data/meta.json --alerts-status ${{ steps.alerts.outputs.status }} ${{ steps.alerts.outputs.started_at && format('--now {0}', steps.alerts.outputs.started_at) || '' }}
 
       - uses: actions/setup-node@v5
         with:

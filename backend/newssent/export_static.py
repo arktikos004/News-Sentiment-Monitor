@@ -15,6 +15,10 @@
 - 模型必須真的載入（is_mock=false）：找不到 artifact 時 API 會退回 mock，不能把假情緒發布出去
 - 個股檔案覆蓋率 ≥ MIN_TICKER_COVERAGE
 - 預警最新交易日不得早於上一版（--prev；分數庫還原失敗的徵兆）
+
+預警的「現在」固定成 --now（每日排程傳入抓新聞開始的時刻）：哪些 UTC 日必須已抓完要和抓新聞時一致。
+否則抓新聞在 UTC 換日（台北 08:00）前、匯出在換日後時，最新兩個交易日的看板會整個變成資料不足而略過，
+誤觸日期倒退的關卡。
 """
 
 from __future__ import annotations
@@ -22,7 +26,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import sys
 import time
 from collections.abc import Iterable
 from datetime import date, datetime, timezone
@@ -146,8 +149,11 @@ def run_export(
     if prev_latest and (latest is None or latest < prev_latest):
         raise ExportError(f"預警最新交易日倒退：本次 {latest}、上一版 {prev_latest}（分數庫還原失敗？）")
 
+    alerts_now = getattr(client.app.state, "alerts_now", None)
     meta = {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        # 預警看板以哪個時刻為準（--now）；None＝匯出當下
+        "alerts_now": alerts_now.isoformat(timespec="seconds") if alerts_now else None,
         "model_version": model["model_version"],
         "scorer": ALERT_SCORER,
         "alerts_latest": latest,
@@ -169,6 +175,18 @@ def run_export(
     return meta
 
 
+def _aware_datetime(value: str) -> datetime:
+    when = datetime.fromisoformat(value)
+    if when.tzinfo is None:
+        raise argparse.ArgumentTypeError(f"必須帶時區（例：2026-10-19T23:47:00Z）：{value}")
+    return when
+
+
+def _annotation(message: str) -> str:
+    """GitHub Actions 的 ::error:: 註記：執行頁不登入也看得到失敗原因。"""
+    return "::error::" + message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="匯出靜態站 JSON")
     parser.add_argument("--out", type=Path, required=True, help="輸出目錄（frontend/public/data）")
@@ -176,6 +194,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--sessions", type=int, default=ALERT_EXPORT_SESSIONS, help="預警看板匯出交易日數")
     parser.add_argument("--alerts-status", choices=("ok", "quota", "failed"), help="當日 alert_recorder 結果")
     parser.add_argument("--tickers", nargs="+", help="只匯出指定標的（除錯用）")
+    parser.add_argument("--now", type=_aware_datetime, help="預警看板以此時刻為準（ISO 8601、帶時區）；省略＝當下")
     args = parser.parse_args(argv)
 
     from fastapi.testclient import TestClient
@@ -190,6 +209,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with TestClient(api_main.app) as client:
             api_main.app.state.limiter.enabled = False  # 同一個 "testclient" IP 連打上百次，會誤觸每分鐘限流
+            api_main.app.state.alerts_now = args.now
             run_export(
                 client,
                 args.out,
@@ -199,7 +219,7 @@ def main(argv: list[str] | None = None) -> int:
                 alerts_status=args.alerts_status,
             )
     except ExportError as exc:
-        print(f"[匯出失敗] {exc}", file=sys.stderr)
+        print(_annotation(f"匯出失敗：{exc}"))
         return 1
     return 0
 
