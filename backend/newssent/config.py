@@ -214,7 +214,7 @@ GEMINI_RPM = 25                    # 免費層每分鐘上限約 30，留餘裕
 # API 讀取的線上評分器。思考設定會改變判讀行為，所以也寫進版本字串（改了就是新評分器、分數不混算）；
 # 組法須與 GeminiReviewer.version_tag 相同（tests/test_gemini_reviewer.py 把關）
 ALERT_SCORER = "llm-gemini:" + GEMINI_MODEL + "".join(f"+{k}={v}" for k, v in GEMINI_THINKING.items())
-# 預警股票池：鏡像 stock-trend-assistant 的 STOCK_POOL（台灣 50 指數成分股，最後核對 2026-09-30，2026-10-19 起使用）。
+# 預警股票池：鏡像 stock-trend-assistant 的 STOCK_POOL（台灣 50 指數成分股，最後核對 2026-09-30，2026-10-20 起使用）。
 # 看板每次都依這份名單重算，過去的交易日也一樣。跨 repo 無法 import 只能複製——以該 repo 為準，變動時兩邊同步。
 ALERT_UNIVERSE: dict[str, str] = {
     "1216.TW": "統一", "1303.TW": "南亞", "2059.TW": "川湖", "2301.TW": "光寶科", "2303.TW": "聯電",
