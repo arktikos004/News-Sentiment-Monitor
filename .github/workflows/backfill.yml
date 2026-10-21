@@ -2,7 +2,7 @@
 #
 # 預警要有 20 個交易日的基準才能判斷，換用新評分器（本機 Ollama → Gemini API）後，得先回補一段
 # 歷史分數看板才有內容。免費層每日額度有限，分段執行：每次用 max_requests 控制呼叫量，
-# 額度用盡（exit 3）時已評的都已存檔，隔天再觸發一次即從斷點接續。
+# 額度用盡或到達時間上限（exit 3）時已評的都已存檔，再觸發一次即從斷點接續。
 # 最後產出新舊評分器的一致性報告（tools/scorer_agreement.py，門檻見 docs/scorer_switch_prereg.md）。
 name: backfill
 
@@ -68,10 +68,11 @@ jobs:
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
         run: |
           set +e
-          python -m newssent.inference.alert_recorder --start "${{ inputs.start }}" ${{ inputs.end && format('--end {0}', inputs.end) || '' }} --max-requests "${{ inputs.max_requests }}"
+          # 抓新聞加評分最多 290 分鐘（從建立評分器起算），先於 job 時限停下，後面的保存步驟才跑得到
+          python -m newssent.inference.alert_recorder --start "${{ inputs.start }}" ${{ inputs.end && format('--end {0}', inputs.end) || '' }} --max-requests "${{ inputs.max_requests }}" --max-minutes 290
           rc=$?
           set -e
-          if [ $rc -eq 3 ]; then echo "::warning::額度用盡，已評的已存檔；再觸發一次即接續"; elif [ $rc -ne 0 ]; then exit $rc; fi
+          if [ $rc -eq 3 ]; then echo "::warning::額度或時間用盡，已評的已存檔；再觸發一次即接續"; elif [ $rc -ne 0 ]; then exit $rc; fi
 
       - name: 資料庫完整性檢查
         if: always()
