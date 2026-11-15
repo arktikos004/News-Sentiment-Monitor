@@ -2,7 +2,7 @@
 
 > 預先聲明：[distill_pilot_prereg.md](distill_pilot_prereg.md)（commit `b848fdd`，早於本結果）｜工具：`backend/tools/distill_pilot.py`
 > 執行：2026-10-06 15:58，只跑一次，沒有修訂。資料快照 SHA-256 `1d8d7785caa997d80df53ae44b43da4980503554cac4c2ee59356e161a9f2247`。
-> 逐則預測與學生權重只留在本機；本文件只有彙總數字。
+> 逐則預測與學生權重沒有公開，2026-11 起也不再保留；本文件只有彙總數字。
 
 ## 結論
 

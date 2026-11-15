@@ -44,7 +44,7 @@
 | SEntFiN 1.0（10,753 則標題，實體層級標注） | Sinha et al. (2022)；由作者的 GitHub `pyRis/SEntFiN` 下載 | MIT | `bert-sentfin`、`bert-combined` 的訓練 |
 | 台股中文標題與 Gemma 4 的評分（5,820 則，發布於 2026-08-13 至 09-21） | 標題取自 FinMind `TaiwanStockNews`；標籤是 Gemma 4 經 Gemini API 的評分 | 標題依 FinMind 條款不對外散布；標籤的使用見下方說明 | 中文小模型蒸餾的離線初步實驗（未上線，見 [docs/distill_pilot.md](docs/distill_pilot.md)） |
 
-前兩個資料集的標籤來自原作者，沒有用模型產生。第三列的標籤全部由語言模型產生，資料與訓練出的權重都只留在本機。
+前兩個資料集的標籤來自原作者，沒有用模型產生。第三列的標籤全部由語言模型產生；資料與訓練出的權重沒有公開，2026-11 起也不再保留。
 
 ### 蒸餾實驗的標籤與服務條款
 
