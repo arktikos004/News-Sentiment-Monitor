@@ -11,10 +11,13 @@
 - 標題尾巴帶「 - 來源名」，會讓轉載的同一則新聞看起來像不同標題，而且不是內容，去掉。
 - 偶爾會讀取逾時（2026-09-26 全池回補跑到第 29 檔時發生）：網路類錯誤與 5xx 以退避重試，
   額度用盡（402）則不重試——要等一小時，交給使用者稍後重跑（recorder 可從斷點接續）。
+- 少數列的 `date` 只有日期、沒有時間（2026-11-13 首次出現）：分不出是開盤前還是開盤後，
+  和沒有時間的列一樣略過，並記一筆警告。
 """
 
 from __future__ import annotations
 
+import logging
 import time
 from collections.abc import Callable
 from datetime import date, datetime, timezone
@@ -25,6 +28,8 @@ FINMIND_API_URL = "https://api.finmindtrade.com/api/v4/data"
 FINMIND_PROVIDER = "finmind"
 FORUM_MARKERS = ("股市爆料同學會",)
 RETRYABLE_STATUS = frozenset({500, 502, 503, 504})
+
+logger = logging.getLogger("newssent")
 
 
 class FinMindError(RuntimeError):
@@ -54,7 +59,11 @@ def parse_rows(rows: list[dict], fetched_at: str | None = None) -> list[Article]
         title = clean_title(raw_title, source)
         if not title:
             continue
-        published = parse_utc(row["date"])
+        try:
+            published = parse_utc(row["date"])
+        except ValueError:
+            logger.warning("FinMind 有一列的時間不是「日期 時:分:秒」，已略過：%r", row["date"])
+            continue
         if title in earliest and earliest[title][0] <= published:
             continue
         earliest[title] = (

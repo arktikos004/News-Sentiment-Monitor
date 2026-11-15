@@ -42,6 +42,12 @@ def test_rows_missing_title_or_date_are_skipped():
     assert parse_rows([_row("", "有標題沒時間"), _row("2025-01-28 02:44:00", "")]) == []
 
 
+def test_rows_without_a_time_of_day_are_skipped():
+    # 2026-11-13 實際發生：資料源回了一列只有日期的新聞，解析失敗讓整次更新停在這一檔
+    rows = [_row("2026-11-13", "只有日期"), _row("2026-11-13 01:00:00", "有時間")]
+    assert [a.title for a in parse_rows(rows)] == ["有時間"]
+
+
 def test_output_is_sorted_by_publish_time():
     rows = [_row("2025-01-28 09:00:00", "晚"), _row("2025-01-28 01:00:00", "早")]
     assert [a.title for a in parse_rows(rows)] == ["早", "晚"]
